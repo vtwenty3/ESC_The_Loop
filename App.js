@@ -18,8 +18,14 @@ const App = props => {
 };
 
 const onPressHandler = () => {
-  console.log('You clicked me!');
-  UsageLog.sendUsageData('Dimana', '24 hours 24 minutes and 69 seconds');
+  // const toPrint = UsageLog.sendUsageData(
+  //   'Dimana',
+  //   '24 hours 24 minutes and 69 seconds',
+  // );
+
+  UsageLog.sendUsageData('Party', 'My House', eventId => {
+    console.log(`Created a new event with id ${eventId}`);
+  });
 };
 
 const openSettings = () => {
