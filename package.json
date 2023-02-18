@@ -10,6 +10,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "base-64": "^1.0.0",
+    "base64-js": "^1.5.1",
     "react": "18.1.0",
     "react-native": "0.70.2",
     "react-native-android-settings-tool": "^1.0.4"

@@ -5,26 +5,16 @@ import static android.content.Context.USAGE_STATS_SERVICE;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.google.gson.Gson;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
-public class UsageLog extends ReactContextBaseJavaModule {
+public class UsageLogBackup extends ReactContextBaseJavaModule {
     private static final String DURATION_SHORT_KEY = "SHORT";
     private static final String DURATION_LONG_KEY = "LONG";
     ReactApplicationContext context = getReactApplicationContext();
@@ -41,7 +31,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
 //        super(context);
 //    }
 
-    public UsageLog(ReactApplicationContext reactContext) {
+    public UsageLogBackup(ReactApplicationContext reactContext) {
         super(reactContext);
     }
 
@@ -53,7 +43,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
     @ReactMethod
     public void sendUsageData(String app, String time, Callback callBack) {
         Log.d("sendusagedata:", "dataSample: " + "app:" + loadStatistics(context) + "; usage time:" + time);
-        // UsageStatsManager usm = (UsageStatsManager) mContext.getSystemService(USAGE_STATS_SERVICE);
+       // UsageStatsManager usm = (UsageStatsManager) mContext.getSystemService(USAGE_STATS_SERVICE);
         String eventId = loadStatistics(context);
         callBack.invoke(eventId);
     }
@@ -61,8 +51,8 @@ public class UsageLog extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getDataAndroid(Callback callBack) {
         // UsageStatsManager usm = (UsageStatsManager) mContext.getSystemService(USAGE_STATS_SERVICE);
-
-        callBack.invoke(loadStatistics(context));
+        String rawDataString = loadStatistics(context);
+        callBack.invoke(rawDataString);
     }
 
 
@@ -101,6 +91,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
     }
 
     public String loadStatistics(Context context) {
+
         UsageStatsManager usm = (UsageStatsManager) context.getSystemService(USAGE_STATS_SERVICE);
 
         List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  System.currentTimeMillis() - 1000*3600*24,  System.currentTimeMillis());
@@ -113,51 +104,16 @@ public class UsageLog extends ReactContextBaseJavaModule {
                 mySortedMap.put(usageStats.getPackageName(), usageStats);
             }
 
-            ArrayList<Map<String, Object>> appInfoList = new ArrayList<>();
-            for (Map.Entry<String, UsageStats> entry : mySortedMap.entrySet()) {
-                String packageName = entry.getKey();
-                UsageStats usageStats = entry.getValue();
-                String[] packageNames = packageName.split("\\.");
-                String appName = packageNames[packageNames.length - 1].trim();
-                String usageDuration = getDurationBreakdown(usageStats.getTotalTimeInForeground());
-//                int usagePercentage = (int) (usageStats.getTotalTimeInForeground() * 100 / totalTime);
 
-                Drawable icon = null;
-                try {
-                    icon = context.getPackageManager().getApplicationIcon(packageName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    // handle the exception
-                }
-                Bitmap bitmap = null;
-                if (icon instanceof BitmapDrawable) {
-                    bitmap = ((BitmapDrawable) icon).getBitmap();
-                } else if (icon instanceof AdaptiveIconDrawable) {
-                    // Convert adaptive icon to bitmap
-                    bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                    icon.draw(canvas);
-                }
-                Map<String, Object> appInfo = new HashMap<>();
-                appInfo.put("appName", appName);
-                appInfo.put("usageDuration", usageDuration);
-                // Convert bitmap to Base64 string
-                if (bitmap != null) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                    byte[] bitmapBytes = outputStream.toByteArray();
-                    String iconBase64 = Base64.encodeToString(bitmapBytes, Base64.DEFAULT);
+            logInfo(mySortedMap);
 
-                    appInfo.put("icon", iconBase64);
-                }
-//                appInfo.put("usagePercentage", usagePercentage);
-                appInfoList.add(appInfo);
-            }
+            String appstats =  mySortedMap.toString();
+            String appinfo = logInfo(mySortedMap);
+            Log.d("loadStatistics2323:", mySortedMap.toString());
 
-            // convert the list to JSON string
-            String appStats = new Gson().toJson(appInfoList);
-           // Log.d("loadStatistics2323:", appStats);
-            return appStats;
+
+            return appinfo;
+//            showAppsUsage(mySortedMap);
         }
         return null;
     }
