@@ -2,6 +2,9 @@ import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, Button, FlatList, Image} from 'react-native';
 import {NativeModules} from 'react-native';
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
+import notifee from '@notifee/react-native';
+import {AndroidColor} from '@notifee/react-native';
+
 const {UsageLog} = NativeModules;
 
 function App(): JSX.Element {
@@ -61,6 +64,31 @@ function App(): JSX.Element {
     );
   }
 
+  async function onDisplayNotification() {
+    // Request permissions (required for iOS)
+    await notifee.requestPermission();
+
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: 'Notification Title',
+      body: 'Main body content of the notification',
+      android: {
+        channelId,
+
+        // pressAction is needed if you want the notification to open the app when pressed
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+  }
+
   const openSettings = () => {
     RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS(); // Open the main settings screen.
   };
@@ -68,10 +96,19 @@ function App(): JSX.Element {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.buttonsContainer}>
-        <Button color="#315461" title={'Get Data'} onPress={getData} />
-        <Button color="#315461" title={'Display Data'} onPress={displayData} />
+        <Button color="#315461" title="Print Data" onPress={displayData} />
+        <Button color="#315461" title="Flush" onPress={flush} />
         <Button color="#315461" title={'Permission'} onPress={openSettings} />
-        <Button color="#315461" title={'Flush'} onPress={flush} />
+      </View>
+
+      <View style={styles.buttonsContainer}>
+        <Button color="#315461" title="Get Data" onPress={getData} />
+        <Button
+          color="#315461"
+          title="Display Notification"
+          onPress={() => onDisplayNotification()}
+        />
+        <Button color="#315461" title="Get Data" onPress={getData} />
       </View>
 
       <FlatList
