@@ -1,5 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Button, FlatList, Image} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  FlatList,
+  Alert,
+  Image,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  TextInput,
+} from 'react-native';
 import {NativeModules} from 'react-native';
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import notifee from '@notifee/react-native';
@@ -9,7 +21,12 @@ const {UsageLog} = NativeModules;
 
 function App(): JSX.Element {
   const [data, setData] = useState<any>();
-  const [usageLimit, setUsageLimit] = useState<number>(0); // usage limit timer in seconds
+  const [timeLimit, setTimeLimit] = useState<number>(0); // usage limit timer in minutes
+  const [timeCurrent, setTimeCurrent] = useState<number>(0); // usage limit timer in minutes
+  const [number, onChangeNumber] = useState<string>('');
+
+  const [modalVisible, setModalVisible] = useState(false);
+
   const getData = () => {
     UsageLog.getDataAndroid((callBack: string) => {
       setData('');
@@ -40,17 +57,20 @@ function App(): JSX.Element {
   // render the data
   function renderAppItem({item}: {item: any}) {
     return (
-      <View style={styles.appContainer}>
-        <Image
-          source={{uri: `data:image/png;base64,${item.icon}`}} //important to add the data:image/png;base64, part
-          style={{width: 50, height: 50, marginRight: 10}}
-        />
-        <View style={styles.appContainerText}>
-          <Text style={{fontSize: 16, fontWeight: 'bold', color: '#f2f2f2'}}>
-            {item.appName}
-          </Text>
-          <Text style={{color: '#f2f2f2'}}>{item.usageDuration}</Text>
-          {/* <Button
+      <View>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.appContainer}>
+          <Image
+            source={{uri: `data:image/png;base64,${item.icon}`}} //important to add the data:image/png;base64, part
+            style={{width: 50, height: 50, marginRight: 10}}
+          />
+          <View style={styles.appContainerText}>
+            <Text style={{fontSize: 16, fontWeight: 'bold', color: '#f2f2f2'}}>
+              {item.appName}
+            </Text>
+            <Text style={{color: '#f2f2f2'}}>{item.usageDuration}</Text>
+            {/* <Button
             title={`Set Usage Limit (${app.usageDuration})`}
             onPress={() =>
               handleSetUsageLimit(
@@ -59,7 +79,8 @@ function App(): JSX.Element {
               )
             }
           /> */}
-        </View>
+          </View>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -117,6 +138,46 @@ function App(): JSX.Element {
         keyExtractor={item => item.appName}
         renderItem={item => renderAppItem(item)}
       />
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Set a timer</Text>
+              <View style={styles.modalInpuit}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={onChangeNumber}
+                  value={number}
+                  keyboardType="numeric"
+                />
+                <Text style={styles.modalText}>Minutes</Text>
+              </View>
+
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => {
+                    setTimeLimit(parseInt(number));
+                    console.log(timeLimit);
+                  }}>
+                  <Text style={styles.textStyle}>Set</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => setModalVisible(!modalVisible)}>
+                  <Text style={styles.textStyle}>Close</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </View>
   );
 }
@@ -147,12 +208,70 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-  button: {
-    color: '#841584',
-  },
-
   appContainerText: {
     flex: 1,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 7,
+    padding: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    shadowColor: '#000',
+    gap: 20,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 7,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  modalInpuit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });
 
