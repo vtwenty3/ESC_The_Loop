@@ -13,20 +13,20 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
+interface Timers {
+  [key: string]: string;
+}
 type Props = {
   name: string;
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setTimers: React.Dispatch<React.SetStateAction<Timers>>;
+  timers: Timers;
 };
 
 export function ModalSetTimer(props: Props) {
   const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
-  const [number, onChangeNumber] = useState<string>('');
-
-  interface Timers {
-    [key: string]: string;
-  }
-  const [timers, setTimers] = useState<Timers>({});
+  //const [timers, setTimers] = useState<Timers>({});
   function handleClose() {
     props.setVisible(false);
     setTimeLimit('');
@@ -56,11 +56,11 @@ export function ModalSetTimer(props: Props) {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.button, styles.buttonClose]}
+                style={[styles.button, styles.buttonOpen]}
                 onPress={() => {
                   setTimeLimit(timeLimit);
-                  setTimers({
-                    ...timers,
+                  props.setTimers({
+                    ...props.timers,
                     [props.name]: timeLimit, // set the initial timer value to the item's usageDuration
                   });
                   handleClose();
@@ -71,11 +71,6 @@ export function ModalSetTimer(props: Props) {
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => handleClose()}>
                 <Text style={styles.textStyle}>Close</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => console.log(timers)}>
-                <Text style={styles.textStyle}>log timers</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -115,10 +110,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   buttonOpen: {
-    backgroundColor: '#F194FF',
+    backgroundColor: '#315461',
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: 'red',
   },
   textStyle: {
     color: 'white',

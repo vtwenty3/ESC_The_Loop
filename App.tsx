@@ -24,13 +24,10 @@ function App(): JSX.Element {
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
 
-  const [timeCurrent, setTimeCurrent] = useState<number>(0); // usage limit timer in minutes
-  const [number, onChangeNumber] = useState<string>('');
-  // const [timers, setTimers] = useState({});
-  const [timeLimit, setTimeLimit] = useState<number>(0); // usage limit timer in minutes
+  //const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
 
   interface Timers {
-    [key: string]: number;
+    [key: string]: string;
   }
   const [timers, setTimers] = useState<Timers>({});
 
@@ -123,9 +120,14 @@ function App(): JSX.Element {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.buttonsContainer}>
-        <Button color="#315461" title="Print Data" onPress={displayData} />
+        {/* <Button color="#315461" title="Print Data" onPress={displayData} /> */}
         <Button color="#315461" title="Flush" onPress={flush} />
         <Button color="#315461" title={'Permission'} onPress={openSettings} />
+        <Button
+          color="#315461"
+          title="Log Timers"
+          onPress={() => console.log(timers)}
+        />
       </View>
       <View style={styles.buttonsContainer}>
         <Button color="#315461" title="Get Data" onPress={getData} />
@@ -134,12 +136,13 @@ function App(): JSX.Element {
           title="Display Notification"
           onPress={() => onDisplayNotification()}
         />
-        <Button color="#315461" title="Get Data" onPress={getData} />
       </View>
       <ModalSetTimer
         setVisible={setModalVisible}
         visible={modalVisible}
         name={appName}
+        setTimers={setTimers}
+        timers={timers}
       />
       <FlatList
         style={{width: '80%'}}
