@@ -120,6 +120,8 @@ public class UsageLog extends ReactContextBaseJavaModule {
                 String[] packageNames = packageName.split("\\.");
                 String appName = packageNames[packageNames.length - 1].trim();
                 String usageDuration = getDurationBreakdown(usageStats.getTotalTimeInForeground());
+                String minutesTotal = getDurationInMinutes(usageStats.getTotalTimeInForeground());
+
 //                int usagePercentage = (int) (usageStats.getTotalTimeInForeground() * 100 / totalTime);
 
                 Drawable icon = null;
@@ -141,6 +143,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
                 Map<String, Object> appInfo = new HashMap<>();
                 appInfo.put("appName", appName);
                 appInfo.put("usageDuration", usageDuration);
+                appInfo.put("minutesTotal", minutesTotal);
                 // Convert bitmap to Base64 string
                 if (bitmap != null) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -181,6 +184,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
             String[] packageNames = packageName.split("\\.");
             String appName = packageNames[packageNames.length-1].trim();
             String usageDuration = getDurationBreakdown(usageStats.getTotalTimeInForeground());
+            String minutesTotal = getDurationInMinutes(usageStats.getTotalTimeInForeground());
             int usagePercentage = (int) (usageStats.getTotalTimeInForeground() * 100 / totalTime);
             logList.add(appName);
             logList.add(usageDuration);
@@ -204,5 +208,13 @@ public class UsageLog extends ReactContextBaseJavaModule {
         millis -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
         return (hours + " h " +  minutes + " m " + seconds + " s");
+    }
+
+    private String getDurationInMinutes(long millis) {
+        if (millis < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        return (String.valueOf(minutes));
     }
 }
