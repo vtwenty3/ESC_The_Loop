@@ -8,7 +8,6 @@ import {
   Alert,
   Image,
   TouchableOpacity,
-  Modal,
   Pressable,
   TextInput,
   NativeModules,
@@ -17,30 +16,22 @@ import {
 import BackgroundService from 'react-native-background-actions';
 
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
-import notifee from '@notifee/react-native';
 import {ModalSetTimer} from './components/ModalSetTimer';
-import {AndroidColor} from '@notifee/react-native';
 
 const {UsageLog} = NativeModules;
-
 function App(): JSX.Element {
+  const [data, setData] = useState<any>();
+  const [appName, setAppName] = useState<string>('');
+  const [timers, setTimers] = useState<Timers>({});
+  const [modalVisible, setModalVisible] = useState(false);
+
+  interface Timers {
+    [key: string]: string;
+  }
+
   const sleep = (time: any) =>
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
-  const options = {
-    taskName: 'Example',
-    taskTitle: 'ExampleTask title',
-    taskDesc: 'ExampleTask desc',
-    taskIcon: {
-      name: 'ic_launcher',
-      type: 'mipmap',
-    },
-    color: '#ff00ff',
-    linkingURI: 'exampleScheme://chat/jane',
-    parameters: {
-      delay: 5000,
-    },
-  };
   const taskRandom = async (taskData: any) => {
     await new Promise(async resolve => {
       // For loop with a delay
@@ -62,8 +53,22 @@ function App(): JSX.Element {
       }
     });
   };
-
   let playing = BackgroundService.isRunning();
+
+  const options = {
+    taskName: 'Example',
+    taskTitle: 'ExampleTask title',
+    taskDesc: 'ExampleTask desc',
+    taskIcon: {
+      name: 'ic_launcher',
+      type: 'mipmap',
+    },
+    color: '#ff00ff',
+    linkingURI: 'exampleScheme://chat/jane',
+    parameters: {
+      delay: 5000,
+    },
+  };
 
   /**
    * Toggles the background task
@@ -85,60 +90,22 @@ function App(): JSX.Element {
     }
   };
 
-  const [data, setData] = useState<any>();
-  const [appName, setAppName] = useState<string>('');
-
-  //const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
-
-  interface Timers {
-    [key: string]: string;
-  }
-  const [timers, setTimers] = useState<Timers>({});
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const getData = () => {
-    //const startTime = Date.now() - 1000 * 3600 * 24; // 24 hours ago
-
+  function getData() {
     console.log('Getting data from Android');
-    UsageLog.currentActivity((callBack: string) => {
-      //setData('');
-      //log the callback
-      console.log('Current ACtivity: ' + callBack);
-      //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
+    UsageLog.getAppUsageData((callBack: string) => {
+      setData(JSON.parse(callBack));
+      //console.log('Data: ', callBack);
     });
-    UsageLog.getDataAndroid((callBack: string) => {
-      //setData('');
-      //log the callback
-      //console.log('Callback: ', JSON.parse(callBack));
-
-      setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
-    });
-
-    UsageLog.test((callBack: string) => {
-      console.log('Total usage time last 24 hours: ', callBack);
-      //setData('');
-      //log the callback
-      //console.log('Callback: ', JSON.parse(callBack));
-      //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
-    });
-  };
-
-  // Call getData every 2 seconds
-  useEffect(() => {
-    // const intervalId = setInterval(getData, 2000);
-    // return () => clearInterval(intervalId);
-  }, []);
-
-  // testing
+  }
   function displayData() {
     if (data === undefined || data.length == 0) {
       console.log('Data is empty');
     } else {
-      console.log('Data from Android: ', data[3].appName);
-      console.log('Data from Android: ', data[3].usageDuration);
+      console.log('Data from Android: ', data);
     }
   }
+
+  useEffect(() => {}, []);
 
   function openSettings() {
     RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS(); // Open the main settings screen.
@@ -155,20 +122,20 @@ function App(): JSX.Element {
           }}
           style={styles.appContainer}>
           <Image
-            source={{uri: `data:image/png;base64,${item.icon}`}} //important to add the data:image/png;base64, part
+            source={{uri: `data:image/png;base64,${item.iconBase64}`}} //important to add the data:image/png;base64, part
             style={{width: 50, height: 50, marginRight: 10}}
           />
           <View style={styles.appContainerText}>
             <Text style={{fontSize: 16, fontWeight: 'bold', color: '#f2f2f2'}}>
               {item.appName}
             </Text>
-            <Text style={{color: '#f2f2f2'}}>{item.usageDuration}</Text>
             <Text style={{color: '#f2f2f2'}}>
-              {'Minutes Total: ' + item.minutesTotal}
+              Minutes: {item.usageTimeMinutes}
             </Text>
             <Text style={{color: '#f2f2f2'}}>
-              Limit: {timers[item.appName]}
+              Seconds: {item.usageTimeSeconds}
             </Text>
+            <Text style={{color: '#f2f2f2'}}>Package: {item.packageName}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -178,7 +145,7 @@ function App(): JSX.Element {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.buttonsContainer}>
-        {/* <Button color="#315461" title="Print Data" onPress={displayData} /> */}
+        <Button color="#315461" title="Print Data" onPress={displayData} />
         <Button color="#315461" title="Test" onPress={toggleBackground} />
         <Button color="#315461" title={'Permission'} onPress={openSettings} />
       </View>

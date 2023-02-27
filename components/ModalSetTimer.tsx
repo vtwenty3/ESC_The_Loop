@@ -4,13 +4,8 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
-  FlatList,
-  Alert,
-  Image,
   TouchableOpacity,
   Modal,
-  Pressable,
   TextInput,
 } from 'react-native';
 interface Timers {
