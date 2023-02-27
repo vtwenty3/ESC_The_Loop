@@ -13,7 +13,8 @@
     "@notifee/react-native": "^7.4.0",
     "react": "18.2.0",
     "react-native": "0.71.3",
-    "react-native-android-settings-tool": "^1.0.4"
+    "react-native-android-settings-tool": "^1.0.4",
+    "react-native-background-actions": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

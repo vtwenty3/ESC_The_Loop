@@ -11,8 +11,11 @@ import {
   Modal,
   Pressable,
   TextInput,
+  NativeModules,
+  NativeEventEmitter,
 } from 'react-native';
-import {NativeModules} from 'react-native';
+import BackgroundService from 'react-native-background-actions';
+
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import notifee from '@notifee/react-native';
 import {ModalSetTimer} from './components/ModalSetTimer';
@@ -21,6 +24,67 @@ import {AndroidColor} from '@notifee/react-native';
 const {UsageLog} = NativeModules;
 
 function App(): JSX.Element {
+  const sleep = (time: any) =>
+    new Promise<void>(resolve => setTimeout(() => resolve(), time));
+
+  const options = {
+    taskName: 'Example',
+    taskTitle: 'ExampleTask title',
+    taskDesc: 'ExampleTask desc',
+    taskIcon: {
+      name: 'ic_launcher',
+      type: 'mipmap',
+    },
+    color: '#ff00ff',
+    linkingURI: 'exampleScheme://chat/jane',
+    parameters: {
+      delay: 5000,
+    },
+  };
+  const taskRandom = async (taskData: any) => {
+    await new Promise(async resolve => {
+      // For loop with a delay
+      const {delay} = taskData;
+      console.log(BackgroundService.isRunning(), delay);
+      for (let i = 0; BackgroundService.isRunning(); i++) {
+        console.log('Runned -> ', i);
+        await UsageLog.currentActivity((callBack: string) => {
+          //setData('');
+          //log the callback
+          console.log('Current ACtivity: ' + callBack);
+          //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
+        });
+
+        await BackgroundService.updateNotification({
+          taskDesc: 'Runned -> ' + i,
+        });
+        await sleep(delay);
+      }
+    });
+  };
+
+  let playing = BackgroundService.isRunning();
+
+  /**
+   * Toggles the background task
+   */
+  const toggleBackground = async () => {
+    playing = !playing;
+    if (playing) {
+      try {
+        console.log('Trying to start background service');
+        await BackgroundService.start(taskRandom, options);
+
+        console.log('Successful start!');
+      } catch (e) {
+        console.log('Error', e);
+      }
+    } else {
+      console.log('Stop background service');
+      await BackgroundService.stop();
+    }
+  };
+
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
 
@@ -34,9 +98,29 @@ function App(): JSX.Element {
   const [modalVisible, setModalVisible] = useState(false);
 
   const getData = () => {
+    //const startTime = Date.now() - 1000 * 3600 * 24; // 24 hours ago
+
+    console.log('Getting data from Android');
+    UsageLog.currentActivity((callBack: string) => {
+      //setData('');
+      //log the callback
+      console.log('Current ACtivity: ' + callBack);
+      //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
+    });
     UsageLog.getDataAndroid((callBack: string) => {
-      setData('');
+      //setData('');
+      //log the callback
+      //console.log('Callback: ', JSON.parse(callBack));
+
       setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
+    });
+
+    UsageLog.test((callBack: string) => {
+      console.log('Total usage time last 24 hours: ', callBack);
+      //setData('');
+      //log the callback
+      //console.log('Callback: ', JSON.parse(callBack));
+      //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
     });
   };
 
@@ -54,32 +138,6 @@ function App(): JSX.Element {
       console.log('Data from Android: ', data[3].appName);
       console.log('Data from Android: ', data[3].usageDuration);
     }
-  }
-
-  function flush() {
-    setData('');
-  }
-  async function onDisplayNotification() {
-    // Request permissions (required for iOS)
-    await notifee.requestPermission();
-    // Create a channel (required for Android)
-    const channelId = await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
-    });
-
-    // Display a notification
-    await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
-      android: {
-        channelId,
-        // pressAction is needed if you want the notification to open the app when pressed
-        pressAction: {
-          id: 'default',
-        },
-      },
-    });
   }
 
   function openSettings() {
@@ -121,20 +179,15 @@ function App(): JSX.Element {
     <View style={styles.mainContainer}>
       <View style={styles.buttonsContainer}>
         {/* <Button color="#315461" title="Print Data" onPress={displayData} /> */}
-        <Button color="#315461" title="Flush" onPress={flush} />
+        <Button color="#315461" title="Test" onPress={toggleBackground} />
         <Button color="#315461" title={'Permission'} onPress={openSettings} />
-        <Button
-          color="#315461"
-          title="Log Timers"
-          onPress={() => console.log(timers)}
-        />
       </View>
       <View style={styles.buttonsContainer}>
         <Button color="#315461" title="Get Data" onPress={getData} />
         <Button
           color="#315461"
-          title="Display Notification"
-          onPress={() => onDisplayNotification()}
+          title="Log Timers"
+          onPress={() => console.log(timers)}
         />
       </View>
       <ModalSetTimer
