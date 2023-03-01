@@ -8,11 +8,16 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
+// interface Timers {
+//   [key: string]: string;
+// }
 interface Timers {
-  [key: string]: string;
+  [key: string]: {timeLeft?: number; timeSet?: number};
 }
+
 type Props = {
   name: string;
+  packageName: string;
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
@@ -20,7 +25,7 @@ type Props = {
 };
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
+  const [timeLimit, setTimeLimit] = useState<number>(); // usage limit timer in minutes
   //const [timers, setTimers] = useState<Timers>({});
   function handleClose() {
     props.setVisible(false);
@@ -43,7 +48,7 @@ export function ModalSetTimer(props: Props) {
               <TextInput
                 style={styles.input}
                 onChangeText={setTimeLimit}
-                value={timeLimit}
+                value={Number(timeLimit)}
                 keyboardType="numeric"
               />
               <Text style={styles.modalText}>Minutes</Text>
@@ -56,8 +61,23 @@ export function ModalSetTimer(props: Props) {
                   setTimeLimit(timeLimit);
                   props.setTimers({
                     ...props.timers,
-                    [props.name]: timeLimit, // set the initial timer value to the item's usageDuration
+                    [props.packageName]: {
+                      timeLeft: timeLimit,
+                      timeSet: timeLimit,
+                    },
+
+                    // set the initial timer value to the item's usageDuration
                   });
+
+                  // props.setTimers2([
+                  //   ...props.timers2,
+                  //   {
+                  //     packageName: props.packageName,
+                  //     timeSet: parseInt(timeLimit),
+                  //     timeLeft: parseInt(timeLimit),
+                  //   },
+                  // ]);
+
                   handleClose();
                 }}>
                 <Text style={styles.textStyle}>Set</Text>

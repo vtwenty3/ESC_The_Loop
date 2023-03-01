@@ -22,28 +22,38 @@ const {UsageLog} = NativeModules;
 function App(): JSX.Element {
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
-  const [timers, setTimers] = useState<Timers>({});
   const [modalVisible, setModalVisible] = useState(false);
+  const [activity, setActivity] = useState<string>('');
+  const [activityOnce, setActivityOnce] = useState(true);
+  const [packageName, setPackageName] = useState<string>('');
+  const [seconds, setSeconds] = useState(0);
+  const [timers, setTimers] = useState<Timers>({});
 
   interface Timers {
-    [key: string]: string;
+    [key: string]: {timeLeft?: number; timeSet?: number};
   }
 
   const sleep = (time: any) =>
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
-
   const taskRandom = async (taskData: any) => {
     await new Promise(async resolve => {
       // For loop with a delay
       const {delay} = taskData;
       console.log(BackgroundService.isRunning(), delay);
       for (let i = 0; BackgroundService.isRunning(); i++) {
-        console.log('Runned -> ', i);
-        await UsageLog.currentActivity((callBack: string) => {
+        UsageLog.currentActivity((callBack: string) => {
           //setData('');
           //log the callback
-          console.log('Current ACtivity: ' + callBack);
-          //setData(JSON.parse(callBack)); //important to parse the JSON string, or else it will be a string
+          //      console.log('Activity Changed');
+          console.log('Runned -> ', i);
+          console.log('Activity:', callBack);
+          setActivity(callBack);
+          //console.log('Current activity state ', currentActivity);
+
+          if (timers[callBack] !== undefined) {
+            //console.log('Timer for this app is set');
+            console.log('Timer for this app is set to: ', timers[callBack]);
+          }
         });
 
         await BackgroundService.updateNotification({
@@ -66,7 +76,7 @@ function App(): JSX.Element {
     color: '#ff00ff',
     linkingURI: 'exampleScheme://chat/jane',
     parameters: {
-      delay: 5000,
+      delay: 2000,
     },
   };
 
@@ -92,11 +102,12 @@ function App(): JSX.Element {
 
   function getData() {
     console.log('Getting data from Android');
-    UsageLog.getAppUsageData((callBack: string) => {
+    UsageLog.getAppUsageData2((callBack: string) => {
       setData(JSON.parse(callBack));
       //console.log('Data: ', callBack);
     });
   }
+
   function displayData() {
     if (data === undefined || data.length == 0) {
       console.log('Data is empty');
@@ -105,7 +116,32 @@ function App(): JSX.Element {
     }
   }
 
-  useEffect(() => {}, []);
+  // useEffect(() => {
+  //   if (activity in timers) {
+  //     console.log(`${activity} found in timers`);
+  //     setTimers({
+  //       ...timers,
+  //       [activity]: {
+  //         timeLeft: timers[activity].timeSet! - 1,
+  //         timeSet: timers[activity].timeSet,
+  //       },
+  //     });
+  //   }
+  // }, [activity]);
+
+  useEffect(() => {
+    if (activity in timers) {
+      console.log(`${activity} found in timers`);
+      // Reduce timeLeft every second
+      setTimers({
+        ...timers,
+        [activity]: {
+          timeLeft: timers[activity].timeSet! - 1,
+          timeSet: timers[activity].timeSet,
+        },
+      });
+    }
+  }, [activity]);
 
   function openSettings() {
     RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS(); // Open the main settings screen.
@@ -117,8 +153,9 @@ function App(): JSX.Element {
       <View>
         <TouchableOpacity
           onPress={() => {
-            setModalVisible(true);
             setAppName(item.appName);
+            setPackageName(item.packageName);
+            setModalVisible(true);
           }}
           style={styles.appContainer}>
           <Image
@@ -135,7 +172,13 @@ function App(): JSX.Element {
             <Text style={{color: '#f2f2f2'}}>
               Seconds: {item.usageTimeSeconds}
             </Text>
-            <Text style={{color: '#f2f2f2'}}>Package: {item.packageName}</Text>
+            {/* <Text style={{color: '#f2f2f2'}}>Package: {item.packageName}</Text> */}
+            <Text style={{color: 'red'}}>
+              Time Left: {timers[item.packageName]?.timeLeft}
+            </Text>
+            <Text style={{color: 'red'}}>
+              Time Set: {timers[item.packageName]?.timeSet}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -154,13 +197,17 @@ function App(): JSX.Element {
         <Button
           color="#315461"
           title="Log Timers"
-          onPress={() => console.log(timers)}
+          onPress={() => {
+            console.log(timers);
+          }}
         />
+        <Text>Seconds: {seconds}</Text>
       </View>
       <ModalSetTimer
         setVisible={setModalVisible}
         visible={modalVisible}
         name={appName}
+        packageName={packageName}
         setTimers={setTimers}
         timers={timers}
       />
