@@ -25,7 +25,7 @@ type Props = {
 };
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<number>(); // usage limit timer in minutes
+  const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
   //const [timers, setTimers] = useState<Timers>({});
   function handleClose() {
     props.setVisible(false);
@@ -48,7 +48,7 @@ export function ModalSetTimer(props: Props) {
               <TextInput
                 style={styles.input}
                 onChangeText={setTimeLimit}
-                value={Number(timeLimit)}
+                value={timeLimit}
                 keyboardType="numeric"
               />
               <Text style={styles.modalText}>Minutes</Text>
@@ -62,8 +62,8 @@ export function ModalSetTimer(props: Props) {
                   props.setTimers({
                     ...props.timers,
                     [props.packageName]: {
-                      timeLeft: timeLimit,
-                      timeSet: timeLimit,
+                      timeLeft: Number(timeLimit),
+                      timeSet: Number(timeLimit),
                     },
 
                     // set the initial timer value to the item's usageDuration
