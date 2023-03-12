@@ -14,9 +14,14 @@ import {
   NativeEventEmitter,
 } from 'react-native';
 import BackgroundService from 'react-native-background-actions';
+import notifee, {
+  AndroidImportance,
+  AndroidCategory,
+} from '@notifee/react-native';
 
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import {ModalSetTimer} from './components/ModalSetTimer';
+import {ModalExpired} from './components/ModalExpired';
 
 //variables that are used and changed in the background
 let activityChanged: boolean = false;
@@ -28,11 +33,14 @@ function App(): JSX.Element {
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalExpiredVis, setModalExpiredVis] = useState(false);
+
   const [activity, setActivity] = useState<string>('');
   const [activityOnce, setActivityOnce] = useState(true);
   const [packageName, setPackageName] = useState<string>('');
   const [seconds, setSeconds] = useState(0);
   const [timers, setTimers] = useState<Timers>({});
+
   const [timeCounter, setTimecounter] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -50,18 +58,18 @@ function App(): JSX.Element {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
   const taskRandom = async (taskData: any) => {
     await new Promise(async resolve => {
-      // For loop with a delay
-      const {delay} = taskData;
+      const {delay} = taskData; // delay is 2 seconds currently, change it from options object
       console.log(BackgroundService.isRunning(), delay);
       for (let i = 0; BackgroundService.isRunning(); i++) {
         UsageLog.currentActivity((callBack: string) => {
-          console.log('Runned -> ', i);
+          // get current activity
+          //console.log('Runned -> ', i);
           setActivity(callBack);
-        }); // get current activity every delay (2 seconds)
-        //on current activity change we got to set the timer,
-        //but thats not possible in background with setState
-        console.log('[BackgroundTask Set]: ' + activityChanged);
+        });
+
+        //console.log('[BackgroundTask Set]: ' + activityChanged);
         if (activityChanged) {
+          //activated from useEffect cleanup
           console.log('[BackgroundTask Setting Timer]...');
           console.log(
             'tempactivity: ' +
@@ -75,24 +83,21 @@ function App(): JSX.Element {
             timeSet: timers[tempactivity].timeSet,
           };
 
-          // await setTimers({
-          //   ...timers,
-          //   [tempactivity]: {
-          //     timeLeft: temptimeLeftLocal,
-          //     timeSet: timers[tempactivity].timeSet! + 100,
-          //   },
-          // });
-
-          console.log('...[BackgroundTask Timer Set]');
+          //console.log('...[BackgroundTask Timer Set]');
           tempi = 0;
           temptimeLeftLocal = 0;
           tempactivity = '';
           activityChanged = false;
+          // UsageLog.startOverlay();
+          // toggleModal();
+          // UsageLog.startOverlayService();
+          // setModalExpiredVis(true);
         }
 
         await BackgroundService.updateNotification({
           taskDesc: 'Runned -> ' + i,
         });
+
         await sleep(delay);
       }
     });
@@ -158,29 +163,21 @@ function App(): JSX.Element {
       intervalId = setInterval(() => {
         console.log('Running every 2 seconds...');
         timeLeftLocal = timeLeftLocal - 2;
-        // setTimers({
-        //   ...timers,
-        //   [activity]: {
-        //     timeLeft: timers[activity].timeLeft! - timeLeftLocal,
-        //     timeSet: timers[activity].timeSet,
-        //   },
-        // });
-        console.log(` [Time Left]: -${timeLeftLocal} seconds`);
-        if (timers[activity].timeLeft! <= 0) {
+        console.log(` [Time Left]: ${timeLeftLocal} seconds`);
+        if (timeLeftLocal <= 0) {
           clearInterval(intervalId);
           console.log('No time left!');
+          onDisplayNotification();
         }
       }, 2000);
 
       return function cleanup() {
+        //exectured when activity changes, or app is closed. App has to be in timers
         clearInterval(intervalId);
         temptimeLeftLocal = timeLeftLocal;
         tempactivity = activity;
-        activityChanged = true;
-        console.log(
-          '[Return Useffect Cleanup] activityChanged: ',
-          activityChanged,
-        );
+        activityChanged = true; //this would trigger attepmpt to change [timers]timeleft in the background
+        console.log('[useEffect Return cleanup()] ');
       };
     }
   }, [activity]);
@@ -227,11 +224,48 @@ function App(): JSX.Element {
     );
   }
 
+  async function onDisplayNotification() {
+    // Request permissions (required for iOS)
+    await notifee.requestPermission();
+
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: 'main',
+      name: 'Main',
+      sound: 'default',
+      vibration: true,
+      importance: AndroidImportance.HIGH, // <-- here
+    });
+
+    // await notifee.displayNotification({
+    //   id: '123',
+    //   title: 'Notification Title',
+    //   body: 'Main body content of the notification',
+    //   android: {
+    //     channelId,
+    //     importance: AndroidImportance.HIGH,
+    //   },
+    // });
+
+    notifee.displayNotification({
+      title: 'Escape The Loop',
+      body: `Timer for  has expired!`,
+      id: '123',
+
+      android: {
+        importance: AndroidImportance.HIGH,
+        channelId,
+        ongoing: true,
+      },
+    });
+  }
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.buttonsContainer}>
         <Button color="#315461" title="Print Data" onPress={displayData} />
         <Button color="#315461" title="Start" onPress={toggleBackground} />
+
         <Button color="#315461" title={'Permission'} onPress={openSettings} />
       </View>
       <View style={styles.buttonsContainer}>
@@ -244,6 +278,11 @@ function App(): JSX.Element {
             setTimers({});
           }}
         />
+        <Button
+          color="#315461"
+          title="Expired"
+          onPress={() => onDisplayNotification()}
+        />
       </View>
       <ModalSetTimer
         setVisible={setModalVisible}
@@ -252,6 +291,12 @@ function App(): JSX.Element {
         packageName={packageName}
         setTimers={setTimers}
         timers={timers}
+      />
+      <ModalExpired
+        setVisible={setModalExpiredVis}
+        visible={modalExpiredVis}
+        name={'Escape The Loop'}
+        packageName={'com.escapetheloop.main'}
       />
       <FlatList
         style={{width: '80%'}}

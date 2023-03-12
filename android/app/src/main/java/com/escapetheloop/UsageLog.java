@@ -1,6 +1,9 @@
 package com.escapetheloop; // replace com.your-app-name with your app’s name
 import static android.content.Context.USAGE_STATS_SERVICE;
 
+import android.app.Activity;
+import android.view.View;
+import android.view.WindowManager;
 import android.app.KeyguardManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -10,16 +13,25 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
+
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.common.LifecycleState;
+import com.facebook.react.modules.core.ReactChoreographer;
+import com.facebook.react.shell.MainReactPackage;
 import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,7 +85,6 @@ public class UsageLog extends ReactContextBaseJavaModule {
             callBack.invoke(currentActivity);
         }
     }
-
 
     @ReactMethod //this method is better in terms of accuracy
     public void getAppUsageData2(Callback callBack) {
@@ -143,7 +154,212 @@ public class UsageLog extends ReactContextBaseJavaModule {
     }
 
 
-    @ReactMethod //gives innacurate info sometimes, has to be tested on real device, more flexible tho
+
+
+    private WindowManager windowManager;
+    private WindowManager.LayoutParams params;
+
+    private ReactRootView reactRootView;
+
+
+
+    @ReactMethod
+    public void show() {
+        ReactApplicationContext context = getReactApplicationContext();
+        Activity currentActivity = context.getCurrentActivity();
+
+        windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+
+        params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+
+        ReactInstanceManager reactInstanceManager = ReactInstanceManager.builder()
+                .setApplication(currentActivity.getApplication())
+                .setCurrentActivity(currentActivity)
+                .setBundleAssetName("index.android.bundle")
+                .setJSMainModulePath("index")
+                .addPackage(new MainReactPackage())
+                .setUseDeveloperSupport(BuildConfig.DEBUG)
+                .setInitialLifecycleState(LifecycleState.RESUMED)
+                .build();
+
+        reactRootView = new ReactRootView(context);
+        reactRootView.startReactApplication(
+                reactInstanceManager,
+                "ReactModal",
+                null
+        );
+
+        windowManager.addView(reactRootView, params);
+
+        View overlayView = new View(context);
+        windowManager.addView(overlayView, params);
+    }
+
+    @ReactMethod
+    public void hide() {
+        ReactApplicationContext context = getReactApplicationContext();
+
+        View overlayView = new View(context);
+        windowManager.removeView(overlayView);
+    }
+    private ReactInstanceManager reactInstanceManager;
+
+    @ReactMethod
+    public void show2() {
+        ReactApplicationContext context = getReactApplicationContext();
+        Activity currentActivity = context.getCurrentActivity();
+
+        windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+
+        params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+
+        reactInstanceManager = ReactInstanceManager.builder()
+                .setApplication(currentActivity.getApplication())
+                .setCurrentActivity(currentActivity)
+                .setBundleAssetName("index.android.bundle")
+                .setJSMainModulePath("index")
+                .addPackage(new MainReactPackage())
+                .setUseDeveloperSupport(BuildConfig.DEBUG)
+                .setInitialLifecycleState(LifecycleState.RESUMED)
+                .build();
+
+        reactRootView = new ReactRootView(context);
+        reactRootView.startReactApplication(
+                reactInstanceManager,
+                "ReactModal",
+                null
+        );
+
+        windowManager.addView(reactRootView, params);
+    }
+
+
+
+
+
+
+
+
+
+
+//
+// NOT GIVING AND ERROR BUT NOT WORKING AS WELL :)
+//    private WindowManager windowManager;
+//    private LinearLayout overlayView;
+//    @ReactMethod
+//    public void startOverlay() {
+//        if (windowManager == null) {
+//            ReactApplicationContext context = getReactApplicationContext();
+//
+//            windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+//
+//            overlayView = new LinearLayout(getReactApplicationContext());
+//            overlayView.setBackgroundColor(0xFF000000);
+//
+//            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+//                    WindowManager.LayoutParams.MATCH_PARENT,
+//                    WindowManager.LayoutParams.MATCH_PARENT,
+//                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+//                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+//                            | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+//                    PixelFormat.TRANSLUCENT);
+//
+//            params.gravity = Gravity.LEFT | Gravity.TOP;
+//            windowManager.addView(overlayView, params);
+//        }
+//    }
+//
+//    @ReactMethod
+//    public void stopOverlay() {
+//        if (overlayView != null) {
+//            windowManager.removeView(overlayView);
+//            overlayView = null;
+//            windowManager = null;
+//        }
+//    }
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @ReactMethod //gives innacurate info sometimes, has to be tested on real device, more flexible than getAppUsageData2
     public void getAppUsageData(Callback callBack) {
         ReactApplicationContext context = getReactApplicationContext();
         UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);

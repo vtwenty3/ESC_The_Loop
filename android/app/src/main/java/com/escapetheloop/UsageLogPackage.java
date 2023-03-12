@@ -23,6 +23,7 @@ public class UsageLogPackage implements ReactPackage {
 
         modules.add(new UsageLog(reactContext));
 
+
         return modules;
     }
 
