@@ -77,6 +77,7 @@ import java.util.HashMap;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
+import io.invertase.notifee.NotifeeApiModule;
 
 
 public class MainActivity extends ReactActivity {
@@ -87,7 +88,9 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "escapetheloop";
+    return NotifeeApiModule.getMainComponent("escapetheloop");
+
+    //return "escapetheloop";
   }
 
   /**

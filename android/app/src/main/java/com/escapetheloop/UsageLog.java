@@ -242,7 +242,7 @@ public class UsageLog extends ReactContextBaseJavaModule {
         reactRootView = new ReactRootView(context);
         reactRootView.startReactApplication(
                 reactInstanceManager,
-                "ReactModal",
+                "modalComp",
                 null
         );
 

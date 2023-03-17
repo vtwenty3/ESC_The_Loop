@@ -4,7 +4,7 @@ import React from 'react';
 export function Tasks() {
   return (
     <View>
-      <Text>Tasks</Text>
+      <Text style={{color: 'white'}}>Tasks</Text>
     </View>
   );
 }

@@ -71,6 +71,14 @@ function App(): JSX.Element {
   interface Timers {
     [key: string]: {timeLeft?: number; timeSet?: number};
   }
+  const linking = {
+    prefixes: ['escapetheloop://'],
+    config: {
+      screens: {
+        Tasks: 'tasks',
+      },
+    },
+  };
 
   const sleep = (time: any) =>
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
@@ -278,7 +286,7 @@ function App(): JSX.Element {
   }
 
   return (
-    <NavigationContainer theme={MyTheme}>
+    <NavigationContainer theme={MyTheme} linking={linking}>
       {/* <View style={styles.mainContainer}>
         <View style={styles.buttonsContainer}>
           <Button color="#315461" title="Print Data" onPress={displayData} />

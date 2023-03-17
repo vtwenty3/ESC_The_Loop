@@ -19,6 +19,7 @@ import BackgroundService from 'react-native-background-actions';
 import notifee, {
   AndroidImportance,
   AndroidCategory,
+  EventType,
 } from '@notifee/react-native';
 
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
@@ -26,6 +27,9 @@ import {ModalSetTimer} from './../components/ModalSetTimer';
 let activityChanged: boolean = false;
 let temptimeLeftLocal = 0;
 let tempactivity = '';
+let test = '';
+import {useNavigation} from '@react-navigation/native';
+import {Linking} from 'react-native';
 
 const {UsageLog} = NativeModules;
 
@@ -60,9 +64,11 @@ export function Usage() {
       for (let i = 0; BackgroundService.isRunning(); i++) {
         UsageLog.currentActivity((callBack: string) => {
           // get current activity
-          //console.log('Runned -> ', i);
           setActivity(callBack);
+          test = callBack;
         });
+        console.log('Runned -> ', i);
+        console.log('activity -> ', test);
 
         //console.log('[BackgroundTask Set]: ' + activityChanged);
         if (activityChanged) {
@@ -153,10 +159,6 @@ export function Usage() {
   }
 
   async function onDisplayNotification() {
-    // Request permissions (required for iOS)
-    await notifee.requestPermission();
-
-    // Create a channel (required for Android)
     const channelId = await notifee.createChannel({
       id: 'main',
       name: 'Main',
@@ -165,27 +167,29 @@ export function Usage() {
       importance: AndroidImportance.HIGH, // <-- here
     });
 
-    // await notifee.displayNotification({
-    //   id: '123',
-    //   title: 'Notification Title',
-    //   body: 'Main body content of the notification',
-    //   android: {
-    //     channelId,
-    //     importance: AndroidImportance.HIGH,
-    //   },
-    // });
-
     notifee.displayNotification({
       title: 'Escape The Loop',
-      body: `Timer for  has expired!`,
+      body: `Timer has expired!`,
       id: '123',
-
       android: {
         importance: AndroidImportance.HIGH,
         channelId,
         ongoing: true,
+        pressAction: {
+          id: 'default',
+        },
       },
     });
+
+    // notifee.onBackgroundEvent(async ({type, detail}) => {
+    //   const {notification, pressAction} = detail;
+
+    //   // Check if the user pressed the "Mark as read" action
+    //   if (type === EventType.ACTION_PRESS) {
+    //     console.log('Background Press action');
+    //     // await notifee.cancelNotification(notification.id);
+    //   }
+    // });
   }
 
   useEffect(() => {
@@ -194,13 +198,13 @@ export function Usage() {
       timeLeftLocal = timers[activity].timeLeft!;
       console.log(`${activity} found in timers`);
       intervalId = setInterval(() => {
-        console.log('Running every 2 seconds...');
-        timeLeftLocal = timeLeftLocal - 2;
-        console.log(` [Time Left]: ${timeLeftLocal} seconds`);
         if (timeLeftLocal <= 0) {
-          clearInterval(intervalId);
           console.log('No time left!');
           onDisplayNotification();
+        } else {
+          console.log('Running every 2 seconds...');
+          timeLeftLocal = timeLeftLocal - 2;
+          console.log(` [Time Left]: ${timeLeftLocal} seconds`);
         }
       }, 2000);
 
@@ -214,6 +218,15 @@ export function Usage() {
       };
     }
   }, [activity]);
+
+  notifee.onBackgroundEvent(async ({type, detail}) => {
+    if (type === EventType.PRESS) {
+      console.log('Background Press action');
+      await Linking.openURL('escapetheloop://tasks');
+
+      // Handle notification tap here
+    }
+  });
 
   function openSettings() {
     RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS(); // Open the main settings screen.

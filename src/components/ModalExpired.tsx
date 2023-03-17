@@ -33,16 +33,8 @@ export const ModalExpired = (props: Props) => {
   return (
     <View style={styles.centeredView}>
       <Modal
-        style={{
-          zIndex: 9999,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-        }}
         animationType="fade"
-        visible={props.visible}
+        visible={true}
         transparent={true}
         onRequestClose={() => {
           handleClose();
@@ -50,7 +42,8 @@ export const ModalExpired = (props: Props) => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Timer for {props.name} expired!
+              {/* Timer for {props.name} expired! */}
+              Timer Expired!
             </Text>
             <View style={styles.modalInpuit}>
               <TextInput
