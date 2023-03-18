@@ -5912,6 +5912,11 @@
   dependencies:
     "eventemitter3" "^4.0.7"
 
+"react-native-background-timer-android@^1.0.4":
+  "integrity" "sha512-/wtSEdvCMoSqeKAg+0fIiXUD6UK/TdQcOXu49CyWT1BB1Xlidjryzixm+BmBEcyRqPT7/cvXlXUrGoij3JmMSA=="
+  "resolved" "https://registry.npmjs.org/react-native-background-timer-android/-/react-native-background-timer-android-1.0.4.tgz"
+  "version" "1.0.4"
+
 "react-native-codegen@^0.71.5":
   "integrity" "sha512-rfsuc0zkuUuMjFnrT55I1mDZ+pBRp2zAiRwxck3m6qeGJBGK5OV5JH66eDQ4aa+3m0of316CqrJDRzVlYufzIg=="
   "resolved" "https://registry.npmjs.org/react-native-codegen/-/react-native-codegen-0.71.5.tgz"
