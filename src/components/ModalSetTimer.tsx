@@ -11,6 +11,9 @@ import {
 // interface Timers {
 //   [key: string]: string;
 // }
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
@@ -23,6 +26,14 @@ type Props = {
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
   timers: Timers;
 };
+const storeData = async (timers: Timers) => {
+  try {
+    await AsyncStorage.setItem('@local', JSON.stringify(timers));
+    console.log('[storeData]: timers saved to storage.');
+  } catch (e) {
+    console.log('error saving timers to storage; Details:', e);
+  }
+};
 
 export function ModalSetTimer(props: Props) {
   const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
@@ -30,6 +41,38 @@ export function ModalSetTimer(props: Props) {
   function handleClose() {
     props.setVisible(false);
     setTimeLimit('');
+  }
+
+  useEffect(() => {
+    if (Object.keys(props.timers).length !== 0) {
+      console.log('[useEffect Modal]: Setting local data... ');
+      storeData(props.timers);
+    }
+  }, [props.timers]);
+
+  function setButton() {
+    setTimeLimit(timeLimit);
+    props.setTimers({
+      ...props.timers,
+      [props.packageName]: {
+        timeLeft: Number(timeLimit),
+        timeSet: Number(timeLimit),
+      },
+
+      // set the initial timer value to the item's usageDuration
+    });
+
+    // props.setTimers2([
+    //   ...props.timers2,
+    //   {
+    //     packageName: props.packageName,
+    //     timeSet: parseInt(timeLimit),
+    //     timeLeft: parseInt(timeLimit),
+    //   },
+    // ]);
+    // storeData(props.timers);
+
+    handleClose();
   }
 
   return (
@@ -57,29 +100,7 @@ export function ModalSetTimer(props: Props) {
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.button, styles.buttonOpen]}
-                onPress={() => {
-                  setTimeLimit(timeLimit);
-                  props.setTimers({
-                    ...props.timers,
-                    [props.packageName]: {
-                      timeLeft: Number(timeLimit),
-                      timeSet: Number(timeLimit),
-                    },
-
-                    // set the initial timer value to the item's usageDuration
-                  });
-
-                  // props.setTimers2([
-                  //   ...props.timers2,
-                  //   {
-                  //     packageName: props.packageName,
-                  //     timeSet: parseInt(timeLimit),
-                  //     timeLeft: parseInt(timeLimit),
-                  //   },
-                  // ]);
-
-                  handleClose();
-                }}>
+                onPress={() => setButton()}>
                 <Text style={styles.textStyle}>Set</Text>
               </TouchableOpacity>
               <TouchableOpacity

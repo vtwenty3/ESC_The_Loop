@@ -88,9 +88,9 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return NotifeeApiModule.getMainComponent("escapetheloop");
+    //return NotifeeApiModule.getMainComponent("escapetheloop");
 
-    //return "escapetheloop";
+    return "escapetheloop";
   }
 
   /**

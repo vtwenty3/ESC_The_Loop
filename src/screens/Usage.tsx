@@ -13,8 +13,10 @@ import {
   NativeModules,
   NativeEventEmitter,
 } from 'react-native';
-
+import {MMKVLoader, useMMKVStorage} from 'react-native-mmkv-storage';
+const MMKV = new MMKVLoader().initialize();
 import BackgroundService from 'react-native-background-actions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import notifee, {
   AndroidImportance,
@@ -28,27 +30,40 @@ let activityChanged: boolean = false;
 let temptimeLeftLocal = 0;
 let tempactivity = '';
 let test = '';
-import {useNavigation} from '@react-navigation/native';
+
+async function getLocal() {
+  console.log('[getLocal()]: Getting local timers...');
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@local');
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.log('error loading local timers; Details:', e);
+  }
+}
+async function initLocal() {
+  const localData = await getLocal();
+  console.log('[initLocal()]: Local Timers State:', localData);
+}
+
 import {Linking} from 'react-native';
 
 const {UsageLog} = NativeModules;
 
-type Props = {
-  setTimers: React.Dispatch<React.SetStateAction<Timers>>;
-
-  timers: Timers;
-};
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
 export function Usage() {
+  //const localDataInit = initLocal();
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalExpiredVis, setModalExpiredVis] = useState(false);
   const [activity, setActivity] = useState<string>('');
   const [packageName, setPackageName] = useState<string>('');
+
   const [timers, setTimers] = useState<Timers>({});
+  const [timersLocal, setTimersLocal] = useMMKVStorage('timers', MMKV, timers); // local timers
 
   let intervalId: number;
   let i = 0;
@@ -219,17 +234,41 @@ export function Usage() {
     }
   }, [activity]);
 
+  useEffect(() => {
+    async function fetchLocalData() {
+      // Check if the timers state is empty
+      if (Object.keys(timers).length === 0) {
+        console.log(
+          '[useEffect]: TimersState is empty, fetching local data...',
+        );
+        const localData = await getLocal();
+        if (localData !== null && Object.keys(localData).length > 0) {
+          console.log(
+            '[useEffect]: Local data not empty! SettingTimers(localData)',
+          );
+          setTimers(localData);
+        } else {
+          console.log('[useEffect]: Local data empty! ');
+        }
+      }
+    }
+
+    fetchLocalData();
+  }, [timers]);
+
+  // useEffect(() => {
+  //   storeData(timers);
+  // }, [timers]);
+
   notifee.onBackgroundEvent(async ({type, detail}) => {
     if (type === EventType.PRESS) {
       console.log('Background Press action');
       await Linking.openURL('escapetheloop://tasks');
-
-      // Handle notification tap here
     }
   });
 
   function openSettings() {
-    RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS(); // Open the main settings screen.
+    RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS();
   }
 
   function renderAppItem({item}: {item: any}) {
@@ -267,6 +306,15 @@ export function Usage() {
       </View>
     );
   }
+  async function clearLocalTimers() {
+    try {
+      await AsyncStorage.removeItem('@local');
+    } catch (e) {
+      // remove error
+    }
+
+    console.log('Done.');
+  }
 
   return (
     <View style={styles.mainContainer}>
@@ -283,13 +331,19 @@ export function Usage() {
           title="Clear Timers"
           onPress={() => {
             console.log('Timers before clear:', timers);
+            console.log('Timers Local before clear:', timersLocal);
+            clearLocalTimers();
             setTimers({});
+
+            setTimersLocal({});
           }}
         />
         <Button
           color="#315461"
-          title="Expired"
-          onPress={() => onDisplayNotification()}
+          title="Timers Log"
+          onPress={() => {
+            // setTimersLocal(timers);
+          }} //this is just for testing purposes
         />
       </View>
 
