@@ -20,7 +20,16 @@ import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import {ModalSetTimer} from './../components/ModalSetTimer';
 let activityChanged: boolean = false;
 
-let test = '';
+let activity = '';
+async function fetchLocalTimers() {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@local');
+    return jsonValue != null ? JSON.parse(jsonValue) : {};
+  } catch (e) {
+    console.log('Error fetching timers from storage; Details:', e);
+    return {};
+  }
+}
 
 async function getLocal() {
   console.log('[getLocal()]: Getting local timers...');
@@ -32,10 +41,7 @@ async function getLocal() {
     console.log('error loading local timers; Details:', e);
   }
 }
-async function initLocal() {
-  const localData = await getLocal();
-  console.log('[initLocal()]: Local Timers State:', localData);
-}
+
 const storeData = async (timers: Timers) => {
   try {
     await AsyncStorage.setItem('@local', JSON.stringify(timers));
@@ -44,6 +50,96 @@ const storeData = async (timers: Timers) => {
     console.log('error saving timers to storage; Details:', e);
   }
 };
+
+const sleep = (time: any) =>
+  new Promise<void>(resolve => setTimeout(() => resolve(), time));
+const taskRandom = async (taskData: any) => {
+  await new Promise(async resolve => {
+    const {delay} = taskData;
+    const {screenOffDelay} = taskData;
+
+    console.log(BackgroundService.isRunning(), delay);
+    for (let i = 0; BackgroundService.isRunning(); i++) {
+      UsageLog.currentActivity((callBack: string) => {
+        // get current activity
+        activity = callBack;
+      });
+
+      // Fetch the latest timers from storage
+      const localTimers = await fetchLocalTimers();
+
+      if (activity !== 'Screen Off!') {
+        if (activity in localTimers) {
+          if (localTimers[activity].timeLeft! <= 0) {
+            console.log('[Timer]: No time left!');
+            onDisplayNotification();
+            // Call onDisplayNotification() here
+          } else {
+            localTimers[activity].timeLeft! -= delay / 1000;
+            await storeData(localTimers);
+            console.log(
+              ` [Timer left]: ${localTimers[activity].timeLeft} seconds`,
+            );
+          }
+        }
+
+        console.log('Runned -> ', i);
+        console.log('activity -> ', activity);
+        await sleep(delay);
+      } else {
+        console.log('Runned -> ', i);
+        console.log('activity -> ', activity);
+        await sleep(screenOffDelay);
+      }
+    }
+  });
+};
+
+async function onDisplayNotification() {
+  const channelId = await notifee.createChannel({
+    id: 'main',
+    name: 'Main',
+    sound: 'default',
+    vibration: true,
+    importance: AndroidImportance.HIGH, // <-- here
+  });
+
+  notifee.displayNotification({
+    title: 'Escape The Loop',
+    body: `Timer has expired!`,
+    id: '123',
+    android: {
+      importance: AndroidImportance.HIGH,
+      channelId,
+      ongoing: true,
+      pressAction: {
+        id: 'default',
+      },
+    },
+  });
+}
+let playing = BackgroundService.isRunning();
+
+const options = {
+  taskName: 'Example',
+  taskTitle: 'ExampleTask title',
+  taskDesc: 'ExampleTask desc',
+  taskIcon: {
+    name: 'ic_launcher',
+    type: 'mipmap',
+  },
+  color: '#ff00ff',
+  linkingURI: 'exampleScheme://chat/jane',
+  parameters: {
+    delay: 2000,
+    screenOffDelay: 10000,
+  },
+};
+
+/**
+ * Toggles the background task
+ */
+
 import {Linking} from 'react-native';
 
 const {UsageLog} = NativeModules;
@@ -67,8 +163,6 @@ export function Usage() {
   let intervalId: number;
   let timeLeftLocal = 0;
 
-  const sleep = (time: any) =>
-    new Promise<void>(resolve => setTimeout(() => resolve(), time));
   // const taskRandom = async (taskData: any) => {
   //   await new Promise(async resolve => {
   //     const {delay} = taskData; // delay is 2 seconds currently, change it from options object
@@ -91,100 +185,16 @@ export function Usage() {
   //     }
   //   });
   // };
-  const taskRandom = async (taskData: any) => {
-    await new Promise(async resolve => {
-      const {delay} = taskData; // delay is 2 seconds currently, change it from options object
-      const {offDelay} = taskData; // delay is 2 seconds currently, change it from options object
 
-      console.log(BackgroundService.isRunning(), delay);
-      for (let i = 0; BackgroundService.isRunning(); i++) {
-        UsageLog.currentActivity((callBack: string) => {
-          // get current activity
-          setActivity(callBack);
-          test = callBack;
-        });
-
-        if (test !== 'Screen Off!') {
-          if (test in timers) {
-            console.log(`[Activity]: ${test} found in timers`);
-
-            if (timers[test].timeLeft! <= 0) {
-              console.log('[Timer]: No time left!');
-              onDisplayNotification();
-            } else {
-              timers[test].timeLeft! -= delay / 1000;
-              await storeData(timers);
-              console.log(` [Timer left]: ${timers[test].timeLeft} seconds`);
-            }
-          }
-          // if (activityChanged) {
-          //   activityChanged = false;
-          // }
-          // await BackgroundService.updateNotification({
-          //   taskDesc: 'Runned -> ' + i,
-          // });
-
-          console.log('Runned -> ', i);
-          console.log('activity -> ', test);
-          await sleep(delay);
-        } else {
-          console.log('Runned -> ', i);
-          console.log('activity -> ', test);
-          await sleep(offDelay);
-        }
-      }
-    });
-  };
-  async function onDisplayNotification() {
-    const channelId = await notifee.createChannel({
-      id: 'main',
-      name: 'Main',
-      sound: 'default',
-      vibration: true,
-      importance: AndroidImportance.HIGH, // <-- here
-    });
-
-    notifee.displayNotification({
-      title: 'Escape The Loop',
-      body: `Timer has expired!`,
-      id: '123',
-      android: {
-        importance: AndroidImportance.HIGH,
-        channelId,
-        ongoing: true,
-        pressAction: {
-          id: 'default',
-        },
-      },
-    });
-  }
-  let playing = BackgroundService.isRunning();
-
-  const options = {
-    taskName: 'Example',
-    taskTitle: 'ExampleTask title',
-    taskDesc: 'ExampleTask desc',
-    taskIcon: {
-      name: 'ic_launcher',
-      type: 'mipmap',
-    },
-    color: '#ff00ff',
-    linkingURI: 'exampleScheme://chat/jane',
-    parameters: {
-      delay: 2000,
-      offDelay: 10000,
-    },
-  };
-
-  /**
-   * Toggles the background task
-   */
   const toggleBackground = async () => {
     playing = !playing;
     if (playing) {
       try {
         console.log('Trying to start background service');
-        await BackgroundService.start(taskRandom, options);
+        await BackgroundService.start(
+          taskData => taskRandom(taskData),
+          options,
+        );
 
         console.log('Successful start!');
       } catch (e) {
@@ -242,33 +252,28 @@ export function Usage() {
   //     };
   //   }
   // }, [activity]);
+  async function initTimerState() {
+    console.log('[useEffect]: TimersState is empty, fetching local data...');
+    const localTimers = await fetchLocalTimers();
+    if (localTimers !== null && Object.keys(localTimers).length > 0) {
+      console.log('[useEffect]:localTimers Found! setTimers(localTimers)');
+      setTimers(localTimers);
+    } else {
+      console.log('[useEffect]: Local data empty! ');
+    }
+  }
 
   useEffect(() => {
     if (Object.keys(timers).length === 0) {
-      fetchLocalData();
-    } else {
-      //console.log(
-      // '[useEffect]: TimersState not empty, Gotta update local data...?',);
-    }
-
-    async function fetchLocalData() {
       // Check if the timers state is empty
-      console.log('[useEffect]: TimersState is empty, fetching local data...');
-      const localData = await getLocal();
-      if (localData !== null && Object.keys(localData).length > 0) {
-        console.log(
-          '[useEffect]: Local data not empty! SettingTimers(localData)',
-        );
-        setTimers(localData);
-      } else {
-        console.log('[useEffect]: Local data empty! ');
-      }
+      initTimerState();
     }
   }, [timers]);
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
       getData();
+      initTimerState();
     }
     try {
       await AsyncStorage.setItem('@appState', nextAppState);
