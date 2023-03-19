@@ -18,10 +18,13 @@ import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import {ModalSetTimer} from './../components/ModalSetTimer';
 const {UsageLog} = NativeModules;
+let playing = BackgroundService.isRunning();
+
 let activity = '';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
+
 async function fetchLocalTimers() {
   try {
     const jsonValue = await AsyncStorage.getItem('@local');
@@ -85,8 +88,6 @@ const taskRandom = async (taskData: any) => {
   });
 };
 
-let playing = BackgroundService.isRunning();
-
 const options = {
   taskName: 'Example',
   taskTitle: 'ExampleTask title',
@@ -128,7 +129,6 @@ async function onDisplayNotification() {
 }
 
 export function Usage() {
-  //const localDataInit = initLocal();
   const [data, setData] = useState<any>();
   const [appName, setAppName] = useState<string>('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -138,26 +138,8 @@ export function Usage() {
     AppState.currentState,
   );
 
+  //Gets the usage data from the native module on app open
   useEffect(() => {
-    if (Object.keys(timers).length === 0) {
-      // Check if the timers state is empty
-      initTimerState();
-    }
-  }, [timers]);
-
-  async function initTimerState() {
-    console.log('[useEffect]: TimersState is empty, fetching local data...');
-    const localTimers = await fetchLocalTimers();
-    if (localTimers !== null && Object.keys(localTimers).length > 0) {
-      console.log('[useEffect]:localTimers Found! setTimers(localTimers)');
-      setTimers(localTimers);
-    } else {
-      console.log('[useEffect]: Local data empty! ');
-    }
-  }
-
-  useEffect(() => {
-    // Call the function on the initial start
     if (data === undefined || data.length == 0) {
       getUsageData();
     }
@@ -172,6 +154,14 @@ export function Usage() {
     };
   }, [appState]);
 
+  //checks if timers state is empty and if so, fetches local data
+  useEffect(() => {
+    if (Object.keys(timers).length === 0) {
+      // Check if the timers state is empty
+      initTimerState();
+    }
+  }, [timers]);
+
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
       getUsageData();
@@ -184,6 +174,17 @@ export function Usage() {
     }
     setAppState(nextAppState);
   };
+
+  async function initTimerState() {
+    console.log('[useEffect]: TimersState is empty, fetching local data...');
+    const localTimers = await fetchLocalTimers();
+    if (localTimers !== null && Object.keys(localTimers).length > 0) {
+      console.log('[useEffect]:localTimers Found! setTimers(localTimers)');
+      setTimers(localTimers);
+    } else {
+      console.log('[useEffect]: Local data empty! ');
+    }
+  }
 
   const toggleBackground = async () => {
     playing = !playing;
