@@ -61,6 +61,21 @@ function App(): JSX.Element {
             ),
           }}
         />
+        {/* <Tab.Screen
+          name="Modal"
+          component={Modal}
+          options={{
+            tabBarLabel: 'Add',
+            tabBarIcon: ({color, size}) => (
+              <Icon
+                name="checkbox-marked-circle-outline"
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        /> */}
+
         <Tab.Screen
           name="Notes"
           component={Notes}
