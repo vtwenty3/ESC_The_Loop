@@ -14,6 +14,15 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-escapetheloop-escapetheloopTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-escapetheloop-escapetheloopTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		A6E4BBC9279642B6BE9324B7 /* Lexend-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C533BB8EE7E74DC083D92D62 /* Lexend-Black.ttf */; };
+		CB28F00060F140F5803B2E27 /* Lexend-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0AA78C71D80C423990C22FBE /* Lexend-Bold.ttf */; };
+		774992AD03F448ED861A67CF /* Lexend-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB03404463AC48819D42266F /* Lexend-ExtraBold.ttf */; };
+		B2E57C9BC88E43C78908723F /* Lexend-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7171CA91F0984E7ABAC26FB8 /* Lexend-ExtraLight.ttf */; };
+		8869D9CF44FD4DB881C5FECB /* Lexend-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C80296C92A0740D3B189E1F7 /* Lexend-Light.ttf */; };
+		319642F9E0204E238ABCC3BD /* Lexend-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B6765141527F4B5DA3041FDC /* Lexend-Medium.ttf */; };
+		82513F4529694195B02A2E5D /* Lexend-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 16CC63855D2644C59C8BDDE4 /* Lexend-Regular.ttf */; };
+		AADDE3249275474E9A425F67 /* Lexend-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 87CECA8407C242FFA8BAC368 /* Lexend-SemiBold.ttf */; };
+		D77C8E01DDF54DFD8B1B012C /* Lexend-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2C739E5AB0B4ABFAD8AC0C1 /* Lexend-Thin.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +53,15 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = escapetheloop/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-escapetheloop-escapetheloopTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-escapetheloop-escapetheloopTests.release.xcconfig"; path = "Target Support Files/Pods-escapetheloop-escapetheloopTests/Pods-escapetheloop-escapetheloopTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		C533BB8EE7E74DC083D92D62 /* Lexend-Black.ttf */ = {isa = PBXFileReference; name = "Lexend-Black.ttf"; path = "../src/fonts/Lexend-Black.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0AA78C71D80C423990C22FBE /* Lexend-Bold.ttf */ = {isa = PBXFileReference; name = "Lexend-Bold.ttf"; path = "../src/fonts/Lexend-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		CB03404463AC48819D42266F /* Lexend-ExtraBold.ttf */ = {isa = PBXFileReference; name = "Lexend-ExtraBold.ttf"; path = "../src/fonts/Lexend-ExtraBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		7171CA91F0984E7ABAC26FB8 /* Lexend-ExtraLight.ttf */ = {isa = PBXFileReference; name = "Lexend-ExtraLight.ttf"; path = "../src/fonts/Lexend-ExtraLight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C80296C92A0740D3B189E1F7 /* Lexend-Light.ttf */ = {isa = PBXFileReference; name = "Lexend-Light.ttf"; path = "../src/fonts/Lexend-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B6765141527F4B5DA3041FDC /* Lexend-Medium.ttf */ = {isa = PBXFileReference; name = "Lexend-Medium.ttf"; path = "../src/fonts/Lexend-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		16CC63855D2644C59C8BDDE4 /* Lexend-Regular.ttf */ = {isa = PBXFileReference; name = "Lexend-Regular.ttf"; path = "../src/fonts/Lexend-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		87CECA8407C242FFA8BAC368 /* Lexend-SemiBold.ttf */ = {isa = PBXFileReference; name = "Lexend-SemiBold.ttf"; path = "../src/fonts/Lexend-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F2C739E5AB0B4ABFAD8AC0C1 /* Lexend-Thin.ttf */ = {isa = PBXFileReference; name = "Lexend-Thin.ttf"; path = "../src/fonts/Lexend-Thin.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +140,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				874966BC3FD84BC7830F62A4 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -147,6 +166,23 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		874966BC3FD84BC7830F62A4 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				C533BB8EE7E74DC083D92D62 /* Lexend-Black.ttf */,
+				0AA78C71D80C423990C22FBE /* Lexend-Bold.ttf */,
+				CB03404463AC48819D42266F /* Lexend-ExtraBold.ttf */,
+				7171CA91F0984E7ABAC26FB8 /* Lexend-ExtraLight.ttf */,
+				C80296C92A0740D3B189E1F7 /* Lexend-Light.ttf */,
+				B6765141527F4B5DA3041FDC /* Lexend-Medium.ttf */,
+				16CC63855D2644C59C8BDDE4 /* Lexend-Regular.ttf */,
+				87CECA8407C242FFA8BAC368 /* Lexend-SemiBold.ttf */,
+				F2C739E5AB0B4ABFAD8AC0C1 /* Lexend-Thin.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -244,6 +280,15 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				A6E4BBC9279642B6BE9324B7 /* Lexend-Black.ttf in Resources */,
+				CB28F00060F140F5803B2E27 /* Lexend-Bold.ttf in Resources */,
+				774992AD03F448ED861A67CF /* Lexend-ExtraBold.ttf in Resources */,
+				B2E57C9BC88E43C78908723F /* Lexend-ExtraLight.ttf in Resources */,
+				8869D9CF44FD4DB881C5FECB /* Lexend-Light.ttf in Resources */,
+				319642F9E0204E238ABCC3BD /* Lexend-Medium.ttf in Resources */,
+				82513F4529694195B02A2E5D /* Lexend-Regular.ttf in Resources */,
+				AADDE3249275474E9A425F67 /* Lexend-SemiBold.ttf in Resources */,
+				D77C8E01DDF54DFD8B1B012C /* Lexend-Thin.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

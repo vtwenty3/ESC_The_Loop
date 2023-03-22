@@ -40,6 +40,19 @@ function App(): JSX.Element {
       },
     },
   };
+
+  const config = {
+    animation: 'spring',
+    config: {
+      stiffness: 1000,
+      damping: 500,
+      mass: 3,
+      overshootClamping: true,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
+    },
+  };
+
   return (
     <NavigationContainer theme={MyTheme} linking={linking}>
       <Tab.Navigator
@@ -48,6 +61,25 @@ function App(): JSX.Element {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {height: 70},
+          tabBarHideOnKeyboard: true,
+          //         tabBarVisibilityAnimationConfig?: {
+          //   show?: TabBarVisibilityAnimationConfig;
+          //   hide?: TabBarVisibilityAnimationConfig;
+          // },
+          tabBarVisibilityAnimationConfig: {
+            hide: {
+              animation: 'timing',
+              config: {
+                duration: 600,
+              },
+            },
+            show: {
+              animation: 'timing',
+              config: {
+                duration: 600,
+              },
+            },
+          },
         }}>
         <Tab.Screen
           name="Usage"
@@ -124,67 +156,4 @@ function App(): JSX.Element {
 }
 export default App;
 
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    backgroundColor: 'white',
-    borderRadius: 7,
-    padding: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    shadowColor: '#000',
-    gap: 20,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 7,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#315461',
-  },
-  buttonClose: {
-    backgroundColor: 'red',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  modalInpuit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-  },
-});
+const styles = StyleSheet.create({});

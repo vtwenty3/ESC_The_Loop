@@ -1,0 +1,100 @@
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Animated,
+  Easing,
+} from 'react-native';
+import React, {useState, useRef} from 'react';
+
+type Props = {
+  placeholder: string;
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+  multiline?: boolean;
+  numberOfLines?: number;
+  fontSize?: number;
+  fontFamily?: string;
+};
+
+export default function InputFiled(props: Props) {
+  const [title, onChangeTitle] = React.useState('');
+  const [focused, setFocused] = useState(false);
+  const animatedValue = useRef(new Animated.Value(focused ? 0 : -4)).current;
+  return (
+    <View>
+      <View style={styles.inputTitleShadow}>
+        <Animated.View
+          style={{
+            transform: [
+              {translateX: animatedValue},
+              {translateY: animatedValue},
+            ],
+          }}>
+          <TextInput
+            maxLength={props.multiline ? undefined : 28}
+            style={[
+              styles.inputTitle,
+              {
+                fontSize: props.fontSize ? props.fontSize : 18,
+                fontFamily: props.fontFamily
+                  ? props.fontFamily
+                  : 'Lexend-Medium',
+              },
+            ]}
+            onChangeText={props.setValue}
+            value={props.value}
+            multiline={props.multiline}
+            numberOfLines={props.multiline ? props.numberOfLines : undefined}
+            textAlignVertical={props.multiline ? 'top' : undefined}
+            placeholder={props.placeholder}
+            onFocus={() => {
+              setFocused(true);
+              Animated.timing(animatedValue, {
+                duration: 600,
+                toValue: 0,
+                easing: Easing.out(Easing.circle),
+                useNativeDriver: true,
+              }).start();
+            }}
+            onBlur={() => {
+              setFocused(false);
+              Animated.spring(animatedValue, {
+                toValue: -4,
+                stiffness: 270,
+                damping: 3.7,
+                mass: 0.4,
+                delay: 150,
+                restSpeedThreshold: 1,
+                restDisplacementThreshold: 0.5,
+                useNativeDriver: true,
+              }).start();
+            }}
+          />
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  inputTitle: {
+    maxHeight: 155,
+    borderWidth: 2,
+    padding: 10,
+    zIndex: 3,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: '100%',
+    // transform: [{translateX: -4}, {translateY: -4}],
+  },
+  inputTitleShadow: {
+    alignSelf: 'center',
+    backgroundColor: 'black',
+    borderRadius: 10,
+    width: '90%',
+    zIndex: 2,
+  },
+});
