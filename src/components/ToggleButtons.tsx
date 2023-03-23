@@ -10,8 +10,8 @@ import {
 import React, {useState, useRef} from 'react';
 
 type Props = {
-  isTask: boolean;
-  setIsTask: React.Dispatch<React.SetStateAction<boolean>>;
+  type: string;
+  setType: React.Dispatch<React.SetStateAction<string>>;
 };
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -42,7 +42,7 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setIsTask(true);
+              props.setType('task');
               Animated.timing(animatedValueTask, {
                 duration: 600,
                 toValue: 0,
@@ -81,7 +81,7 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setIsTask(false);
+              props.setType('note');
               Animated.timing(animatedValueNote, {
                 duration: 600,
                 toValue: 0,

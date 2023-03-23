@@ -16,7 +16,7 @@ import BackgroundService from 'react-native-background-actions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
-import {ModalSetTimer} from './../components/ModalSetTimer';
+import {ModalSetTimer} from '../components/ModalSetTimer';
 
 const {UsageLog} = NativeModules;
 let playing = BackgroundService.isRunning();

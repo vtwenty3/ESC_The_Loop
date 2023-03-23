@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
-import {Tasks} from './src/screens/Tasks';
-import {Notes} from './src/screens/Notes';
-import {Settings} from './src/screens/Settings';
-import {Usage} from './src/screens/Usage';
-import {Create} from './src/screens/Create';
+import {Tasks} from './src/screens/TasksScreen';
+import {Notes} from './src/screens/NotesScreen';
+import {Settings} from './src/screens/SettingsScreen';
+import {Usage} from './src/screens/UsageScreen';
+import {Create} from './src/screens/CreateScreen';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 const Tab = createBottomTabNavigator();

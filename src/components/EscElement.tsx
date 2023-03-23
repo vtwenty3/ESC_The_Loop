@@ -78,7 +78,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pressed: {
-    transform: [{translateX: 4}, {translateY: 4}, {scale: 0.99}],
-  },
 });

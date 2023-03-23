@@ -7,7 +7,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 
 type Props = {
   placeholder: string;
@@ -17,9 +17,25 @@ type Props = {
   numberOfLines?: number;
   fontSize?: number;
   fontFamily?: string;
+  pop: boolean;
 };
 
 export default function InputFiled(props: Props) {
+  useEffect(() => {
+    setTimeout(function () {
+      Animated.spring(animatedValue, {
+        toValue: -4,
+        stiffness: 270,
+        damping: 3.7,
+        mass: 0.4,
+        delay: 150,
+        restSpeedThreshold: 1,
+        restDisplacementThreshold: 0.5,
+        useNativeDriver: true,
+      }).start();
+    }, 100);
+  }, [props.pop]);
+
   const [title, onChangeTitle] = React.useState('');
   const [focused, setFocused] = useState(false);
   const animatedValue = useRef(new Animated.Value(focused ? 0 : -4)).current;
@@ -61,16 +77,16 @@ export default function InputFiled(props: Props) {
             }}
             onBlur={() => {
               setFocused(false);
-              Animated.spring(animatedValue, {
-                toValue: -4,
-                stiffness: 270,
-                damping: 3.7,
-                mass: 0.4,
-                delay: 150,
-                restSpeedThreshold: 1,
-                restDisplacementThreshold: 0.5,
-                useNativeDriver: true,
-              }).start();
+              // Animated.spring(animatedValue, {
+              //   toValue: -4,
+              //   stiffness: 270,
+              //   damping: 3.7,
+              //   mass: 0.4,
+              //   delay: 150,
+              //   restSpeedThreshold: 1,
+              //   restDisplacementThreshold: 0.5,
+              //   useNativeDriver: true,
+              // }).start();
             }}
           />
         </Animated.View>
