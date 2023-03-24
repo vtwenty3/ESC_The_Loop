@@ -11,8 +11,10 @@ import {
 // interface Timers {
 //   [key: string]: string;
 // }
+import InputFiled from '../components/InputFiledElement';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BrutalButton from './BrutalButton';
 
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
@@ -36,11 +38,16 @@ const storeData = async (timers: Timers) => {
 };
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<string>(''); // usage limit timer in minutes
+  const [timeLimit, setTimeLimit] = useState<string>('');
+  const [pop, setPop] = useState<boolean>(false);
+  // usage limit timer in minutes
   //const [timers, setTimers] = useState<Timers>({});
   function handleClose() {
-    props.setVisible(false);
     setTimeLimit('');
+
+    setTimeout(function () {
+      props.setVisible(false);
+    }, 250);
   }
 
   useEffect(() => {
@@ -51,6 +58,7 @@ export function ModalSetTimer(props: Props) {
   }, [props.timers]);
 
   function setButton() {
+    setPop(false);
     setTimeLimit(timeLimit);
     props.setTimers({
       ...props.timers,
@@ -76,69 +84,100 @@ export function ModalSetTimer(props: Props) {
   }
 
   return (
-    <View style={styles.centeredView}>
-      <Modal
-        animationType="fade"
-        visible={props.visible}
-        transparent={true}
-        onRequestClose={() => {
-          handleClose();
-        }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Set a timer for {props.name}</Text>
-            <View style={styles.modalInpuit}>
-              <TextInput
-                style={styles.input}
-                onChangeText={setTimeLimit}
-                value={timeLimit}
-                keyboardType="numeric"
-              />
-              <Text style={styles.modalText}>Minutes</Text>
-            </View>
+    <Modal
+      animationType="fade"
+      visible={props.visible}
+      transparent={true}
+      onRequestClose={() => {
+        handleClose();
+      }}>
+      <View style={styles.modalBackground}>
+        <View style={styles.modalChildren}>
+          <Text style={{fontFamily: 'Lexend-SemiBold', fontSize: 20}}>
+            Timer for{' '}
+            <Text
+              style={{
+                fontFamily: 'Lexend-SemiBold',
+                color: 'black',
+              }}>
+              {props.name}
+            </Text>
+          </Text>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonOpen]}
-                onPress={() => setButton()}>
-                <Text style={styles.textStyle}>Set</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => handleClose()}>
-                <Text style={styles.textStyle}>Close</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.modalInpuit}>
+            {/* <TextInput
+              style={styles.input}
+              onChangeText={setTimeLimit}
+              value={timeLimit}
+              keyboardType="numeric"
+            /> */}
+            <InputFiled
+              placeholder=""
+              value={timeLimit}
+              setValue={setTimeLimit}
+              pop={pop}
+              numeric={true}
+            />
+            <Text
+              style={{
+                fontFamily: 'Lexend-SemiBold',
+                fontSize: 18,
+                paddingLeft: 5,
+              }}>
+              Seconds
+            </Text>
+          </View>
+
+          <View style={styles.modalButtons}>
+            <BrutalButton
+              onPress={handleClose}
+              text="Close"
+              color="#FF6B6B"
+              iconName="close-circle-outline"
+            />
+            <BrutalButton
+              onPress={setButton}
+              text="Set"
+              iconName="timer-sand"
+            />
+
+            {/* <TouchableOpacity
+              style={[styles.button, styles.buttonOpen]}
+              onPress={() => {
+                setButton();
+                setPop(true);
+              }}>
+              <Text style={styles.textStyle}>Set</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => handleClose()}>
+              <Text style={styles.textStyle}>Close</Text>
+            </TouchableOpacity> */}
           </View>
         </View>
-      </Modal>
-    </View>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
+  modalBackground: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    backgroundColor: '#00000063',
   },
-  modalView: {
+  modalChildren: {
     backgroundColor: 'white',
-    borderRadius: 7,
-    padding: 35,
+    borderRadius: 10,
+    padding: 20,
+    borderColor: 'black',
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'column',
-    shadowColor: '#000',
     gap: 20,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   button: {
     borderRadius: 7,

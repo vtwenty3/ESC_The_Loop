@@ -12,6 +12,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
   onPress: () => void;
   text: string;
+  color?: string;
+  iconName?: string;
+  iconColor?: string;
+  iconSize?: number;
 };
 export default function BrutalButton(props: Props) {
   const [isPressed, setIsPressed] = useState(false);
@@ -59,8 +63,17 @@ export default function BrutalButton(props: Props) {
               {translateY: animatedValueTask},
             ],
           }}>
-          <View style={[styles.button]}>
-            <Icon name="check" size={25} color={'black'} />
+          <View
+            style={[
+              styles.button,
+              {backgroundColor: props.color ? props.color : '#7FBC8C'},
+            ]}>
+            <Icon
+              style={{paddingLeft: 10}}
+              name={props.iconName ? props.iconName : 'check'}
+              size={props.iconSize ? props.iconSize : 25}
+              color={props.iconColor ? props.iconColor : 'black'}
+            />
             <Text style={styles.text}>{props.text}</Text>
           </View>
         </Animated.View>
@@ -79,9 +92,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Lexend-Regular',
     fontSize: 18,
     textAlign: 'center',
+    padding: 10,
   },
   button: {
-    padding: 10,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -89,8 +102,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     zIndex: 3,
     borderRadius: 10,
-    gap: 10,
     backgroundColor: '#7FBC8C',
-    // transform: [{translateX: -4}, {translateY: -4}],
   },
 });

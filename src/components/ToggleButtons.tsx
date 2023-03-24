@@ -42,7 +42,7 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setType('task');
+              props.setType('Task');
               Animated.timing(animatedValueTask, {
                 duration: 600,
                 toValue: 0,
@@ -81,7 +81,7 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setType('note');
+              props.setType('Note');
               Animated.timing(animatedValueNote, {
                 duration: 600,
                 toValue: 0,
@@ -112,7 +112,6 @@ export default function ToggleButtons(props: Props) {
 const styles = StyleSheet.create({
   button: {
     borderWidth: 2,
-    padding: 10,
     zIndex: 3,
     borderRadius: 10,
     backgroundColor: '#FDF2AD',
@@ -126,6 +125,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Lexend-Regular',
     fontSize: 18,
     textAlign: 'center',
+    paddingVertical: 10,
   },
   buttonShadow: {
     alignSelf: 'center',

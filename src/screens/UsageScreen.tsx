@@ -17,6 +17,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import {ModalSetTimer} from '../components/ModalSetTimer';
+import {globalStyles} from '../globalStyles';
+import Title from '../components/TitleElement';
+import Esc from '../components/EscElement';
+import UsageElement from '../components/UsageElement';
+
+import BrutalButton from '../components/BrutalButton';
 
 const {UsageLog} = NativeModules;
 let playing = BackgroundService.isRunning();
@@ -235,75 +241,81 @@ export function Usage() {
     console.log('Done.');
   }
 
-  function renderAppItem({item}: {item: any}) {
-    return (
-      <View>
-        <TouchableOpacity
-          onPress={() => {
-            setAppName(item.appName);
-            setPackageName(item.packageName);
-            setModalVisible(true);
-          }}
-          style={styles.appContainer}>
-          <Image
-            source={{uri: `data:image/png;base64,${item.iconBase64}`}} //important to add the data:image/png;base64, part
-            style={{width: 50, height: 50, marginRight: 10}}
-          />
-          <View style={styles.appContainerText}>
-            <Text style={{fontSize: 16, fontWeight: 'bold', color: '#f2f2f2'}}>
-              {item.appName}
-            </Text>
-            <Text style={{color: '#f2f2f2'}}>
-              Minutes: {item.usageTimeMinutes}
-            </Text>
-            <Text style={{color: '#f2f2f2'}}>
-              Seconds: {item.usageTimeSeconds}
-            </Text>
-            <Text style={{color: 'red'}}>
-              Time Left: {timers[item.packageName]?.timeLeft}
-            </Text>
-            <Text style={{color: 'red'}}>
-              Time Set: {timers[item.packageName]?.timeSet}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.mainContainer}>
-      <View style={styles.buttonsContainer}>
-        <Button color="#315461" title={'Permission'} onPress={openSettings} />
-        <Button color="#315461" title="Start" onPress={toggleBackground} />
+    <View style={[globalStyles.root]}>
+      <View style={[globalStyles.header]}>
+        <View style={[globalStyles.headerChildren]}>
+          <Esc onPress={() => console.log('Esc')} />
+          <Title text={'Usage'} fontFamily={'Lexend-Medium'} fontSize={40} />
+        </View>
+      </View>
+      <View style={[globalStyles.body]}>
+        <View style={styles.buttonsContainer}>
+          <BrutalButton
+            text="Permission"
+            iconName="shield-sync-outline"
+            color="#FF6B6B"
+            onPress={openSettings}
+          />
+          <BrutalButton
+            text="Background"
+            iconName="sync"
+            color="#FF6B6B"
+            onPress={toggleBackground}
+          />
+        </View>
+        <View style={{width: '85%', alignSelf: 'center'}}>
+          <BrutalButton
+            text="Clear Timers"
+            iconName="timer-off-outline"
+            color="#FF6B6B"
+            onPress={() => {
+              console.log('Timers before clear:', timers);
+              clearLocalTimers();
+              setTimers({});
+            }}
+          />
+        </View>
+        <View style={{width: '85%', alignSelf: 'center'}}>
+          <BrutalButton
+            text="Display Data"
+            iconName="timer-off-outline"
+            color="#FF6B6B"
+            onPress={() => {
+              console.log('data', data);
+            }}
+          />
+        </View>
+        <View style={{width: '85%', alignSelf: 'center'}}>
+          <BrutalButton
+            text="Refresh Data"
+            iconName="sync"
+            color="#FF6B6B"
+            onPress={() => {
+              getUsageData();
+            }}
+          />
+        </View>
 
-        <Button
-          color="#315461"
-          title="Clear Timers"
-          onPress={() => {
-            console.log('Timers before clear:', timers);
-            clearLocalTimers();
-            setTimers({});
-          }}
+        <FlatList
+          data={data}
+          keyExtractor={item => item.appName}
+          renderItem={({item}) => (
+            <View style={{width: '85%', alignSelf: 'center'}}>
+              <UsageElement timers={timers} setTimers={setTimers} item={item} />
+            </View>
+          )}
+        />
+
+        <ModalSetTimer
+          setVisible={setModalVisible}
+          visible={modalVisible}
+          name={appName}
+          packageName={packageName}
+          setTimers={setTimers}
+          timers={timers}
         />
       </View>
-      <View style={styles.buttonsContainer}></View>
-
-      <ModalSetTimer
-        setVisible={setModalVisible}
-        visible={modalVisible}
-        name={appName}
-        packageName={packageName}
-        setTimers={setTimers}
-        timers={timers}
-      />
-
-      <FlatList
-        style={{width: '80%'}}
-        data={data}
-        keyExtractor={item => item.appName}
-        renderItem={item => renderAppItem(item)}
-      />
     </View>
   );
 }
@@ -329,9 +341,7 @@ const styles = StyleSheet.create({
 
   buttonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    paddingTop: 10,
+    justifyContent: 'space-evenly',
   },
 
   appContainerText: {

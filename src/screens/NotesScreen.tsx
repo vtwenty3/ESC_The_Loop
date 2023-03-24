@@ -25,7 +25,7 @@ export function Notes() {
 
   async function getMyObject() {
     try {
-      const jsonValue = await AsyncStorage.getItem('@myData');
+      const jsonValue = await AsyncStorage.getItem('@Note');
       return jsonValue != null ? await JSON.parse(jsonValue) : null;
     } catch (e) {
       console.log(' Error: ', e);
@@ -40,7 +40,7 @@ export function Notes() {
       const fetchData = async () => {
         try {
           const data = await getMyObject();
-          console.log('gettttin data', data);
+          // console.log('gettttin data', data);
           if (isActive) {
             setData(data);
           }

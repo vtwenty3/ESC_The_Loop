@@ -99,18 +99,23 @@ public class UsageLog extends ReactContextBaseJavaModule {
         PackageManager pm = context.getPackageManager();
 
         for (UsageStats usageStats : usageStatsList) {
-            if (pm.getLaunchIntentForPackage(usageStats.getPackageName()) == null) {
-                continue;
-            }
+//            if (pm.getLaunchIntentForPackage(usageStats.getPackageName()) == null) {
+//                continue;
+//            }
+
             long usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
-            if (usageTimeSeconds < 60) {
+            if (usageTimeSeconds < 10) {
                 continue;
             }
             AppUsageData appUsageData = new AppUsageData();
             appUsageData.packageName = usageStats.getPackageName();
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(appUsageData.packageName, 0);
+//                if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) { // Add this condition to filter out system apps
+//                    continue;
+//                }
                 appUsageData.appName = ai.loadLabel(pm).toString();
+
                 Drawable icon = pm.getApplicationIcon(ai);
                 Bitmap bitmap = null;
                 if (icon instanceof BitmapDrawable) {
@@ -122,12 +127,21 @@ public class UsageLog extends ReactContextBaseJavaModule {
                     icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
                     icon.draw(canvas);
                 }
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
-                byte[] byteArray = byteArrayOutputStream.toByteArray();
-                appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                if (bitmap != null) { // Add this null check
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+                    appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                }
+//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
+//                byte[] byteArray = byteArrayOutputStream.toByteArray();
+//                appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
             } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace(); // Add this line to print the stack trace
+
                 appUsageData.appName = appUsageData.packageName;
+
             }
             appUsageData.usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
             appUsageData.usageTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(usageStats.getTotalTimeInForeground());
@@ -411,7 +425,8 @@ public class UsageLog extends ReactContextBaseJavaModule {
                             byte[] byteArray = byteArrayOutputStream.toByteArray();
                             appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
                         } catch (PackageManager.NameNotFoundException e) {
-                            appUsageData.appName = packageName;
+                            appUsageData.appName = appUsageData.packageName;
+                            e.printStackTrace(); // Add this line to print the stack trace
                         }
                         appUsageTimeMap.put(packageName, appUsageData);
                     }

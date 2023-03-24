@@ -16,6 +16,7 @@ type Props = {
   multiline?: boolean;
   numberOfLines?: number;
   fontSize?: number;
+  numeric?: boolean;
   fontFamily?: string;
   pop: boolean;
 };
@@ -63,6 +64,7 @@ export default function InputFiled(props: Props) {
             onChangeText={props.setValue}
             value={props.value}
             multiline={props.multiline}
+            keyboardType={props.numeric ? 'numeric' : undefined}
             numberOfLines={props.multiline ? props.numberOfLines : undefined}
             textAlignVertical={props.multiline ? 'top' : undefined}
             placeholder={props.placeholder}

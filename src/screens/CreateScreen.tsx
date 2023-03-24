@@ -42,22 +42,21 @@ export function Create() {
 
     // Get the current data in storage
 
-    const currentDataString = await AsyncStorage.getItem('@myData');
-
+    const currentDataString = await AsyncStorage.getItem('@' + type);
     // If there is no current data, create a new array and add the new data
     if (!currentDataString) {
       const newDataString = JSON.stringify([data]);
-      await AsyncStorage.setItem('@myData', newDataString);
+      await AsyncStorage.setItem('@' + type, newDataString);
     } else {
       // If there is current data, parse it and add the new data to the array
       const currentData = JSON.parse(currentDataString);
       currentData.push(data);
       const newDataString = JSON.stringify(currentData);
-      await AsyncStorage.setItem('@myData', newDataString);
+      await AsyncStorage.setItem('@' + type, newDataString);
     }
 
     // Log the saved data and navigate back to previous screen
-    console.log('Saved:', data);
+    // console.log('Saved:', data);
     complete();
   }
 
@@ -112,14 +111,6 @@ export function Create() {
         onRequestClose={() => setModalEmpty(false)}>
         <View style={styles.modalBackground}>
           <View style={styles.modalChildren}>
-            {/* <Esc
-              onPress={() =>
-                setTimeout(function () {
-                  setModalVis(false);
-                  //your code here
-                }, 50)
-              }
-            /> */}
             <Text style={styles.modalText}>Title Empty</Text>
             <BrutalButton
               text={'OK'}
@@ -194,7 +185,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignContent: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000bf',
+    backgroundColor: '#00000063',
   },
   modalChildren: {
     alignSelf: 'center',
