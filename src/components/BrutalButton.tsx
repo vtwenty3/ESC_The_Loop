@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
   buttonShadow: {
     borderRadius: 10,
     backgroundColor: 'black',
+    width: '100%',
   },
   text: {
     color: 'black',
@@ -95,7 +96,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   button: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

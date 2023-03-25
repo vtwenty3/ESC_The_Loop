@@ -18,6 +18,7 @@ type Props = {
   item: any;
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
   timers: Timers;
+  onOpenModal: (appName: string, packageName: string) => void;
 };
 export default function UsageElement(props: Props) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -57,7 +58,8 @@ export default function UsageElement(props: Props) {
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={() => {
-          setModalVisible(true);
+          props.onOpenModal(props.item.appName, props.item.packageName);
+          // setModalVisible(true);
         }}>
         <View style={styles.appContainerShadow}>
           <Animated.View
@@ -112,14 +114,14 @@ export default function UsageElement(props: Props) {
         </View>
       </TouchableOpacity>
       <View style={{position: 'absolute'}}>
-        <ModalSetTimer
+        {/* <ModalSetTimer
           setVisible={setModalVisible}
           visible={modalVisible}
           name={props.item.appName}
           packageName={props.item.packageName}
           setTimers={props.setTimers}
           timers={props.timers}
-        />
+        /> */}
       </View>
     </View>
   );

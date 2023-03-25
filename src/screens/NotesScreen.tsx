@@ -3,11 +3,11 @@ import InputFiled from '../components/InputFiledElement';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import ToggleButtons from '../components/ToggleButtons';
-import Note from '../components/NoteElement';
+import NoteElement from '../components/NoteElement';
 
 import BrutalButton from '../components/BrutalButton';
 import {useFocusEffect} from '@react-navigation/native';
-
+import ModalEdit from '../components/ModalEdit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
 import {
@@ -32,6 +32,32 @@ export function Notes() {
     }
     console.log('Data Loaded.');
   }
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalObject, setModalObject] = useState({});
+
+  async function updateMyObject(updatedData: any) {
+    try {
+      await AsyncStorage.setItem('@Note', JSON.stringify(updatedData));
+    } catch (e) {
+      console.log('Error: ', e);
+    }
+  }
+  const handleSave = async (itemUpdated: object, timestampOld: string) => {
+    const findIndex = data.findIndex(
+      (obj: any) => obj.timestamp === timestampOld,
+    );
+    if (findIndex !== -1) {
+      data.splice(findIndex, 1); // Remove the object at the found index
+      data.push(itemUpdated); // Append the new object to the end of the array
+    }
+    await updateMyObject(data);
+    setModalVisible(false);
+  };
+
+  // const handleOpenModal = (item: any) => {
+  //   setModalObject(item);
+  //   setModalVisible(true);
+  // };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -40,17 +66,15 @@ export function Notes() {
       const fetchData = async () => {
         try {
           const data = await getMyObject();
-          // console.log('gettttin data', data);
           if (isActive) {
             setData(data);
+            // console.log('data:', data, typeof data);
           }
         } catch (e) {
-          // Handle error
+          console.log('Error fetchData:', e);
         }
       };
-
       fetchData();
-
       return () => {
         isActive = false;
       };
@@ -65,10 +89,7 @@ export function Notes() {
           <Title text={'Notes'} fontFamily={'Lexend-Medium'} fontSize={40} />
         </View>
       </View>
-      <View style={{flexDirection: 'row', paddingBottom: 30, gap: 100}}>
-        {/* <BrutalButton text={'printData'} onPress={printData} />
-        <BrutalButton text={'getData'} onPress={getData} /> */}
-      </View>
+      <View style={{flexDirection: 'row', paddingBottom: 30, gap: 100}}></View>
       <View style={[globalStyles.body]}>
         <View style={styles.FlatList}>
           <FlatList
@@ -76,15 +97,22 @@ export function Notes() {
             data={data}
             keyExtractor={item => item.timestamp}
             renderItem={({item}) => (
-              <Note
-                title={item.title}
-                description={item.description}
-                onPressTask={() => console.log('')}
-                onPressTick={() => console.log('')}
+              <NoteElement
+                onOpenModal={() => {
+                  setModalObject(item);
+                  setModalVisible(true);
+                }}
+                item={item}
               />
             )}
           />
         </View>
+        <ModalEdit
+          setVisible={setModalVisible}
+          visible={modalVisible}
+          item={modalObject}
+          onSave={handleSave}
+        />
       </View>
     </View>
   );

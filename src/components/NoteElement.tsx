@@ -10,10 +10,17 @@ import {
 import React, {useState, useRef} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
-  onPressTick: () => void;
-  onPressTask: () => void;
-  title: string;
-  description: string;
+  // onPressTick: () => void;
+  // onPressTask: () => void;
+  // title: string;
+  // description: string;
+  // timestamp={timestamp}
+  item: {
+    title: string;
+    description: string;
+    timestamp: string;
+  };
+  onOpenModal: (item: object) => void;
 };
 export default function Note(props: Props) {
   const [shadow, setShadow] = useState(-6);
@@ -23,12 +30,12 @@ export default function Note(props: Props) {
     <View style={styles.noteWrapper}>
       <View>
         <TouchableOpacity
-          onPress={props.onPressTask}
+          onPress={() => props.onOpenModal(props.item)}
           onPressIn={() => setIsPressed(true)}
           onPressOut={() => setIsPressed(false)}
           activeOpacity={1}>
           <View style={[styles.textWrapperShadow]}>
-            <Text style={[styles.titleText]}>{props.title}</Text>
+            <Text style={[styles.titleText]}>{props.item.title}</Text>
           </View>
 
           <View
@@ -38,7 +45,7 @@ export default function Note(props: Props) {
                 transform: [{translateX: shadow}, {translateY: shadow}],
               },
             ]}>
-            <Text style={[styles.titleText]}>{props.title}</Text>
+            <Text style={[styles.titleText]}>{props.item.title}</Text>
           </View>
           <View style={[styles.descriptionWrapperShadow]}></View>
           <View
@@ -48,7 +55,9 @@ export default function Note(props: Props) {
                 transform: [{translateX: shadow}, {translateY: shadow}],
               },
             ]}>
-            <Text style={[styles.descriptionText]}>{props.description}</Text>
+            <Text style={[styles.descriptionText]}>
+              {props.item.description}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -63,7 +72,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
-    width: '90%',
+    width: '100%',
     paddingVertical: 6,
   },
 

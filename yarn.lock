@@ -5900,11 +5900,6 @@
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz"
   "version" "17.0.2"
 
-"react-native-android-settings-tool@^1.0.4":
-  "integrity" "sha512-hMeJXgBM70OXzpxqZElWq04gHj51YA8E6UMGBsONXLgP4a0dwKqVOvqi9VWtrUkE9GvgvWWcwXt4P9u7krPn3Q=="
-  "resolved" "https://registry.npmjs.org/react-native-android-settings-tool/-/react-native-android-settings-tool-1.0.4.tgz"
-  "version" "1.0.4"
-
 "react-native-background-actions@^3.0.0":
   "integrity" "sha512-O/KFdetp8n9cwSfPJQ7hPywTaEHO1ui7ISxKTGkzHxs3IVgEV+QOvKKLxAkTcQs1w5f68KK/LoQsEVwMpbVqew=="
   "resolved" "https://registry.npmjs.org/react-native-background-actions/-/react-native-background-actions-3.0.0.tgz"

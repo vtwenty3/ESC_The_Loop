@@ -19,8 +19,30 @@ import {
   Easing,
   FlatList,
 } from 'react-native';
+import ModalEdit from '../components/ModalEdit';
 export function Tasks() {
   const [data, setData] = useState<any>();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalObject, setModalObject] = useState({});
+
+  async function updateMyObject(updatedData: any) {
+    try {
+      await AsyncStorage.setItem('@Task', JSON.stringify(updatedData));
+    } catch (e) {
+      console.log('Error: ', e);
+    }
+  }
+  const handleSave = async (itemUpdated: object, timestampOld: string) => {
+    const findIndex = data.findIndex(
+      (obj: any) => obj.timestamp === timestampOld,
+    );
+    if (findIndex !== -1) {
+      data.splice(findIndex, 1); // Remove the object at the found index
+      data.push(itemUpdated); // Append the new object to the end of the array
+    }
+    await updateMyObject(data);
+    setModalVisible(false);
+  };
 
   async function getMyObject() {
     try {
@@ -44,7 +66,7 @@ export function Tasks() {
             setData(data);
           }
         } catch (e) {
-          // Handle error
+          console.log('Error fetchData:', e);
         }
       };
 
@@ -76,8 +98,13 @@ export function Tasks() {
             renderItem={({item}) => (
               <View style={styles.FlatListElement}>
                 <Task
-                  title={item.title}
-                  description={item.description}
+                  //title={item.title}
+                  onOpenModal={() => {
+                    setModalObject(item);
+                    setModalVisible(true);
+                  }}
+                  item={item}
+                  //description={item.description}
                   onPressTask={() => console.log('')}
                   onPressTick={() => console.log('')}
                 />
@@ -85,6 +112,12 @@ export function Tasks() {
             )}
           />
         </View>
+        <ModalEdit
+          setVisible={setModalVisible}
+          visible={modalVisible}
+          item={modalObject}
+          onSave={handleSave}
+        />
       </View>
     </View>
   );

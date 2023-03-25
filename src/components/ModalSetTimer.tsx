@@ -12,9 +12,9 @@ import {
 //   [key: string]: string;
 // }
 import InputFiled from '../components/InputFiledElement';
+import BrutalButton from './BrutalButton';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BrutalButton from './BrutalButton';
 
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
@@ -84,16 +84,15 @@ export function ModalSetTimer(props: Props) {
   }
 
   return (
-    <Modal
-      animationType="fade"
-      visible={props.visible}
-      transparent={true}
-      onRequestClose={() => {
-        handleClose();
-      }}>
+    <Modal animationType="fade" visible={props.visible} transparent={true}>
       <View style={styles.modalBackground}>
         <View style={styles.modalChildren}>
-          <Text style={{fontFamily: 'Lexend-SemiBold', fontSize: 20}}>
+          <Text
+            style={{
+              fontFamily: 'Lexend-SemiBold',
+              fontSize: 20,
+              color: 'black',
+            }}>
             Timer for{' '}
             <Text
               style={{
@@ -123,6 +122,7 @@ export function ModalSetTimer(props: Props) {
                 fontFamily: 'Lexend-SemiBold',
                 fontSize: 18,
                 paddingLeft: 5,
+                color: 'black',
               }}>
               Seconds
             </Text>

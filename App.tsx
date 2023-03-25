@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Dimensions,
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
@@ -15,12 +16,14 @@ import {Notes} from './src/screens/NotesScreen';
 import {Settings} from './src/screens/SettingsScreen';
 import {Usage} from './src/screens/UsageScreen';
 import {Create} from './src/screens/CreateScreen';
+const {width, height} = Dimensions.get('window');
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 const Tab = createBottomTabNavigator();
 
 function App(): JSX.Element {
   const [iconSize, setIconSize] = useState(37);
+  // const radius = (iconSize + 14) / 2;
   const MyTheme = {
     dark: false,
     colors: {
@@ -54,104 +57,114 @@ function App(): JSX.Element {
   };
 
   return (
-    <NavigationContainer theme={MyTheme} linking={linking}>
-      <Tab.Navigator
-        initialRouteName="Usage"
-        screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {height: 70},
-          tabBarHideOnKeyboard: true,
-          //         tabBarVisibilityAnimationConfig?: {
-          //   show?: TabBarVisibilityAnimationConfig;
-          //   hide?: TabBarVisibilityAnimationConfig;
-          // },
-          tabBarVisibilityAnimationConfig: {
-            hide: {
-              animation: 'timing',
-              config: {
-                duration: 600,
+    <View
+      style={{
+        width,
+        height,
+      }}>
+      <NavigationContainer theme={MyTheme} linking={linking}>
+        <Tab.Navigator
+          initialRouteName="Usage"
+          screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarStyle: {height: 90},
+            // tabBarHideOnKeyboard: true,
+            //         tabBarVisibilityAnimationConfig?: {
+            //   show?: TabBarVisibilityAnimationConfig;
+            //   hide?: TabBarVisibilityAnimationConfig;
+            // },
+            tabBarVisibilityAnimationConfig: {
+              hide: {
+                animation: 'timing',
+                config: {
+                  duration: 600,
+                },
+              },
+              show: {
+                animation: 'timing',
+                config: {
+                  duration: 600,
+                },
               },
             },
-            show: {
-              animation: 'timing',
-              config: {
-                duration: 600,
-              },
-            },
-          },
-        }}>
-        <Tab.Screen
-          name="Usage"
-          component={Usage}
-          options={{
-            tabBarLabel: 'Usage',
-            lazy: false,
-            tabBarIcon: ({color, size}) => (
-              <Icon name="chart-donut" size={iconSize} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Tasks"
-          component={Tasks}
-          options={{
-            tabBarLabel: 'Tasks',
-            tabBarIcon: ({color, size}) => (
-              <Icon
-                name="checkbox-marked-circle-outline"
-                size={iconSize}
-                color={color}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Create"
-          component={Create}
-          options={{
-            tabBarLabel: 'Create',
-            tabBarIcon: ({color, size}) => (
-              <Icon
-                style={{
-                  backgroundColor: 'black',
-                  borderRadius: 50,
-                }}
-                name="plus-circle"
-                size={iconSize + 14}
-                color={'#FDF2AD'}
-              />
-            ),
-          }}
-        />
+          }}>
+          <Tab.Screen
+            name="Usage"
+            component={Usage}
+            options={{
+              tabBarLabel: 'Usage',
+              lazy: false,
+              tabBarIcon: ({color, size}) => (
+                <Icon name="chart-donut" size={iconSize} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Tasks"
+            component={Tasks}
+            options={{
+              tabBarLabel: 'Tasks',
+              tabBarIcon: ({color, size}) => (
+                <Icon
+                  name="checkbox-marked-circle-outline"
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Create"
+            component={Create}
+            options={{
+              tabBarLabel: 'Create',
+              tabBarIcon: ({color, size}) => (
+                <Icon
+                  style={{
+                    backgroundColor: 'black',
+                    borderRadius: iconSize + 13 / 2,
+                  }}
+                  name="plus-circle"
+                  size={iconSize + 13}
+                  color={'#FDF2AD'}
+                />
+              ),
+            }}
+          />
 
-        <Tab.Screen
-          name="Notes"
-          component={Notes}
-          options={{
-            tabBarLabel: 'Notes',
+          <Tab.Screen
+            name="Notes"
+            component={Notes}
+            options={{
+              tabBarLabel: 'Notes',
 
-            tabBarIcon: ({color, size}) => (
-              <Icon name="circle-edit-outline" size={iconSize} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Settings"
-          component={Settings}
-          options={{
-            tabBarLabel: 'Settings',
-            tabBarIcon: ({color, size}) => (
-              <Icon
-                name="dots-vertical-circle-outline"
-                size={iconSize}
-                color={color}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+              tabBarIcon: ({color, size}) => (
+                <Icon
+                  name="circle-edit-outline"
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={Settings}
+            options={{
+              tabBarLabel: 'Settings',
+              tabBarIcon: ({color, size}) => (
+                <Icon
+                  name="dots-vertical-circle-outline"
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </View>
   );
 }
 export default App;

@@ -60,15 +60,6 @@ export function Create() {
     complete();
   }
 
-  async function PrintData() {
-    const currentDataString = await AsyncStorage.getItem('@myData');
-    console.log(currentDataString);
-  }
-  const animateChild = () => {
-    console.log('Animation started!');
-    setPop(!pop);
-  };
-
   return (
     <View style={styles.root}>
       <View style={styles.header}>

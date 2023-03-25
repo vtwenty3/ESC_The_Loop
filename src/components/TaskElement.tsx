@@ -12,8 +12,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
   onPressTick: () => void;
   onPressTask: () => void;
-  title: string;
-  description: string;
+  // title: string;
+  // description: string;
+  item: {
+    title: string;
+    description: string;
+    timestamp: string;
+  };
+  onOpenModal: (item: object) => void;
 };
 export default function Task(props: Props) {
   const [shadow, setShadow] = useState(-5);
@@ -67,7 +73,7 @@ export default function Task(props: Props) {
             ],
           }}>
           <TouchableOpacity
-            onPress={props.onPressTask}
+            onPress={() => props.onOpenModal(props.item)}
             onPressIn={() => setIsPressedTask(true)}
             onPressOut={() => setIsPressedTask(false)}
             activeOpacity={1}
@@ -83,7 +89,7 @@ export default function Task(props: Props) {
                     opacity: normalTextOpacity,
                   },
                 ]}>
-                {props.title}
+                {props.item.title}
               </Animated.Text>
               <Animated.Text
                 style={[
@@ -94,7 +100,7 @@ export default function Task(props: Props) {
                     opacity: strikethroughTextOpacity,
                   },
                 ]}>
-                {props.title}
+                {props.item.title}
               </Animated.Text>
             </View>
           </TouchableOpacity>
@@ -172,7 +178,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
-    width: '90%',
+    width: '100%',
     paddingTop: 10,
   },
   task: {

@@ -55,6 +55,7 @@ export default function InputFiled(props: Props) {
             style={[
               styles.inputTitle,
               {
+                color: 'black',
                 fontSize: props.fontSize ? props.fontSize : 18,
                 fontFamily: props.fontFamily
                   ? props.fontFamily
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: 'black',
     borderRadius: 10,
-    width: '90%',
+    width: '100%',
     zIndex: 2,
   },
 });

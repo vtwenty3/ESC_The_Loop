@@ -12,10 +12,10 @@ import {
   AppStateStatus,
   Linking,
 } from 'react-native';
+
 import BackgroundService from 'react-native-background-actions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import RNAndroidSettingsTool from 'react-native-android-settings-tool';
 import {ModalSetTimer} from '../components/ModalSetTimer';
 import {globalStyles} from '../globalStyles';
 import Title from '../components/TitleElement';
@@ -227,9 +227,10 @@ export function Usage() {
       await Linking.openURL('escapetheloop://tasks');
     }
   });
-
   function openSettings() {
-    RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS();
+    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+
+    // RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS();
   }
 
   async function clearLocalTimers() {
@@ -240,7 +241,13 @@ export function Usage() {
     }
     console.log('Done.');
   }
-
+  const [modalAppName, setModalAppName] = useState('');
+  const [modalPackageName, setModalPackageName] = useState('');
+  const handleOpenModal = (appName: string, packageName: string) => {
+    setModalAppName(appName);
+    setModalPackageName(packageName);
+    setModalVisible(true);
+  };
   return (
     <View style={[globalStyles.root]}>
       <View style={[globalStyles.header]}>
@@ -264,7 +271,7 @@ export function Usage() {
             onPress={toggleBackground}
           />
         </View>
-        <View style={{width: '85%', alignSelf: 'center'}}>
+        {/* <View style={{width: '85%', alignSelf: 'center'}}>
           <BrutalButton
             text="Clear Timers"
             iconName="timer-off-outline"
@@ -295,14 +302,19 @@ export function Usage() {
               getUsageData();
             }}
           />
-        </View>
+        </View> */}
 
         <FlatList
           data={data}
           keyExtractor={item => item.appName}
           renderItem={({item}) => (
             <View style={{width: '85%', alignSelf: 'center'}}>
-              <UsageElement timers={timers} setTimers={setTimers} item={item} />
+              <UsageElement
+                onOpenModal={handleOpenModal}
+                timers={timers}
+                setTimers={setTimers}
+                item={item}
+              />
             </View>
           )}
         />
@@ -310,8 +322,8 @@ export function Usage() {
         <ModalSetTimer
           setVisible={setModalVisible}
           visible={modalVisible}
-          name={appName}
-          packageName={packageName}
+          name={modalAppName}
+          packageName={modalPackageName}
           setTimers={setTimers}
           timers={timers}
         />

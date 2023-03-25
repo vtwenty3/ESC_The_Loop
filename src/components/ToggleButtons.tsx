@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   buttonsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
   },
 });

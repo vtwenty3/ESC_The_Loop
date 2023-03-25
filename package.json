@@ -16,7 +16,6 @@
     "@react-navigation/native": "^6.1.6",
     "react": "18.2.0",
     "react-native": "0.71.3",
-    "react-native-android-settings-tool": "^1.0.4",
     "react-native-background-actions": "^3.0.0",
     "react-native-background-timer-android": "^1.0.4",
     "react-native-mmkv": "^2.6.3",
