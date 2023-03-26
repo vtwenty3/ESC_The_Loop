@@ -23,22 +23,11 @@ type Props = {
   onOpenModal: (appName: string, packageName: string) => void;
 };
 export default function UsageElement(props: Props) {
+  const [shadow, setShadow] = useState(-5);
   const [isPressed, setIsPressed] = useState(false);
   const animatedValueTask = useRef(
-    new Animated.Value(isPressed ? 0 : -4),
+    new Animated.Value(isPressed ? 0 : shadow),
   ).current;
-
-  // const calculateUsagePercentage = () => {
-  //   //const totalTime = props.timers[props.item.packageName]?.timeSet || 0;
-  //   const usageTime = props.item.usageTimeSeconds || 0;
-  //   const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
-  //   const totalTime = Number(usageTime) + timeLeft;
-  //   //const usageTime = totalTime - timeLeft;
-  //   const percentage = (timeLeft / totalTime) * 100;
-  //   console.log(props.item.appName, ':', percentage);
-  //   return percentage;
-  // };
-
   const calculateUsagePercentage = () => {
     const usageTime = props.item.usageTimeSeconds || 0;
     const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
@@ -63,7 +52,7 @@ export default function UsageElement(props: Props) {
   const handlePressOut = () => {
     setIsPressed(false);
     Animated.spring(animatedValueTask, {
-      toValue: -4,
+      toValue: shadow,
       stiffness: 270,
       damping: 3.7,
       mass: 0.4,
@@ -73,18 +62,17 @@ export default function UsageElement(props: Props) {
     }).start();
   };
   return (
-    <View style={styles.mainContainer}>
+    <View style={[{paddingTop: -shadow, paddingLeft: -shadow}]}>
       <TouchableOpacity
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={() => {
           props.onOpenModal(props.item.appName, props.item.packageName);
-          // setModalVisible(true);
         }}>
-        <View style={styles.appContainerShadow}>
+        <View style={styles.usageShadow}>
           <Animated.View
             style={[
-              styles.appContainer,
+              styles.usageChildrenWrapper,
               {
                 transform: [
                   {translateX: animatedValueTask},
@@ -96,46 +84,17 @@ export default function UsageElement(props: Props) {
               source={{uri: `data:image/png;base64,${props.item.iconBase64}`}} //important to add the data:image/png;base64, part
               style={styles.image}
             />
-            <View
-              style={{
-                flexDirection: 'column',
-                flex: 1,
-                paddingHorizontal: 5,
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Lexend-SemiBold',
-                  fontSize: 17,
-                  color: 'black',
-                }}>
-                {props.item.appName}
-              </Text>
-              {/* <View style={styles.appContainerText}>
-                <Text style={{color: 'black'}}>
-                  <Text style={{fontWeight: 'bold'}}>Usage: </Text>
-                  {props.item.usageTimeMinutes} Minutes
-                </Text>
-                <Text style={{color: 'black'}}>
-                  {props.item.usageTimeSeconds} Seconds
-                </Text>
-              </View>
-              <View style={styles.appContainerText}>
-                <Text style={{color: 'red'}}>
-                  <Text style={{fontWeight: 'bold'}}>Timers: </Text>
-                  {props.timers[props.item.packageName]?.timeLeft}
-                </Text>
-                <Text style={{color: 'red'}}>
-                  {props.timers[props.item.packageName]?.timeSet} set
-                </Text>
-              </View> */}
+            <View style={styles.textAndBarWrapper}>
+              <Text style={styles.appName}>{props.item.appName}</Text>
+
               <View style={styles.usageBarWrapper}>
                 <View style={styles.usageBar}>
                   <View style={styles.usageTextWrapper}>
                     <Text style={styles.usageText}>
-                      Used: {props.item.usageTimeSeconds} s
+                      Used: {props.item.usageTimeSeconds}s
                     </Text>
                     <Text style={[styles.usageText, styles.timeLeftText]}>
-                      Left: {props.timers[props.item.packageName]?.timeLeft} s
+                      Left: {props.timers[props.item.packageName]?.timeLeft}s
                     </Text>
                   </View>
                   <View
@@ -155,46 +114,41 @@ export default function UsageElement(props: Props) {
 }
 
 const styles = StyleSheet.create({
-  appContainerShadow: {
+  usageShadow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'black',
     borderRadius: 10,
     borderColor: 'black',
   },
-  appContainer: {
+  usageChildrenWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FDF2AD',
     borderRadius: 10,
     borderWidth: 2,
     borderColor: 'black',
+    padding: 9,
+    gap: 8,
     zIndex: 20,
-    padding: 5,
-    transform: [{translateX: -6}, {translateY: -6}],
-  },
-  usageContainer: {
-    flex: 1,
-    backgroundColor: 'black',
-    borderRadius: 10,
-    zIndex: 4,
-  },
-  appContainerText: {
-    color: 'black',
-    fontSize: 16,
-    fontWeight: 'bold',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  mainContainer: {
-    paddingTop: 10,
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 54,
+    height: 54,
     borderWidth: 2,
     borderColor: 'black',
-    borderRadius: 25,
+    borderRadius: 27,
+  },
+
+  textAndBarWrapper: {
+    flexDirection: 'column',
+    flex: 1,
+  },
+  appName: {
+    fontFamily: 'Lexend-SemiBold',
+    fontSize: 17,
+    color: 'black',
+    paddingBottom: 5,
   },
   usageBar: {
     backgroundColor: '#DE6464',
@@ -217,6 +171,7 @@ const styles = StyleSheet.create({
   usageTextWrapper: {
     position: 'absolute',
     zIndex: 10,
+
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -233,3 +188,31 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+
+{
+  /* <View style={styles.appContainerText}>
+                <Text style={{color: 'black'}}>
+                  <Text style={{fontWeight: 'bold'}}>Usage: </Text>
+                  {props.item.usageTimeMinutes} Minutes
+                </Text>
+                <Text style={{color: 'black'}}>
+                  {props.item.usageTimeSeconds} Seconds
+                </Text>
+              </View>
+              <View style={styles.appContainerText}>
+                <Text style={{color: 'red'}}>
+                  <Text style={{fontWeight: 'bold'}}>Timers: </Text>
+                  {props.timers[props.item.packageName]?.timeLeft}
+                </Text>
+                <Text style={{color: 'red'}}>
+                  {props.timers[props.item.packageName]?.timeSet} set
+                </Text>
+              </View> */
+}
+// appContainerText: {
+//   color: 'black',
+//   fontSize: 16,
+//   fontWeight: 'bold',
+//   flexDirection: 'row',
+//   justifyContent: 'space-between',
+// },

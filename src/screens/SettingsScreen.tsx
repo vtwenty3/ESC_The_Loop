@@ -1,21 +1,10 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Animated,
-  Easing,
-  FlatList,
-} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
-
-import React, {useState, useEffect} from 'react';
-import InputFiled from '../components/InputFiledElement';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import BrutalButton from '../components/BrutalButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Settings() {
   async function deleteNotes() {
@@ -84,18 +73,17 @@ export function Settings() {
           <Title text={'Settings'} fontFamily={'Lexend-Medium'} fontSize={40} />
         </View>
       </View>
-      <View style={{flexDirection: 'row', paddingBottom: 30, gap: 100}}></View>
-      <View style={[styles.body, globalStyles.body]}>
-        <BrutalButton
-          iconName="database-export-outline"
-          text="Export Data"
-          onPress={backupData}
-        />
-        <BrutalButton
-          iconName="database-import-outline"
-          text="Import Data"
-          onPress={backupData}
-        />
+      <View style={[{gap: 10}, globalStyles.body]}>
+        <Text
+          style={{
+            fontFamily: 'Lexend-Black',
+            fontSize: 34,
+            color: 'black',
+            alignSelf: 'center',
+            textAlign: 'center',
+          }}>
+          Under Construction
+        </Text>
         <BrutalButton
           color="#FF6B6B"
           iconName="delete-circle-outline"
@@ -121,16 +109,19 @@ export function Settings() {
           text="Delete All Timers"
           onPress={deleteTimers}
         />
+        <BrutalButton
+          iconName="database-export-outline"
+          text="Export Data"
+          onPress={backupData}
+        />
+        <BrutalButton
+          iconName="database-import-outline"
+          text="Import Data"
+          onPress={backupData}
+        />
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    marginTop: 20,
-    flexDirection: 'column',
-    maxWidth: '60%',
-  },
-});
+const styles = StyleSheet.create({});

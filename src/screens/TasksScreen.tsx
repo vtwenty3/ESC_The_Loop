@@ -1,25 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import InputFiled from '../components/InputFiledElement';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import ToggleButtons from '../components/ToggleButtons';
-import Task from '../components/TaskElement';
-import BrutalButton from '../components/BrutalButton';
 import {useFocusEffect} from '@react-navigation/native';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Animated,
-  Easing,
-  FlatList,
-} from 'react-native';
+import {StyleSheet, View, FlatList} from 'react-native';
 import ModalEdit from '../components/ModalEdit';
+import Title from '../components/TitleElement';
+import Esc from '../components/EscElement';
+import Task from '../components/TaskElement';
+
 export function Tasks() {
   const [data, setData] = useState<any>();
   const [modalVisible, setModalVisible] = useState(false);

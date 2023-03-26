@@ -5,9 +5,6 @@ import BrutalButton from './BrutalButton';
 import ToggleButtons from './ToggleButtons';
 
 type Props = {
-  //title: string;
-  //description: string;
-  //   type: string;
   item: any;
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -21,7 +18,6 @@ export default function EditModal(props: Props) {
   const [type, setType] = React.useState<string>('note');
   const [pop, setPop] = React.useState<boolean>(false);
   const [timestampOld, setTimestampOld] = React.useState<string>('');
-  const [timestampNew, setTimestampNew] = React.useState<string>('');
 
   function close() {
     // setTitle('');

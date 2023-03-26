@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Animated,
-  TextInput,
-} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Animated} from 'react-native';
 import React, {useState, useRef} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 

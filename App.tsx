@@ -1,14 +1,6 @@
-import React, {useState, useEffect} from 'react';
-import {
-  StyleSheet,
-  NativeModules,
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  Dimensions,
-} from 'react-native';
+import React, {useState} from 'react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {StyleSheet, View, Dimensions} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {Tasks} from './src/screens/TasksScreen';
@@ -16,9 +8,8 @@ import {Notes} from './src/screens/NotesScreen';
 import {Settings} from './src/screens/SettingsScreen';
 import {Usage} from './src/screens/UsageScreen';
 import {Create} from './src/screens/CreateScreen';
-const {width, height} = Dimensions.get('window');
 
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+const {width, height} = Dimensions.get('window');
 const Tab = createBottomTabNavigator();
 
 function App(): JSX.Element {
@@ -69,11 +60,6 @@ function App(): JSX.Element {
             headerShown: false,
             tabBarShowLabel: false,
             tabBarStyle: {height: 90},
-            // tabBarHideOnKeyboard: true,
-            //         tabBarVisibilityAnimationConfig?: {
-            //   show?: TabBarVisibilityAnimationConfig;
-            //   hide?: TabBarVisibilityAnimationConfig;
-            // },
             tabBarVisibilityAnimationConfig: {
               hide: {
                 animation: 'timing',

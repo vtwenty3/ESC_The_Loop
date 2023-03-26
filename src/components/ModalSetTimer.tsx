@@ -1,19 +1,7 @@
 import React, {useState, useEffect} from 'react';
-
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-} from 'react-native';
-// interface Timers {
-//   [key: string]: string;
-// }
+import {View, Text, StyleSheet, Modal} from 'react-native';
 import InputFiled from '../components/InputFiledElement';
 import BrutalButton from './BrutalButton';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Timers {

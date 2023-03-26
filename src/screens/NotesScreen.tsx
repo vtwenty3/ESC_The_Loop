@@ -2,24 +2,13 @@ import React, {useState, useEffect} from 'react';
 import InputFiled from '../components/InputFiledElement';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
-import ToggleButtons from '../components/ToggleButtons';
 import NoteElement from '../components/NoteElement';
 
-import BrutalButton from '../components/BrutalButton';
 import {useFocusEffect} from '@react-navigation/native';
 import ModalEdit from '../components/ModalEdit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Animated,
-  Easing,
-  FlatList,
-} from 'react-native';
+import {StyleSheet, View, FlatList} from 'react-native';
 export function Notes() {
   const [data, setData] = useState<any>();
 

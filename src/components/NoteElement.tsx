@@ -1,20 +1,7 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Animated,
-  Easing,
-} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React, {useState, useRef} from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 type Props = {
-  // onPressTick: () => void;
-  // onPressTask: () => void;
-  // title: string;
-  // description: string;
-  // timestamp={timestamp}
   item: {
     title: string;
     description: string;
@@ -22,6 +9,7 @@ type Props = {
   };
   onOpenModal: (item: object) => void;
 };
+
 export default function Note(props: Props) {
   const [shadow, setShadow] = useState(-6);
   const [isPressed, setIsPressed] = useState(false);

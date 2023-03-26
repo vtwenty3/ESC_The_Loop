@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react';
-
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,12 +7,6 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-// interface Timers {
-//   [key: string]: string;
-// }
-interface Timers {
-  [key: string]: {timeLeft?: number; timeSet?: number};
-}
 
 type Props = {
   name: string;

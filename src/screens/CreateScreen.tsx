@@ -6,7 +6,6 @@ import Esc from '../components/EscElement';
 import ToggleButtons from '../components/ToggleButtons';
 import BrutalButton from '../components/BrutalButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
 
 export function Create() {
   const [title, setTitle] = React.useState('');
@@ -21,8 +20,6 @@ export function Create() {
       setModalCreated(true);
     }, 200);
   }
-
-  const textInputRef = React.useRef();
 
   function clearInputs() {
     setTitle('');

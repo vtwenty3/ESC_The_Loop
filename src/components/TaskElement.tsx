@@ -3,7 +3,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,
   Animated,
   Easing,
 } from 'react-native';
@@ -12,8 +11,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
   onPressTick: () => void;
   onPressTask: () => void;
-  // title: string;
-  // description: string;
   item: {
     title: string;
     description: string;

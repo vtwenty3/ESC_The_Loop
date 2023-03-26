@@ -1,12 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Animated,
-  Easing,
-} from 'react-native';
+import {StyleSheet, View, TextInput, Animated, Easing} from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 
 type Props = {

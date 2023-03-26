@@ -1,12 +1,8 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  Button,
   FlatList,
-  Image,
-  TouchableOpacity,
   NativeModules,
   AppState,
   AppStateStatus,
@@ -21,7 +17,6 @@ import {globalStyles} from '../globalStyles';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import UsageElement from '../components/UsageElement';
-
 import BrutalButton from '../components/BrutalButton';
 
 const {UsageLog} = NativeModules;
@@ -137,10 +132,10 @@ async function onDisplayNotification() {
 
 export function Usage() {
   const [data, setData] = useState<any>();
-  const [appName, setAppName] = useState<string>('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [packageName, setPackageName] = useState<string>('');
   const [timers, setTimers] = useState<Timers>({});
+  const [modalAppName, setModalAppName] = useState('');
+  const [modalPackageName, setModalPackageName] = useState('');
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   );
@@ -229,20 +224,8 @@ export function Usage() {
   });
   function openSettings() {
     Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
-
-    // RNAndroidSettingsTool.ACTION_USAGE_ACCESS_SETTINGS();
   }
 
-  async function clearLocalTimers() {
-    try {
-      await AsyncStorage.removeItem('@local');
-    } catch (e) {
-      // remove error
-    }
-    console.log('Done.');
-  }
-  const [modalAppName, setModalAppName] = useState('');
-  const [modalPackageName, setModalPackageName] = useState('');
   const handleOpenModal = (appName: string, packageName: string) => {
     setModalAppName(appName);
     setModalPackageName(packageName);
@@ -271,7 +254,65 @@ export function Usage() {
             onPress={toggleBackground}
           />
         </View>
-        {/* <View style={{width: '85%', alignSelf: 'center'}}>
+        <FlatList
+          data={data}
+          contentContainerStyle={{paddingTop: 35, gap: 15}}
+          keyExtractor={item => item.appName}
+          renderItem={({item}) => (
+            <UsageElement
+              onOpenModal={handleOpenModal}
+              timers={timers}
+              setTimers={setTimers}
+              item={item}
+            />
+          )}
+        />
+
+        <ModalSetTimer
+          setVisible={setModalVisible}
+          visible={modalVisible}
+          name={modalAppName}
+          packageName={modalPackageName}
+          setTimers={setTimers}
+          timers={timers}
+        />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  buttonsContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    width: '100%',
+    top: 0,
+    marginTop: -20,
+    justifyContent: 'space-between',
+    zIndex: 3,
+  },
+});
+
+// function displayData() {
+//   if (data === undefined || data.length == 0) {
+//     console.log('Data is empty');
+//   } else {
+//     console.log('Data from Android: ', data);
+//   }
+// }
+
+/* <Button color="#315461" title="Get Data" onPress={getData} /> */
+
+/* <Button
+          color="#315461"
+          title="Timers Log"
+          onPress={() => {
+          }} //this is just for testing purposes
+        /> */
+
+/* <Button color="#315461" title="Print Data" onPress={displayData} /> */
+{
+  /* <View style={{width: '85%', alignSelf: 'center'}}>
           <BrutalButton
             text="Clear Timers"
             iconName="timer-off-outline"
@@ -302,80 +343,5 @@ export function Usage() {
               getUsageData();
             }}
           />
-        </View> */}
-
-        <FlatList
-          data={data}
-          keyExtractor={item => item.appName}
-          renderItem={({item}) => (
-            <View style={{width: '85%', alignSelf: 'center'}}>
-              <UsageElement
-                onOpenModal={handleOpenModal}
-                timers={timers}
-                setTimers={setTimers}
-                item={item}
-              />
-            </View>
-          )}
-        />
-
-        <ModalSetTimer
-          setVisible={setModalVisible}
-          visible={modalVisible}
-          name={modalAppName}
-          packageName={modalPackageName}
-          setTimers={setTimers}
-          timers={timers}
-        />
-      </View>
-    </View>
-  );
+        </View> */
 }
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    backgroundColor: '#1b1b1d',
-  },
-
-  appContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 5,
-    backgroundColor: '#20232a',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#969696',
-    marginVertical: 4,
-  },
-
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-  },
-
-  appContainerText: {
-    flex: 1,
-  },
-});
-
-// function displayData() {
-//   if (data === undefined || data.length == 0) {
-//     console.log('Data is empty');
-//   } else {
-//     console.log('Data from Android: ', data);
-//   }
-// }
-
-/* <Button color="#315461" title="Get Data" onPress={getData} /> */
-
-/* <Button
-          color="#315461"
-          title="Timers Log"
-          onPress={() => {
-          }} //this is just for testing purposes
-        /> */
-
-/* <Button color="#315461" title="Print Data" onPress={displayData} /> */
