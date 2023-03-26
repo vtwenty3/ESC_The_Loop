@@ -59,7 +59,6 @@ export default function Task(props: Props) {
         duration: 500,
         useNativeDriver: true,
       }).start();
-      //
     }
   };
 
