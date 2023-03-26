@@ -14,14 +14,12 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: -10,
+    width: '90%',
+    alignSelf: 'center',
     justifyContent: 'space-between',
   },
   body: {
     flex: 1,
-    width: '100%',
-    top: -20,
-    gap: 20,
+    width: '90%',
   },
 });

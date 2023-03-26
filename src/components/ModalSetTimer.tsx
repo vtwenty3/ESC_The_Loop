@@ -111,6 +111,7 @@ export function ModalSetTimer(props: Props) {
               keyboardType="numeric"
             /> */}
             <InputFiled
+              autofocus={true}
               placeholder=""
               value={timeLimit}
               setValue={setTimeLimit}

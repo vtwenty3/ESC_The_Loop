@@ -12,6 +12,8 @@ type Props = {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSave: (itemUpdated: object, timestampOld: string) => void;
+  autofocusTitle: boolean;
+  autofocusDescription: boolean;
 };
 export default function EditModal(props: Props) {
   const [title, setTitle] = React.useState<string>('');
@@ -38,12 +40,14 @@ export default function EditModal(props: Props) {
       <View style={styles.modalBackground}>
         <View style={styles.modalChildren}>
           <InputFiled
+            autofocus={props.autofocusTitle}
             pop={pop}
             placeholder="Title"
             value={title}
             setValue={setTitle}
           />
           <InputFiled
+            autofocus={props.autofocusDescription}
             pop={pop}
             placeholder="Description"
             value={description}

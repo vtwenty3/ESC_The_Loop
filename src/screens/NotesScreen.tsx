@@ -89,25 +89,26 @@ export function Notes() {
           <Title text={'Notes'} fontFamily={'Lexend-Medium'} fontSize={40} />
         </View>
       </View>
-      <View style={{flexDirection: 'row', paddingBottom: 30, gap: 100}}></View>
       <View style={[globalStyles.body]}>
-        <View style={styles.FlatList}>
-          <FlatList
-            style={{gap: 30, flex: 1, width: '100%'}}
-            data={data}
-            keyExtractor={item => item.timestamp}
-            renderItem={({item}) => (
-              <NoteElement
-                onOpenModal={() => {
-                  setModalObject(item);
-                  setModalVisible(true);
-                }}
-                item={item}
-              />
-            )}
-          />
-        </View>
+        {/* <View style={styles.FlatList}> */}
+        <FlatList
+          contentContainerStyle={{paddingTop: 15, gap: 5}}
+          data={data}
+          keyExtractor={item => item.timestamp}
+          renderItem={({item}) => (
+            <NoteElement
+              onOpenModal={() => {
+                setModalObject(item);
+                setModalVisible(true);
+              }}
+              item={item}
+            />
+          )}
+        />
+        {/* </View> */}
         <ModalEdit
+          autofocusDescription={true}
+          autofocusTitle={false}
           setVisible={setModalVisible}
           visible={modalVisible}
           item={modalObject}
@@ -118,10 +119,4 @@ export function Notes() {
   );
 }
 
-const styles = StyleSheet.create({
-  FlatList: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-});
+const styles = StyleSheet.create({});

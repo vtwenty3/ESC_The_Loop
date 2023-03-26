@@ -6,6 +6,7 @@ import Esc from '../components/EscElement';
 import ToggleButtons from '../components/ToggleButtons';
 import BrutalButton from '../components/BrutalButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 
 export function Create() {
   const [title, setTitle] = React.useState('');
@@ -20,6 +21,9 @@ export function Create() {
       setModalCreated(true);
     }, 200);
   }
+
+  const textInputRef = React.useRef();
+
   function clearInputs() {
     setTitle('');
     setDescription('');
@@ -70,6 +74,7 @@ export function Create() {
       </View>
       <View style={styles.body}>
         <InputFiled
+          autofocus={true}
           pop={pop}
           placeholder="Title"
           value={title}
@@ -159,14 +164,14 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    width: '100%',
+    width: '90%',
     top: -20,
     gap: 20,
   },
   brutalButtonWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
   },
   brutalButtonFiller: {

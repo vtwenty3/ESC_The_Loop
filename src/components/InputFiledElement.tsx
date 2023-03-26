@@ -19,6 +19,7 @@ type Props = {
   numeric?: boolean;
   fontFamily?: string;
   pop: boolean;
+  autofocus?: boolean;
 };
 
 export default function InputFiled(props: Props) {
@@ -51,7 +52,9 @@ export default function InputFiled(props: Props) {
             ],
           }}>
           <TextInput
-            maxLength={props.multiline ? undefined : 28}
+            placeholderTextColor="#7a7a7a"
+            autoFocus={props.autofocus ? props.autofocus : undefined}
+            maxLength={props.multiline ? undefined : 40}
             style={[
               styles.inputTitle,
               {

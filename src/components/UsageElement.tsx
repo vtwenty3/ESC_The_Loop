@@ -3,30 +3,51 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,
   Animated,
-  Easing,
   Image,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
-import {ModalSetTimer} from '../components/ModalSetTimer';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
-
 type Props = {
-  item: any;
+  item: {
+    packageName: string;
+    appName: string;
+    usageTimeSeconds: string;
+    usageTimeMinutes: string;
+    iconBase64: string;
+  };
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
   timers: Timers;
   onOpenModal: (appName: string, packageName: string) => void;
 };
 export default function UsageElement(props: Props) {
-  const [modalVisible, setModalVisible] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
-
   const animatedValueTask = useRef(
     new Animated.Value(isPressed ? 0 : -4),
   ).current;
+
+  // const calculateUsagePercentage = () => {
+  //   //const totalTime = props.timers[props.item.packageName]?.timeSet || 0;
+  //   const usageTime = props.item.usageTimeSeconds || 0;
+  //   const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
+  //   const totalTime = Number(usageTime) + timeLeft;
+  //   //const usageTime = totalTime - timeLeft;
+  //   const percentage = (timeLeft / totalTime) * 100;
+  //   console.log(props.item.appName, ':', percentage);
+  //   return percentage;
+  // };
+
+  const calculateUsagePercentage = () => {
+    const usageTime = props.item.usageTimeSeconds || 0;
+    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
+    const totalTime = Number(usageTime) + timeLeft;
+    const percentage = (Number(usageTime) / totalTime) * 100;
+    console.log(props.item.appName, ':', percentage);
+    return percentage;
+  };
+
   const handlePressIn = () => {
     setIsPressed(true);
     Animated.spring(animatedValueTask, {
@@ -39,7 +60,6 @@ export default function UsageElement(props: Props) {
       useNativeDriver: true,
     }).start();
   };
-
   const handlePressOut = () => {
     setIsPressed(false);
     Animated.spring(animatedValueTask, {
@@ -90,7 +110,7 @@ export default function UsageElement(props: Props) {
                 }}>
                 {props.item.appName}
               </Text>
-              <View style={styles.appContainerText}>
+              {/* <View style={styles.appContainerText}>
                 <Text style={{color: 'black'}}>
                   <Text style={{fontWeight: 'bold'}}>Usage: </Text>
                   {props.item.usageTimeMinutes} Minutes
@@ -99,7 +119,6 @@ export default function UsageElement(props: Props) {
                   {props.item.usageTimeSeconds} Seconds
                 </Text>
               </View>
-
               <View style={styles.appContainerText}>
                 <Text style={{color: 'red'}}>
                   <Text style={{fontWeight: 'bold'}}>Timers: </Text>
@@ -108,21 +127,29 @@ export default function UsageElement(props: Props) {
                 <Text style={{color: 'red'}}>
                   {props.timers[props.item.packageName]?.timeSet} set
                 </Text>
+              </View> */}
+              <View style={styles.usageBarWrapper}>
+                <View style={styles.usageBar}>
+                  <View style={styles.usageTextWrapper}>
+                    <Text style={styles.usageText}>
+                      Used: {props.item.usageTimeSeconds} s
+                    </Text>
+                    <Text style={[styles.usageText, styles.timeLeftText]}>
+                      Left: {props.timers[props.item.packageName]?.timeLeft} s
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.usageBarFill,
+                      {width: `${calculateUsagePercentage()}%`},
+                    ]}
+                  />
+                </View>
               </View>
             </View>
           </Animated.View>
         </View>
       </TouchableOpacity>
-      <View style={{position: 'absolute'}}>
-        {/* <ModalSetTimer
-          setVisible={setModalVisible}
-          visible={modalVisible}
-          name={props.item.appName}
-          packageName={props.item.packageName}
-          setTimers={props.setTimers}
-          timers={props.timers}
-        /> */}
-      </View>
     </View>
   );
 }
@@ -168,5 +195,41 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'black',
     borderRadius: 25,
+  },
+  usageBar: {
+    backgroundColor: '#DE6464',
+    width: '100%',
+    height: '100%',
+  },
+  usageBarFill: {
+    backgroundColor: '#FFB5C6',
+    height: '100%',
+    width: '100%',
+  },
+  usageText: {
+    fontSize: 15,
+    color: 'black',
+    fontFamily: 'Lexend-Regular',
+  },
+  timeLeftText: {
+    right: 0,
+  },
+  usageTextWrapper: {
+    position: 'absolute',
+    zIndex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    paddingHorizontal: 5,
+  },
+  usageBarWrapper: {
+    width: '100%',
+    height: 29,
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
 });

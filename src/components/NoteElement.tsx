@@ -27,7 +27,8 @@ export default function Note(props: Props) {
   const [isPressed, setIsPressed] = useState(false);
 
   return (
-    <View style={styles.noteWrapper}>
+    <View
+      style={[styles.noteWrapper, {paddingTop: -shadow, paddingLeft: -shadow}]}>
       <View>
         <TouchableOpacity
           onPress={() => props.onOpenModal(props.item)}
@@ -71,9 +72,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 10,
     width: '100%',
-    paddingVertical: 6,
   },
 
   textWrapper: {

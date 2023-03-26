@@ -63,7 +63,8 @@ export default function Task(props: Props) {
   };
 
   return (
-    <View style={styles.taskWrapper}>
+    <View
+      style={[styles.taskWrapper, {paddingTop: -shadow, paddingLeft: -shadow}]}>
       <View style={styles.taskShadow}>
         <Animated.View
           style={{
@@ -178,8 +179,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
+    marginBottom: 5,
     width: '100%',
-    paddingTop: 10,
   },
   task: {
     borderWidth: 2,

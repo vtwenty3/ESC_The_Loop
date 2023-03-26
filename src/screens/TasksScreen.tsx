@@ -86,33 +86,33 @@ export function Tasks() {
           <Title text={'Tasks'} fontFamily={'Lexend-Medium'} fontSize={40} />
         </View>
       </View>
-      <View style={{flexDirection: 'row', paddingBottom: 30, gap: 100}}>
-        {/* <BrutalButton text={'printData'} onPress={printData} />
-        <BrutalButton text={'getData'} onPress={getData} /> */}
-      </View>
+
       <View style={[globalStyles.body]}>
-        <View style={styles.FlatList}>
-          <FlatList
-            data={data}
-            keyExtractor={item => item.timestamp}
-            renderItem={({item}) => (
-              <View style={styles.FlatListElement}>
-                <Task
-                  //title={item.title}
-                  onOpenModal={() => {
-                    setModalObject(item);
-                    setModalVisible(true);
-                  }}
-                  item={item}
-                  //description={item.description}
-                  onPressTask={() => console.log('')}
-                  onPressTick={() => console.log('')}
-                />
-              </View>
-            )}
-          />
-        </View>
+        {/* <View style={styles.FlatList}> */}
+        <FlatList
+          contentContainerStyle={{paddingTop: 15, gap: 5}}
+          data={data}
+          keyExtractor={item => item.timestamp}
+          renderItem={({item}) => (
+            // <View style={styles.FlatListElement}>
+            <Task
+              //title={item.title}
+              onOpenModal={() => {
+                setModalObject(item);
+                setModalVisible(true);
+              }}
+              item={item}
+              //description={item.description}
+              onPressTask={() => console.log('')}
+              onPressTick={() => console.log('')}
+            />
+            // </View>
+          )}
+        />
+        {/* </View> */}
         <ModalEdit
+          autofocusDescription={false}
+          autofocusTitle={true}
           setVisible={setModalVisible}
           visible={modalVisible}
           item={modalObject}
@@ -123,13 +123,4 @@ export function Tasks() {
   );
 }
 
-const styles = StyleSheet.create({
-  FlatList: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  FlatListElement: {
-    paddingBottom: 5,
-  },
-});
+const styles = StyleSheet.create({});
