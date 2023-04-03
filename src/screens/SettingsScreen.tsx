@@ -73,7 +73,7 @@ export function Settings() {
           <Title text={'Settings'} fontFamily={'Lexend-Medium'} fontSize={40} />
         </View>
       </View>
-      <View style={[{gap: 10}, globalStyles.body]}>
+      <View style={styles.body}>
         <Text
           style={{
             fontFamily: 'Lexend-Black',
@@ -124,4 +124,10 @@ export function Settings() {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  body: {
+    flex: 1,
+    width: '90%',
+    gap: 10,
+  },
+});

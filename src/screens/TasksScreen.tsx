@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
-import {StyleSheet, View, FlatList} from 'react-native';
+import {StyleSheet, View, FlatList, Text} from 'react-native';
 import ModalEdit from '../components/ModalEdit';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import Task from '../components/TaskElement';
+import NoDataFound from '../components/NoDataFound';
 
 export function Tasks() {
   const [data, setData] = useState<any>();
@@ -32,6 +33,23 @@ export function Tasks() {
     setModalVisible(false);
   };
 
+  const handleDelete = async (timestamp: string) => {
+    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp);
+    if (findIndex !== -1) {
+      data.splice(findIndex, 1); // Remove the object at the found index
+    }
+    await updateMyObject(data);
+    fetchData();
+  };
+
+  const handleComplete = async (timestamp: string, complete: boolean) => {
+    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp);
+    if (findIndex !== -1) {
+      data[findIndex].complete = !complete;
+    }
+    await updateMyObject(data);
+  };
+
   async function getMyObject() {
     try {
       const jsonValue = await AsyncStorage.getItem('@Task');
@@ -42,21 +60,23 @@ export function Tasks() {
     console.log('Data Loaded.');
   }
 
+  let isActive = true;
+
+  const fetchData = async () => {
+    try {
+      const data = await getMyObject();
+      console.log('gettttin data', data);
+      if (isActive) {
+        setData(data);
+        console.log('Data Loaded.', data);
+      }
+    } catch (e) {
+      console.log('Error fetchData:', e);
+    }
+  };
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;
-
-      const fetchData = async () => {
-        try {
-          const data = await getMyObject();
-          // console.log('gettttin data', data);
-          if (isActive) {
-            setData(data);
-          }
-        } catch (e) {
-          console.log('Error fetchData:', e);
-        }
-      };
 
       fetchData();
 
@@ -75,28 +95,37 @@ export function Tasks() {
         </View>
       </View>
 
-      <View style={[globalStyles.body]}>
-        {/* <View style={styles.FlatList}> */}
-        <FlatList
-          contentContainerStyle={{paddingTop: 15, gap: 5}}
-          data={data}
-          keyExtractor={item => item.timestamp}
-          renderItem={({item}) => (
-            // <View style={styles.FlatListElement}>
-            <Task
-              //title={item.title}
-              onOpenModal={() => {
-                setModalObject(item);
-                setModalVisible(true);
-              }}
-              item={item}
-              //description={item.description}
-              onPressTask={() => console.log('')}
-              onPressTick={() => console.log('')}
-            />
-            // </View>
-          )}
-        />
+      <View style={styles.Tasks}>
+        {!data === undefined || data == null || data.length === 0 ? (
+          <NoDataFound
+            boldText="No Tasks Found"
+            boldTextSize={20}
+            text="Add a task by pressing the + button"
+          />
+        ) : (
+          <FlatList
+            contentContainerStyle={{paddingTop: 15, gap: 5}}
+            data={data}
+            keyExtractor={item => item.timestamp}
+            renderItem={({item}) => (
+              // <View style={styles.FlatListElement}>
+              <Task
+                //title={item.title}
+                onOpenModal={() => {
+                  setModalObject(item);
+                  setModalVisible(true);
+                }}
+                item={item}
+                modalVisible={modalVisible}
+                //description={item.description}
+                onPressTask={() => console.log('')}
+                onPressTick={handleComplete}
+                onPressDelete={handleDelete}
+              />
+              // </View>
+            )}
+          />
+        )}
         {/* </View> */}
         <ModalEdit
           autofocusDescription={false}
@@ -111,4 +140,9 @@ export function Tasks() {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  Tasks: {
+    flex: 1,
+    width: '100%',
+  },
+});

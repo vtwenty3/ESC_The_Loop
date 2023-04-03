@@ -16,20 +16,23 @@ type Props = {
 
 export default function InputFiled(props: Props) {
   useEffect(() => {
-    setTimeout(function () {
-      Animated.spring(animatedValue, {
-        toValue: -4,
-        stiffness: 270,
-        damping: 3.7,
-        mass: 0.4,
-        delay: 150,
-        restSpeedThreshold: 1,
-        restDisplacementThreshold: 0.5,
-        useNativeDriver: true,
-      }).start();
-    }, 100);
+    if (props.pop == true) {
+      handlePressOut();
+    }
   }, [props.pop]);
 
+  const handlePressOut = () => {
+    Animated.spring(animatedValue, {
+      toValue: -4,
+      stiffness: 270,
+      damping: 3.7,
+      mass: 0.4,
+      delay: 150,
+      restSpeedThreshold: 1,
+      restDisplacementThreshold: 0.5,
+      useNativeDriver: true,
+    }).start();
+  };
   const [title, onChangeTitle] = React.useState('');
   const [focused, setFocused] = useState(false);
   const animatedValue = useRef(new Animated.Value(focused ? 0 : -4)).current;

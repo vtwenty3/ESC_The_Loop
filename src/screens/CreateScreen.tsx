@@ -27,8 +27,6 @@ export function Create() {
   }
 
   async function SaveData() {
-    //  console.log(isTask ? 'Task' : 'Note', title, description);
-    // Create a data object to store
     if (title === '') {
       setModalEmpty(true);
       return;
@@ -38,6 +36,7 @@ export function Create() {
       description,
       type,
       tags: '',
+      complete: false,
       timestamp: new Date().toISOString(),
     };
 
@@ -128,7 +127,7 @@ export function Create() {
               text={'OK'}
               onPress={() => {
                 setTimeout(function () {
-                  setPop(!pop);
+                  setPop(true);
                   clearInputs();
                   setModalCreated(false);
                 }, 350);

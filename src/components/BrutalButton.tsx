@@ -1,5 +1,13 @@
-import {StyleSheet, Text, View, TouchableOpacity, Animated} from 'react-native';
-import React, {useState, useRef} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Animated,
+  Easing,
+  Vibration,
+} from 'react-native';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Props = {
@@ -9,6 +17,7 @@ type Props = {
   iconName?: string;
   iconColor?: string;
   iconSize?: number;
+  rotate?: boolean;
 };
 export default function BrutalButton(props: Props) {
   const [isPressed, setIsPressed] = useState(false);
@@ -17,7 +26,37 @@ export default function BrutalButton(props: Props) {
     new Animated.Value(isPressed ? 0 : -4),
   ).current;
 
+  const rotationValue = useRef(new Animated.Value(0)).current;
+
+  const startRotationAnimation = useCallback(() => {
+    rotationValue.setValue(0);
+    Animated.timing(rotationValue, {
+      toValue: 1,
+      duration: 2000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start(({finished}) => {
+      if (finished) {
+        startRotationAnimation();
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (props.rotate === true) {
+      startRotationAnimation();
+    } else {
+      rotationValue.stopAnimation();
+    }
+  }, [props.rotate, startRotationAnimation]);
+
+  const rotation = rotationValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '-360deg'],
+  });
+
   const handlePressIn = () => {
+    Vibration.vibrate(10);
     setIsPressed(true);
     Animated.spring(animatedValueTask, {
       toValue: 0,
@@ -61,12 +100,13 @@ export default function BrutalButton(props: Props) {
               styles.button,
               {backgroundColor: props.color ? props.color : '#7FBC8C'},
             ]}>
-            <Icon
-              style={{paddingLeft: 10}}
-              name={props.iconName ? props.iconName : 'check'}
-              size={props.iconSize ? props.iconSize : 25}
-              color={props.iconColor ? props.iconColor : 'black'}
-            />
+            <Animated.View style={{transform: [{rotate: rotation}]}}>
+              <Icon
+                name={props.iconName ? props.iconName : 'check'}
+                size={props.iconSize ? props.iconSize : 25}
+                color={props.iconColor ? props.iconColor : 'black'}
+              />
+            </Animated.View>
             <Text style={styles.text}>{props.text}</Text>
           </View>
         </Animated.View>
@@ -95,6 +135,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     zIndex: 3,
     borderRadius: 10,
+    paddingLeft: 10,
     backgroundColor: '#7FBC8C',
   },
 });

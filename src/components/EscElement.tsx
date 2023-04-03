@@ -1,4 +1,4 @@
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, TouchableOpacity, Vibration} from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -8,6 +8,7 @@ type Props = {
 export default function Esc(props: Props) {
   const [isPressed, setIsPressed] = useState(false);
   const handlePressIn = () => {
+    Vibration.vibrate(11);
     setIsPressed(true);
   };
 

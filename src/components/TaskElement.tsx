@@ -5,18 +5,25 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
+  Vibration,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type Props = {
-  onPressTick: () => void;
+  onPressTick: (timestamp: string, complete: boolean) => void;
+  onPressDelete: (timestamp: string) => void;
+
   onPressTask: () => void;
   item: {
     title: string;
     description: string;
     timestamp: string;
+    complete: boolean;
   };
   onOpenModal: (item: object) => void;
+  //onComplete: (timestampOld: string) => void;
+
+  modalVisible: boolean;
 };
 export default function Task(props: Props) {
   const [shadow, setShadow] = useState(-5);
@@ -26,7 +33,25 @@ export default function Task(props: Props) {
   const [strikethroughTextOpacity] = useState(new Animated.Value(0));
   const animatedValueTick = useRef(new Animated.Value(0)).current;
   const animatedValueTask = useRef(new Animated.Value(0)).current;
+  const animatedOut = useRef(new Animated.Value(0)).current;
+
   const [strike, setStrike] = useState(false);
+  const [complete, setComplete] = useState(props.item.complete);
+  const [animatedColor] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    if (props.modalVisible == false && props.item.complete == false) {
+      handlePressOutTask();
+    }
+  }, [props.modalVisible]);
+
+  useEffect(() => {
+    if (props.item.complete == true) {
+      setStrike(true);
+      handlePressInTick();
+      toggleStrike();
+    }
+  }, []);
 
   const toggleStrike = () => {
     if (strike) {
@@ -59,113 +84,189 @@ export default function Task(props: Props) {
     }
   };
 
-  return (
-    <View
-      style={[styles.taskWrapper, {paddingTop: -shadow, paddingLeft: -shadow}]}>
-      <View style={styles.taskShadow}>
-        <Animated.View
-          style={{
-            transform: [
-              {translateX: animatedValueTask},
-              {translateY: animatedValueTask},
-            ],
-          }}>
-          <TouchableOpacity
-            onPress={() => props.onOpenModal(props.item)}
-            onPressIn={() => setIsPressedTask(true)}
-            onPressOut={() => setIsPressedTask(false)}
-            activeOpacity={1}
-            style={[
-              styles.task,
-              {transform: [{translateX: shadow}, {translateY: shadow}]},
-            ]}>
-            <View style={styles.container}>
-              <Animated.Text
-                style={[
-                  styles.text,
-                  {
-                    opacity: normalTextOpacity,
-                  },
-                ]}>
-                {props.item.title}
-              </Animated.Text>
-              <Animated.Text
-                style={[
-                  styles.text,
-                  {
-                    textDecorationLine: 'line-through',
-                    position: 'absolute',
-                    opacity: strikethroughTextOpacity,
-                  },
-                ]}>
-                {props.item.title}
-              </Animated.Text>
-            </View>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+  const handlePressInTick = () => {
+    toggleStrike();
+    setIsPressedTick(!isPressedTick);
+    if (isPressedTick) {
+      setTimeout(() => {
+        Vibration.vibrate(13);
+      }, 300);
 
-      <View style={styles.tickShadow}>
-        <Animated.View
-          style={{
-            transform: [
-              {translateX: animatedValueTick},
-              {translateY: animatedValueTick},
-            ],
-          }}>
-          <TouchableOpacity
-            activeOpacity={1}
-            style={[
-              styles.tickButton,
-              {transform: [{translateX: shadow}, {translateY: shadow}]},
-            ]}
-            onPressIn={() => {
-              toggleStrike();
-              setIsPressedTick(!isPressedTick);
-              if (isPressedTick) {
-                Animated.spring(animatedValueTask, {
-                  //duration: 600,
-                  toValue: 0,
-                  delay: 600,
-                  stiffness: 270,
-                  damping: 3.7,
-                  mass: 0.6,
-                  restSpeedThreshold: 1,
-                  restDisplacementThreshold: 0.5,
-                  useNativeDriver: true,
-                }).start();
-                Animated.spring(animatedValueTick, {
-                  //duration: 600,
-                  toValue: 0,
-                  stiffness: 270,
-                  damping: 3.7,
-                  mass: 0.4,
-                  restSpeedThreshold: 1,
-                  restDisplacementThreshold: 0.5,
-                  useNativeDriver: true,
-                }).start();
-              } else {
-                Animated.timing(animatedValueTask, {
-                  duration: 800,
-                  delay: 600,
-                  toValue: -shadow,
-                  easing: Easing.out(Easing.circle),
-                  useNativeDriver: true,
-                }).start();
-                Animated.timing(animatedValueTick, {
-                  duration: 800,
-                  toValue: -shadow,
-                  easing: Easing.out(Easing.circle),
-                  useNativeDriver: true,
-                }).start();
-              }
-            }}
-            onPress={props.onPressTick}>
-            <Icon name="check-bold" size={30} color={'black'} />
-          </TouchableOpacity>
-        </Animated.View>
+      Animated.spring(animatedValueTask, {
+        //duration: 600,
+        toValue: 0,
+        delay: 300,
+        stiffness: 270,
+        damping: 3.7,
+        mass: 0.6,
+        restSpeedThreshold: 1,
+        restDisplacementThreshold: 0.5,
+        useNativeDriver: true,
+      }).start(() => {
+        if (complete == false) {
+          Vibration.vibrate(12);
+          Animated.spring(animatedValueTick, {
+            toValue: 0,
+            stiffness: 270,
+            damping: 3.7,
+            mass: 0.4,
+            restSpeedThreshold: 1,
+            restDisplacementThreshold: 0.5,
+            useNativeDriver: true,
+          }).start();
+        }
+      });
+    } else {
+      Animated.timing(animatedValueTick, {
+        duration: 800,
+        toValue: -shadow,
+        easing: Easing.out(Easing.circle),
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.timing(animatedValueTask, {
+          duration: 800,
+          toValue: -shadow,
+          easing: Easing.out(Easing.circle),
+          useNativeDriver: true,
+        }).start();
+      });
+    }
+  };
+
+  const handlePressInTask = () => {
+    setIsPressedTask(true);
+    Vibration.vibrate(10);
+    Animated.timing(animatedValueTask, {
+      duration: 300,
+      toValue: -shadow,
+      easing: Easing.out(Easing.circle),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleDeleteAnimation = () => {
+    Animated.timing(animatedOut, {
+      delay: 500,
+      duration: 600,
+      toValue: 500,
+      easing: Easing.out(Easing.circle),
+      useNativeDriver: true,
+    }).start(() => props.onPressDelete(props.item.timestamp));
+  };
+
+  const handlePressOutTask = () => {
+    Animated.spring(animatedValueTask, {
+      toValue: 0,
+      delay: 600,
+      stiffness: 270,
+      damping: 3.7,
+      mass: 0.6,
+      restSpeedThreshold: 1,
+      restDisplacementThreshold: 0.5,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{translateX: animatedOut}],
+      }}>
+      <View
+        style={[
+          styles.taskWrapper,
+          {paddingTop: -shadow, paddingLeft: -shadow},
+        ]}>
+        <View style={styles.taskShadow}>
+          <Animated.View
+            style={{
+              transform: [
+                {translateX: animatedValueTask},
+                {translateY: animatedValueTask},
+              ],
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                if (complete == false) {
+                  props.onOpenModal(props.item);
+                } else {
+                  setComplete(false);
+                  props.onPressTick(props.item.timestamp, false);
+                  handlePressInTick();
+                }
+              }}
+              onPressIn={handlePressInTask}
+              //onPressOut={() => setIsPressedTask(false)}
+              activeOpacity={1}
+              style={[
+                styles.task,
+                {transform: [{translateX: shadow}, {translateY: shadow}]},
+              ]}>
+              <View style={styles.container}>
+                <Animated.Text
+                  style={[
+                    styles.text,
+                    {
+                      opacity: normalTextOpacity,
+                    },
+                  ]}>
+                  {props.item.title}
+                </Animated.Text>
+                <Animated.Text
+                  style={[
+                    styles.text,
+                    {
+                      textDecorationLine: 'line-through',
+                      position: 'absolute',
+                      opacity: strikethroughTextOpacity,
+                    },
+                  ]}>
+                  {props.item.title}
+                </Animated.Text>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+
+        <View style={styles.tickShadow}>
+          <Animated.View
+            style={{
+              transform: [
+                {translateX: animatedValueTick},
+                {translateY: animatedValueTick},
+              ],
+            }}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={[
+                styles.tickButton,
+                {backgroundColor: complete ? '#E95B5B' : '#59C570'},
+                {
+                  transform: [{translateX: shadow}, {translateY: shadow}],
+                },
+              ]}
+              onPressIn={() => {
+                handlePressInTick();
+              }}
+              onPress={() => {
+                if (complete) {
+                  console.log('delete');
+                  handleDeleteAnimation(); //also delete from database
+                } else {
+                  setComplete(!complete);
+                  props.onPressTick(props.item.timestamp, complete);
+                }
+              }}>
+              <Icon
+                name={complete ? 'trash-can-outline' : 'check-bold'}
+                size={30}
+                color={'black'}
+              />
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -176,8 +277,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 10,
+    width: '90%',
     marginBottom: 5,
-    width: '100%',
   },
   task: {
     borderWidth: 2,
@@ -188,7 +289,6 @@ const styles = StyleSheet.create({
   },
   tickButton: {
     padding: 7,
-    backgroundColor: '#59C570',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',

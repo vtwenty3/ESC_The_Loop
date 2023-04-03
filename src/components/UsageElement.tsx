@@ -5,8 +5,9 @@ import {
   TouchableOpacity,
   Animated,
   Image,
+  Vibration,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
@@ -20,6 +21,7 @@ type Props = {
   };
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
   timers: Timers;
+  modalVisible: boolean;
   onOpenModal: (appName: string, packageName: string) => void;
 };
 export default function UsageElement(props: Props) {
@@ -33,11 +35,18 @@ export default function UsageElement(props: Props) {
     const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
     const totalTime = Number(usageTime) + timeLeft;
     const percentage = (Number(usageTime) / totalTime) * 100;
-    console.log(props.item.appName, ':', percentage);
+
     return percentage;
   };
 
+  useEffect(() => {
+    if (props.modalVisible == false) {
+      handlePressOut();
+    }
+  }, [props.modalVisible]);
+
   const handlePressIn = () => {
+    Vibration.vibrate(11);
     setIsPressed(true);
     Animated.spring(animatedValueTask, {
       toValue: 0,
@@ -49,23 +58,31 @@ export default function UsageElement(props: Props) {
       useNativeDriver: true,
     }).start();
   };
+
   const handlePressOut = () => {
     setIsPressed(false);
     Animated.spring(animatedValueTask, {
       toValue: shadow,
-      stiffness: 270,
-      damping: 3.7,
-      mass: 0.4,
-      restSpeedThreshold: 1,
-      restDisplacementThreshold: 0.5,
+      delay: 800,
+      stiffness: 470,
+      damping: 5.4,
+      mass: 0.8,
+      restSpeedThreshold: 0.2,
+      restDisplacementThreshold: 0.2,
       useNativeDriver: true,
     }).start();
   };
+
   return (
-    <View style={[{paddingTop: -shadow, paddingLeft: -shadow}]}>
+    <View
+      style={[
+        styles.UsageWrapper,
+        {paddingTop: -shadow, paddingLeft: -shadow},
+      ]}>
       <TouchableOpacity
+        activeOpacity={1}
         onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
+        // onPressOut={handlePressOut}
         onPress={() => {
           props.onOpenModal(props.item.appName, props.item.packageName);
         }}>
@@ -93,9 +110,13 @@ export default function UsageElement(props: Props) {
                     <Text style={styles.usageText}>
                       Used: {props.item.usageTimeSeconds}s
                     </Text>
-                    <Text style={[styles.usageText, styles.timeLeftText]}>
-                      Left: {props.timers[props.item.packageName]?.timeLeft}s
-                    </Text>
+                    {props.timers[props.item.packageName]?.timeLeft == null ? (
+                      ''
+                    ) : (
+                      <Text style={[styles.usageText, styles.timeLeftText]}>
+                        Left: {props.timers[props.item.packageName]?.timeLeft}s
+                      </Text>
+                    )}
                   </View>
                   <View
                     style={[
@@ -114,6 +135,10 @@ export default function UsageElement(props: Props) {
 }
 
 const styles = StyleSheet.create({
+  UsageWrapper: {
+    width: '90%',
+    alignSelf: 'center',
+  },
   usageShadow: {
     flexDirection: 'row',
     alignItems: 'center',

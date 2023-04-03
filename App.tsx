@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {StyleSheet, View, Dimensions} from 'react-native';
+import {StyleSheet, View, Dimensions, StatusBar} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {Tasks} from './src/screens/TasksScreen';
@@ -35,31 +35,24 @@ function App(): JSX.Element {
     },
   };
 
-  const config = {
-    animation: 'spring',
-    config: {
-      stiffness: 1000,
-      damping: 500,
-      mass: 3,
-      overshootClamping: true,
-      restDisplacementThreshold: 0.01,
-      restSpeedThreshold: 0.01,
-    },
-  };
-
   return (
     <View
       style={{
         width,
         height,
       }}>
+      <StatusBar backgroundColor={'#9723C9'} />
+
       <NavigationContainer theme={MyTheme} linking={linking}>
         <Tab.Navigator
           initialRouteName="Usage"
           screenOptions={{
             headerShown: false,
             tabBarShowLabel: false,
-            tabBarStyle: {height: 90},
+            tabBarStyle: {
+              height: '11%',
+              borderTopWidth: 2,
+            },
             tabBarVisibilityAnimationConfig: {
               hide: {
                 animation: 'timing',

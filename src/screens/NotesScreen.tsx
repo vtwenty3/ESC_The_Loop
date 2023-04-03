@@ -9,6 +9,8 @@ import ModalEdit from '../components/ModalEdit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
 import {StyleSheet, View, FlatList} from 'react-native';
+import NoDataFound from '../components/NoDataFound';
+
 export function Notes() {
   const [data, setData] = useState<any>();
 
@@ -95,6 +97,13 @@ export function Notes() {
           )}
         />
         {/* </View> */}
+        {data === undefined || data == undefined ? (
+          <NoDataFound
+            boldText="No Notes Found"
+            boldTextSize={20}
+            text="Add a task by pressing the + button"
+          />
+        ) : null}
         <ModalEdit
           autofocusDescription={true}
           autofocusTitle={false}

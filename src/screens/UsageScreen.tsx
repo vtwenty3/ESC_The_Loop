@@ -6,7 +6,9 @@ import {
   NativeModules,
   AppState,
   AppStateStatus,
+  PermissionsAndroid,
   Linking,
+  Text,
 } from 'react-native';
 
 import BackgroundService from 'react-native-background-actions';
@@ -18,11 +20,13 @@ import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import UsageElement from '../components/UsageElement';
 import BrutalButton from '../components/BrutalButton';
+import NoDataFound from '../components/NoDataFound';
 
 const {UsageLog} = NativeModules;
 let playing = BackgroundService.isRunning();
 
 let activity = '';
+let permission = '';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
@@ -98,7 +102,6 @@ const options = {
     name: 'ic_launcher',
     type: 'mipmap',
   },
-  color: '#ff00ff',
   linkingURI: 'exampleScheme://chat/jane',
   parameters: {
     delay: 2000,
@@ -136,6 +139,7 @@ export function Usage() {
   const [timers, setTimers] = useState<Timers>({});
   const [modalAppName, setModalAppName] = useState('');
   const [modalPackageName, setModalPackageName] = useState('');
+  const [rotate, setRotate] = useState(false);
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   );
@@ -189,6 +193,7 @@ export function Usage() {
   }
 
   const toggleBackground = async () => {
+    setRotate(!rotate);
     playing = !playing;
     if (playing) {
       try {
@@ -210,6 +215,11 @@ export function Usage() {
 
   function getUsageData() {
     console.log('Getting data from Android');
+    if (BackgroundService.isRunning() == true) {
+      console.log('-------------BackgroundService is running');
+      setRotate(true);
+    }
+
     UsageLog.getAppUsageData2((callBack: string) => {
       setData(JSON.parse(callBack));
       //console.log('Data: ', callBack);
@@ -222,8 +232,25 @@ export function Usage() {
       await Linking.openURL('escapetheloop://tasks');
     }
   });
-  function openSettings() {
+
+  async function openSettings() {
     Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+  }
+
+  async function openSpecificApp(packageName: string) {
+    // Linking.sendIntent('android.chrome');
+    //Linking.openURL('android.chrome');
+    //   Linking.openURL('getmimo://');
+    //  await Linking.sendIntent('android.intent.action.VIEW', {
+    //    package: "getmimo",
+    //  });
+    // Linking.canOpenURL('mimo://').then(supported => {
+    //   if (supported) {
+    //     Linking.openURL('mimo://');
+    //   } else {
+    //     console.log('sorry invalid url');
+    //   }
+    // });
   }
 
   const handleOpenModal = (appName: string, packageName: string) => {
@@ -251,12 +278,26 @@ export function Usage() {
             text="Background"
             iconName="sync"
             color="#FF6B6B"
+            rotate={rotate}
             onPress={toggleBackground}
           />
         </View>
+        {data === undefined || data.length == 0 ? (
+          <View style={{paddingTop: 20}}>
+            <NoDataFound
+              boldText="In order to use Escape The Loop you have to grant usage acess permissions:"
+              step1="1. Click on the Permission button"
+              step2="2. Find Escape The Loop in the
+          list of apps"
+              step3="3. Toggle Permit usage acess"
+              disclamer="Escape The Loop does not send any data to the cloud, everythis is stored
+        locally on your phone. It uses the data collected to provide you the features of the app."
+            />
+          </View>
+        ) : null}
         <FlatList
           data={data}
-          contentContainerStyle={{paddingTop: 35, gap: 15}}
+          contentContainerStyle={{paddingTop: 45, gap: 15}}
           keyExtractor={item => item.appName}
           renderItem={({item}) => (
             <UsageElement
@@ -264,6 +305,7 @@ export function Usage() {
               timers={timers}
               setTimers={setTimers}
               item={item}
+              modalVisible={modalVisible}
             />
           )}
         />
@@ -285,7 +327,9 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: 'row',
     position: 'absolute',
-    width: '100%',
+    width: '90%',
+    paddingLeft: 3,
+    alignSelf: 'center',
     top: 0,
     marginTop: -20,
     justifyContent: 'space-between',

@@ -20,8 +20,6 @@ export default function EditModal(props: Props) {
   const [timestampOld, setTimestampOld] = React.useState<string>('');
 
   function close() {
-    // setTitle('');
-    // setDescription('');
     props.setVisible(false);
   }
   useEffect(() => {
@@ -73,8 +71,8 @@ export default function EditModal(props: Props) {
                     type,
                     tags: '',
                     timestamp: new Date().toISOString(),
+                    complete: false,
                   };
-
                   props.onSave(itemUpdated, timestampOld);
                   close();
                 }}
