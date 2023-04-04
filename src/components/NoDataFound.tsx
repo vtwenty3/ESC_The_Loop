@@ -17,7 +17,7 @@ export default function NoDataFound(props: Props) {
       <View>
         <Text
           style={{
-            fontSize: props.boldTextSize ? props.boldTextSize : 16,
+            fontSize: props.boldTextSize ? props.boldTextSize : 17,
             color: 'black',
             fontFamily: 'Lexend-SemiBold',
           }}>
@@ -25,7 +25,7 @@ export default function NoDataFound(props: Props) {
         </Text>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 15,
             color: 'black',
             fontFamily: 'Lexend-Regular',
           }}>

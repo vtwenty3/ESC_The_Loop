@@ -254,6 +254,12 @@ export function Usage() {
     }
   };
 
+  const requestNotificationPermission = async () => {
+    await notifee.requestPermission({
+      provisional: true,
+    });
+  };
+
   function getUsageData() {
     console.log('Getting data from Android');
     if (BackgroundService.isRunning() == true) {
@@ -274,8 +280,25 @@ export function Usage() {
     }
   });
 
+  const requestCameraPermission = async () => {};
+
   async function openSettings() {
-    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+    // await notifee.requestPermission({
+    //   sound: false,
+    //   announcement: true,
+    // });
+
+    const pNotification = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+
+    if (pNotification) {
+      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+    } else {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+    }
   }
 
   async function openSpecificApp(packageName: string) {
@@ -317,24 +340,26 @@ export function Usage() {
               onPress={openSettings}
             />
           </View>
-          <View style={styles.brutalButton}>
-            <BrutalButton
-              text="Background"
-              iconName="sync"
-              color="#FF6B6B"
-              rotate={rotate}
-              onPress={toggleBackground}
-            />
-          </View>
+          {data === undefined || data.length == 0 ? null : (
+            <View style={styles.brutalButton}>
+              <BrutalButton
+                text="Background"
+                iconName="sync"
+                color="#FF6B6B"
+                rotate={rotate}
+                onPress={toggleBackground}
+              />
+            </View>
+          )}
         </View>
         {data === undefined || data.length == 0 ? (
           <View style={{paddingTop: 20}}>
             <NoDataFound
-              boldText="In order to use Escape The Loop you have to grant usage acess permissions:"
-              step1="1. Click on the Permission button"
-              step2="2. Find Escape The Loop in the
+              boldText="In order to use ESC The Loop you have to grant notification and usage acess permissions:"
+              step1="1. Click on the Permission button above and grant notification acess"
+              step2="2. Click on the Permission button above and find ESC The Loop in the
           list of apps"
-              step3="3. Toggle Permit usage acess"
+              step3="3. Toggle usage acess"
               disclamer="Escape The Loop does not send any data to the cloud, everythis is stored
         locally on your phone. It uses the data collected to provide you the features of the app."
             />
