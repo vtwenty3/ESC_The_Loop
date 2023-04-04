@@ -107,7 +107,7 @@ export function Notes() {
           )}
         />
         {/* </View> */}
-        {data === undefined || data == undefined ? (
+        {!data === undefined || data == null || data.length === 0 ? (
           <NoDataFound
             boldText="No Notes Found"
             boldTextSize={20}

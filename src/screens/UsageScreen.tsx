@@ -79,8 +79,8 @@ const taskRandom = async (taskData: any) => {
             await sleep(timerExpiredDelay);
           } else {
             await BackgroundService.updateNotification({
-              taskTitle: activity,
-              taskDesc: `Remaining: ${localTimers[activity].timeLeft} seconds`,
+              taskTitle: `Time Remaining: ${localTimers[activity].timeLeft}s`,
+              taskDesc: `Time set: ${localTimers[activity].timeSet} `,
               progressBar: {
                 value:
                   localTimers[activity].timeSet -
@@ -121,7 +121,7 @@ const taskRandom = async (taskData: any) => {
 //Its required by android when using background service
 //Updated in the taskRandom function
 const options = {
-  taskName: 'ESC The Loop',
+  taskName: 'Background Service',
   taskTitle: 'ESC The Loop',
   taskDesc: 'Current task is not timed.',
 
@@ -129,7 +129,7 @@ const options = {
     name: 'ic_launcher',
     type: 'mipmap',
   },
-  linkingURI: 'exampleScheme://chat/jane',
+  linkingURI: 'escapetheloop://',
   parameters: {
     delay: 2000,
     screenOffDelay: 10000,
