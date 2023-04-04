@@ -10,6 +10,7 @@ import {
   Linking,
   Text,
 } from 'react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 import BackgroundService from 'react-native-background-actions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -56,6 +57,7 @@ const taskRandom = async (taskData: any) => {
   await new Promise(async resolve => {
     const {delay} = taskData;
     const {screenOffDelay} = taskData;
+    const {timerExpiredDelay} = taskData;
 
     console.log(BackgroundService.isRunning(), delay);
     for (let i = 0; BackgroundService.isRunning(); i++) {
@@ -70,21 +72,43 @@ const taskRandom = async (taskData: any) => {
       if (activity !== 'Screen Off!') {
         if (activity in localTimers) {
           if (localTimers[activity].timeLeft! <= 0) {
-            console.log('[Timer]: No time left!');
+            //console.log('[Timer]: No time left!');
             onDisplayNotification();
-            // Call onDisplayNotification() here
+            console.log('Runned -> ', i);
+            console.log('activity -> ', activity);
+            await sleep(timerExpiredDelay);
           } else {
+            await BackgroundService.updateNotification({
+              taskTitle: activity,
+              taskDesc: `Remaining: ${localTimers[activity].timeLeft} seconds`,
+              progressBar: {
+                value:
+                  localTimers[activity].timeSet -
+                  localTimers[activity].timeLeft,
+                max: localTimers[activity].timeSet,
+                indeterminate: false,
+              },
+            }); // Only Android, iOS will ignore this call
+
             localTimers[activity].timeLeft! -= delay / 1000;
             await storeData(localTimers);
             console.log(
               ` [Timer left]: ${localTimers[activity].timeLeft} seconds`,
             );
+            console.log('Runned -> ', i);
+            console.log('activity -> ', activity);
+            await sleep(delay);
           }
+        } else {
+          await BackgroundService.updateNotification({
+            taskTitle: 'ESC The Loop',
+            taskDesc: 'Current task is not timed.',
+            progressBar: undefined,
+          });
+          console.log('Runned -> ', i);
+          console.log('activity -> ', activity);
+          await sleep(delay);
         }
-
-        console.log('Runned -> ', i);
-        console.log('activity -> ', activity);
-        await sleep(delay);
       } else {
         console.log('Runned -> ', i);
         console.log('activity -> ', activity);
@@ -93,11 +117,14 @@ const taskRandom = async (taskData: any) => {
     }
   });
 };
-
+//initial notification when background service is on.
+//Its required by android when using background service
+//Updated in the taskRandom function
 const options = {
-  taskName: 'Example',
-  taskTitle: 'ExampleTask title',
-  taskDesc: 'ExampleTask desc',
+  taskName: 'ESC The Loop',
+  taskTitle: 'ESC The Loop',
+  taskDesc: 'Current task is not timed.',
+
   taskIcon: {
     name: 'ic_launcher',
     type: 'mipmap',
@@ -106,9 +133,11 @@ const options = {
   parameters: {
     delay: 2000,
     screenOffDelay: 10000,
+    timerExpiredDelay: 8000,
   },
 };
 
+//this notification is displayied when the timer has expired
 async function onDisplayNotification() {
   const channelId = await notifee.createChannel({
     id: 'main',
@@ -167,6 +196,18 @@ export function Usage() {
       initTimerState();
     }
   }, [timers]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      initTimerState();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
@@ -268,19 +309,23 @@ export function Usage() {
       </View>
       <View style={[globalStyles.body]}>
         <View style={styles.buttonsContainer}>
-          <BrutalButton
-            text="Permission"
-            iconName="shield-sync-outline"
-            color="#FF6B6B"
-            onPress={openSettings}
-          />
-          <BrutalButton
-            text="Background"
-            iconName="sync"
-            color="#FF6B6B"
-            rotate={rotate}
-            onPress={toggleBackground}
-          />
+          <View style={styles.brutalButton}>
+            <BrutalButton
+              text="Permission"
+              iconName="shield-sync-outline"
+              color="#FF6B6B"
+              onPress={openSettings}
+            />
+          </View>
+          <View style={styles.brutalButton}>
+            <BrutalButton
+              text="Background"
+              iconName="sync"
+              color="#FF6B6B"
+              rotate={rotate}
+              onPress={toggleBackground}
+            />
+          </View>
         </View>
         {data === undefined || data.length == 0 ? (
           <View style={{paddingTop: 20}}>
@@ -334,6 +379,9 @@ const styles = StyleSheet.create({
     marginTop: -20,
     justifyContent: 'space-between',
     zIndex: 3,
+  },
+  brutalButton: {
+    width: '48%',
   },
 });
 

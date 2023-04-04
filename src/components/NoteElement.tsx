@@ -1,5 +1,13 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import React, {useState, useRef} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Animated,
+  Easing,
+  Vibration,
+} from 'react-native';
+import React, {useState, useRef, useEffect} from 'react';
 
 type Props = {
   item: {
@@ -8,11 +16,49 @@ type Props = {
     timestamp: string;
   };
   onOpenModal: (item: object) => void;
+  modalVisible: boolean;
 };
 
 export default function Note(props: Props) {
-  const [shadow, setShadow] = useState(-6);
+  const [shadow, setShadow] = useState(-5);
   const [isPressed, setIsPressed] = useState(false);
+  const animatedValueNote = useRef(new Animated.Value(shadow)).current;
+
+  useEffect(() => {
+    if (props.modalVisible == false && isPressed == true) {
+      handlePressOutNote();
+    }
+  }, [props.modalVisible]);
+
+  const handlePressInNote = () => {
+    setIsPressed(true);
+    setTimeout(() => {
+      Vibration.vibrate(12);
+    }, 60);
+    Animated.timing(animatedValueNote, {
+      duration: 300,
+      toValue: 0,
+      easing: Easing.out(Easing.circle),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOutNote = () => {
+    setTimeout(() => {
+      Vibration.vibrate(14);
+    }, 600);
+
+    Animated.spring(animatedValueNote, {
+      toValue: shadow,
+      delay: 600,
+      stiffness: 270,
+      damping: 3.7,
+      mass: 0.6,
+      restSpeedThreshold: 1,
+      restDisplacementThreshold: 0.5,
+      useNativeDriver: true,
+    }).start();
+  };
 
   return (
     <View
@@ -20,34 +66,38 @@ export default function Note(props: Props) {
       <View>
         <TouchableOpacity
           onPress={() => props.onOpenModal(props.item)}
-          onPressIn={() => setIsPressed(true)}
-          onPressOut={() => setIsPressed(false)}
+          onPressIn={() => handlePressInNote()}
           activeOpacity={1}>
           <View style={[styles.textWrapperShadow]}>
             <Text style={[styles.titleText]}>{props.item.title}</Text>
           </View>
-
-          <View
+          <Animated.View
             style={[
               styles.textWrapper,
-              !isPressed && {
-                transform: [{translateX: shadow}, {translateY: shadow}],
+              {
+                transform: [
+                  {translateX: animatedValueNote},
+                  {translateY: animatedValueNote},
+                ],
               },
             ]}>
             <Text style={[styles.titleText]}>{props.item.title}</Text>
-          </View>
+          </Animated.View>
           <View style={[styles.descriptionWrapperShadow]}></View>
-          <View
+          <Animated.View
             style={[
               styles.descriptionWrapper,
-              !isPressed && {
-                transform: [{translateX: shadow}, {translateY: shadow}],
+              {
+                transform: [
+                  {translateX: animatedValueNote},
+                  {translateY: animatedValueNote},
+                ],
               },
             ]}>
             <Text style={[styles.descriptionText]}>
               {props.item.description}
             </Text>
-          </View>
+          </Animated.View>
         </TouchableOpacity>
       </View>
     </View>
@@ -60,7 +110,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
-    width: '100%',
+    width: '90%',
   },
 
   textWrapper: {
@@ -117,7 +167,7 @@ const styles = StyleSheet.create({
 
   descriptionText: {
     fontSize: 14,
-    fontFamily: 'Lexend-Light',
+    fontFamily: 'Lexend-Regular',
     color: 'black',
   },
 

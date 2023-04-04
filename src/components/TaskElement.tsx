@@ -88,9 +88,9 @@ export default function Task(props: Props) {
     toggleStrike();
     setIsPressedTick(!isPressedTick);
     if (isPressedTick) {
-      setTimeout(() => {
-        Vibration.vibrate(13);
-      }, 300);
+      // setTimeout(() => {
+      //   Vibration.vibrate(13);
+      // }, 300);
 
       Animated.spring(animatedValueTask, {
         //duration: 600,
@@ -103,18 +103,16 @@ export default function Task(props: Props) {
         restDisplacementThreshold: 0.5,
         useNativeDriver: true,
       }).start(() => {
-        if (complete == false) {
-          Vibration.vibrate(12);
-          Animated.spring(animatedValueTick, {
-            toValue: 0,
-            stiffness: 270,
-            damping: 3.7,
-            mass: 0.4,
-            restSpeedThreshold: 1,
-            restDisplacementThreshold: 0.5,
-            useNativeDriver: true,
-          }).start();
-        }
+        Vibration.vibrate(12);
+        Animated.spring(animatedValueTick, {
+          toValue: 0,
+          stiffness: 270,
+          damping: 3.7,
+          mass: 0.4,
+          restSpeedThreshold: 1,
+          restDisplacementThreshold: 0.5,
+          useNativeDriver: true,
+        }).start();
       });
     } else {
       Animated.timing(animatedValueTick, {
@@ -191,8 +189,9 @@ export default function Task(props: Props) {
                   props.onOpenModal(props.item);
                 } else {
                   setComplete(false);
-                  props.onPressTick(props.item.timestamp, false);
+                  setIsPressedTick(!isPressedTick);
                   handlePressInTick();
+                  props.onPressTick(props.item.timestamp, true);
                 }
               }}
               onPressIn={handlePressInTask}
@@ -250,7 +249,7 @@ export default function Task(props: Props) {
               }}
               onPress={() => {
                 if (complete) {
-                  console.log('delete');
+                  // console.log('delete');
                   handleDeleteAnimation(); //also delete from database
                 } else {
                   setComplete(!complete);

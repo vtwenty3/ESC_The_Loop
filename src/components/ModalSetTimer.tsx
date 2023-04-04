@@ -118,17 +118,21 @@ export function ModalSetTimer(props: Props) {
           </View>
 
           <View style={styles.modalButtons}>
-            <BrutalButton
-              onPress={handleClose}
-              text="Close"
-              color="#FF6B6B"
-              iconName="close-circle-outline"
-            />
-            <BrutalButton
-              onPress={setButton}
-              text="Set"
-              iconName="timer-sand"
-            />
+            <View style={{width: 120}}>
+              <BrutalButton
+                onPress={handleClose}
+                text="Close"
+                color="#FF6B6B"
+                iconName="close-circle-outline"
+              />
+            </View>
+            <View style={{width: 120}}>
+              <BrutalButton
+                onPress={setButton}
+                text="Set"
+                iconName="timer-sand"
+              />
+            </View>
 
             {/* <TouchableOpacity
               style={[styles.button, styles.buttonOpen]}

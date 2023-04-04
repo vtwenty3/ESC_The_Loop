@@ -40,7 +40,7 @@ export default function UsageElement(props: Props) {
   };
 
   useEffect(() => {
-    if (props.modalVisible == false) {
+    if (props.modalVisible == false && isPressed == true) {
       handlePressOut();
     }
   }, [props.modalVisible]);
@@ -61,6 +61,9 @@ export default function UsageElement(props: Props) {
 
   const handlePressOut = () => {
     setIsPressed(false);
+    setTimeout(() => {
+      Vibration.vibrate(10);
+    }, 800);
     Animated.spring(animatedValueTask, {
       toValue: shadow,
       delay: 800,
@@ -102,8 +105,21 @@ export default function UsageElement(props: Props) {
               style={styles.image}
             />
             <View style={styles.textAndBarWrapper}>
-              <Text style={styles.appName}>{props.item.appName}</Text>
-
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignContent: 'center',
+                  justifyContent: 'space-between',
+                  paddingRight: 5,
+                }}>
+                <Text style={styles.appName}>{props.item.appName}</Text>
+                {props.timers[props.item.packageName]?.timeSet ==
+                null ? null : (
+                  <Text style={styles.appTimeSet}>
+                    Set: {props.timers[props.item.packageName]?.timeSet}s
+                  </Text>
+                )}
+              </View>
               <View style={styles.usageBarWrapper}>
                 <View style={styles.usageBar}>
                   <View style={styles.usageTextWrapper}>
@@ -190,6 +206,13 @@ const styles = StyleSheet.create({
     color: 'black',
     fontFamily: 'Lexend-Regular',
   },
+  appTimeSet: {
+    fontSize: 15,
+    color: 'black',
+    fontFamily: 'Lexend-Regular',
+    marginTop: 2,
+  },
+
   timeLeftText: {
     right: 0,
   },

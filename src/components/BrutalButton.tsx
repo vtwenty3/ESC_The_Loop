@@ -12,12 +12,13 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Props = {
   onPress: () => void;
-  text: string;
+  text?: string;
   color?: string;
   iconName?: string;
   iconColor?: string;
   iconSize?: number;
   rotate?: boolean;
+  getStuck?: boolean;
 };
 export default function BrutalButton(props: Props) {
   const [isPressed, setIsPressed] = useState(false);
@@ -49,6 +50,14 @@ export default function BrutalButton(props: Props) {
       rotationValue.stopAnimation();
     }
   }, [props.rotate, startRotationAnimation]);
+
+  useEffect(() => {
+    if (props.getStuck === true) {
+      handlePressIn();
+    } else {
+      handlePressOut();
+    }
+  }, [props.getStuck]);
 
   const rotation = rotationValue.interpolate({
     inputRange: [0, 1],
@@ -100,14 +109,18 @@ export default function BrutalButton(props: Props) {
               styles.button,
               {backgroundColor: props.color ? props.color : '#7FBC8C'},
             ]}>
-            <Animated.View style={{transform: [{rotate: rotation}]}}>
+            <Animated.View
+              style={[
+                {transform: [{rotate: rotation}]},
+                {padding: props.text ? 0 : 10},
+              ]}>
               <Icon
                 name={props.iconName ? props.iconName : 'check'}
                 size={props.iconSize ? props.iconSize : 25}
                 color={props.iconColor ? props.iconColor : 'black'}
               />
             </Animated.View>
-            <Text style={styles.text}>{props.text}</Text>
+            {props.text ? <Text style={styles.text}>{props.text}</Text> : null}
           </View>
         </Animated.View>
       </View>
@@ -135,7 +148,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     zIndex: 3,
     borderRadius: 10,
-    paddingLeft: 10,
     backgroundColor: '#7FBC8C',
   },
 });

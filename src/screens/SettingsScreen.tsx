@@ -1,12 +1,16 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../globalStyles';
 import Title from '../components/TitleElement';
 import Esc from '../components/EscElement';
 import BrutalButton from '../components/BrutalButton';
-
+interface Timers {
+  [key: string]: {timeLeft?: number; timeSet?: number};
+}
 export function Settings() {
+  const [timers, setTimers] = useState<Timers>({});
+
   async function deleteNotes() {
     try {
       await AsyncStorage.clear();
@@ -51,6 +55,31 @@ export function Settings() {
       console.log('Erorr: ', e);
     }
   }
+
+  async function fetchLocalTimers() {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@local');
+      return jsonValue != null ? JSON.parse(jsonValue) : {};
+    } catch (e) {
+      console.log('Error fetching timers from storage; Details:', e);
+      return {};
+    }
+  }
+  async function resetTimers() {
+    const localTimers = await fetchLocalTimers();
+    if (localTimers !== null && Object.keys(localTimers).length > 0) {
+      const updatedTimers = {...localTimers};
+      console.log('Timers before reset: ', updatedTimers);
+      for (const key in updatedTimers) {
+        updatedTimers[key].timeLeft = updatedTimers[key].timeSet;
+      }
+      console.log('Updated Timers: ', updatedTimers);
+      await AsyncStorage.setItem('@local', JSON.stringify(updatedTimers));
+    } else {
+      console.log('[useEffect]: Local data empty! ');
+    }
+  }
+
   async function deleteAll() {
     try {
       await AsyncStorage.clear();
@@ -85,6 +114,17 @@ export function Settings() {
           Under Construction
         </Text>
         <BrutalButton
+          iconName="timer-sand"
+          text="Reset All Timers"
+          onPress={resetTimers}
+        />
+        <BrutalButton
+          iconName="timer-sand-empty"
+          color="#FF6B6B"
+          text="Delete All Timers"
+          onPress={deleteTimers}
+        />
+        <BrutalButton
           color="#FF6B6B"
           iconName="delete-circle-outline"
           text="Delete All Data"
@@ -103,12 +143,7 @@ export function Settings() {
           text="Delete All Tasks"
           onPress={deleteTasks}
         />
-        <BrutalButton
-          iconName="timer-off-outline"
-          color="#FF6B6B"
-          text="Delete All Timers"
-          onPress={deleteTimers}
-        />
+
         <BrutalButton
           iconName="database-export-outline"
           text="Export Data"
