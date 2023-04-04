@@ -148,8 +148,8 @@ async function onDisplayNotification() {
   });
 
   notifee.displayNotification({
-    title: 'Escape The Loop',
-    body: `Timer has expired!`,
+    title: 'ESC',
+    body: 'Timer expired!',
     id: '123',
     android: {
       importance: AndroidImportance.HIGH,
