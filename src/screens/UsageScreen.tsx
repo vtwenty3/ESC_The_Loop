@@ -8,6 +8,7 @@ import {
   AppStateStatus,
   PermissionsAndroid,
   Linking,
+  Platform,
   Text,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -58,7 +59,7 @@ const taskRandom = async (taskData: any) => {
     const {delay} = taskData;
     const {screenOffDelay} = taskData;
     const {timerExpiredDelay} = taskData;
-
+    let once = true;
     console.log(BackgroundService.isRunning(), delay);
     for (let i = 0; BackgroundService.isRunning(); i++) {
       UsageLog.currentActivity((callBack: string) => {
@@ -73,6 +74,7 @@ const taskRandom = async (taskData: any) => {
         if (activity in localTimers) {
           if (localTimers[activity].timeLeft! <= 0) {
             //console.log('[Timer]: No time left!');
+            localTimers[activity].timeLeft = 0;
             onDisplayNotification();
             console.log('Runned -> ', i);
             console.log('activity -> ', activity);
@@ -88,7 +90,12 @@ const taskRandom = async (taskData: any) => {
                 max: localTimers[activity].timeSet,
                 indeterminate: false,
               },
-            }); // Only Android, iOS will ignore this call
+            });
+
+            if (once) {
+              notificationTimeLeft(localTimers[activity].timeLeft);
+              once = false;
+            }
 
             localTimers[activity].timeLeft! -= delay / 1000;
             await storeData(localTimers);
@@ -133,7 +140,7 @@ const options = {
   parameters: {
     delay: 2000,
     screenOffDelay: 10000,
-    timerExpiredDelay: 8000,
+    timerExpiredDelay: 10000,
   },
 };
 
@@ -155,6 +162,30 @@ async function onDisplayNotification() {
       importance: AndroidImportance.HIGH,
       channelId,
       ongoing: true,
+      pressAction: {
+        id: 'default',
+      },
+    },
+  });
+}
+
+async function notificationTimeLeft(timeLeft: number) {
+  const channelId = await notifee.createChannel({
+    id: 'main',
+    name: 'Main',
+    sound: 'none',
+    vibration: false,
+    importance: AndroidImportance.HIGH, // <-- here
+  });
+
+  notifee.displayNotification({
+    title: 'Just a heads up',
+    body: `Time remaining: ${timeLeft} seconds`,
+    id: '123',
+    android: {
+      importance: AndroidImportance.HIGH,
+      channelId,
+      ongoing: false,
       pressAction: {
         id: 'default',
       },
@@ -233,43 +264,71 @@ export function Usage() {
     }
   }
 
+  // const toggleBackground = async () => {
+  //   playing = !playing;
+  //   if (playing) {
+  //     try {
+  //       console.log('Trying to start background service');
+  //       await BackgroundService.start(
+  //         taskData => taskRandom(taskData),
+  //         options,
+  //       );
+  //       setRotate(true);
+  //       console.log('Successful start!');
+  //     } catch (e) {
+  //       console.log('Error', e);
+  //     }
+  //   } else {
+  //     console.log('Stop background service');
+  //     await BackgroundService.stop();
+  //     setRotate(false);
+  //   }
+  // };
+
   const toggleBackground = async () => {
-    setRotate(!rotate);
-    playing = !playing;
-    if (playing) {
+    if (BackgroundService.isRunning() === false) {
       try {
         console.log('Trying to start background service');
         await BackgroundService.start(
           taskData => taskRandom(taskData),
           options,
         );
-
+        setRotate(true);
         console.log('Successful start!');
       } catch (e) {
         console.log('Error', e);
       }
     } else {
-      console.log('Stop background service');
-      await BackgroundService.stop();
+      try {
+        console.log('Stop background service');
+        await BackgroundService.stop();
+        setRotate(false);
+      } catch (e) {
+        console.log('Error', e);
+      }
     }
-  };
-
-  const requestNotificationPermission = async () => {
-    await notifee.requestPermission({
-      provisional: true,
-    });
   };
 
   function getUsageData() {
     console.log('Getting data from Android');
     if (BackgroundService.isRunning() == true) {
-      console.log('-------------BackgroundService is running');
       setRotate(true);
+    } else {
+      toggleBackground();
     }
 
+    // UsageLog.getAppUsageData2((callBack: string) => {
+    //   setData(JSON.parse(callBack));
+    //   //console.log('Data: ', callBack);
+    // });
+
     UsageLog.getAppUsageData2((callBack: string) => {
-      setData(JSON.parse(callBack));
-      //console.log('Data: ', callBack);
+      const parsedData = JSON.parse(callBack);
+      parsedData.sort(
+        (a: {usageTimeSeconds: number}, b: {usageTimeSeconds: number}) =>
+          b.usageTimeSeconds - a.usageTimeSeconds,
+      );
+      setData(parsedData);
     });
   }
 
@@ -280,27 +339,23 @@ export function Usage() {
     }
   });
 
-  const requestCameraPermission = async () => {};
-
   async function openSettings() {
-    // await notifee.requestPermission({
-    //   sound: false,
-    //   announcement: true,
-    // });
-
-    const pNotification = await PermissionsAndroid.check(
-      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-    );
-
-    if (pNotification) {
-      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
-    } else {
-      await PermissionsAndroid.request(
+    if (Number(Platform.Version) >= 32) {
+      const pNotification = await PermissionsAndroid.check(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
+
+      if (pNotification) {
+        Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+      } else {
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+      }
+    } else {
+      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
     }
   }
-
   async function openSpecificApp(packageName: string) {
     // Linking.sendIntent('android.chrome');
     //Linking.openURL('android.chrome');
@@ -317,6 +372,22 @@ export function Usage() {
     // });
   }
 
+  async function resetTimers() {
+    const localTimers = await fetchLocalTimers();
+    if (localTimers !== null && Object.keys(localTimers).length > 0) {
+      const updatedTimers = {...localTimers};
+      console.log('Timers before reset: ', updatedTimers);
+      for (const key in updatedTimers) {
+        updatedTimers[key].timeLeft = updatedTimers[key].timeSet;
+      }
+      console.log('Updated Timers: ', updatedTimers);
+      await AsyncStorage.setItem('@local', JSON.stringify(updatedTimers));
+      initTimerState();
+    } else {
+      console.log('[useEffect]: Local data empty! ');
+    }
+  }
+
   const handleOpenModal = (appName: string, packageName: string) => {
     setModalAppName(appName);
     setModalPackageName(packageName);
@@ -331,16 +402,19 @@ export function Usage() {
         </View>
       </View>
       <View style={[globalStyles.body]}>
-        <View style={styles.buttonsContainer}>
-          <View style={styles.brutalButton}>
-            <BrutalButton
-              text="Permission"
-              iconName="shield-sync-outline"
-              color="#FF6B6B"
-              onPress={openSettings}
-            />
+        {data === undefined || data.length == 0 ? (
+          <View style={styles.buttonsContainer}>
+            <View style={styles.brutalButton}>
+              <BrutalButton
+                text="Permission"
+                iconName="shield-sync-outline"
+                color="#FF6B6B"
+                onPress={openSettings}
+              />
+            </View>
           </View>
-          {data === undefined || data.length == 0 ? null : (
+        ) : (
+          <View style={styles.buttonsContainer}>
             <View style={styles.brutalButton}>
               <BrutalButton
                 text="Background"
@@ -350,8 +424,16 @@ export function Usage() {
                 onPress={toggleBackground}
               />
             </View>
-          )}
-        </View>
+
+            <View style={styles.brutalButton}>
+              <BrutalButton
+                iconName="timer-sand"
+                text="Reset Timers"
+                onPress={resetTimers}
+              />
+            </View>
+          </View>
+        )}
         {data === undefined || data.length == 0 ? (
           <View style={{paddingTop: 20}}>
             <NoDataFound
@@ -367,7 +449,7 @@ export function Usage() {
         ) : null}
         <FlatList
           data={data}
-          contentContainerStyle={{paddingTop: 45, gap: 15}}
+          contentContainerStyle={{paddingTop: 45, gap: 10}}
           keyExtractor={item => item.appName}
           renderItem={({item}) => (
             <UsageElement
@@ -409,56 +491,3 @@ const styles = StyleSheet.create({
     width: '48%',
   },
 });
-
-// function displayData() {
-//   if (data === undefined || data.length == 0) {
-//     console.log('Data is empty');
-//   } else {
-//     console.log('Data from Android: ', data);
-//   }
-// }
-
-/* <Button color="#315461" title="Get Data" onPress={getData} /> */
-
-/* <Button
-          color="#315461"
-          title="Timers Log"
-          onPress={() => {
-          }} //this is just for testing purposes
-        /> */
-
-/* <Button color="#315461" title="Print Data" onPress={displayData} /> */
-{
-  /* <View style={{width: '85%', alignSelf: 'center'}}>
-          <BrutalButton
-            text="Clear Timers"
-            iconName="timer-off-outline"
-            color="#FF6B6B"
-            onPress={() => {
-              console.log('Timers before clear:', timers);
-              clearLocalTimers();
-              setTimers({});
-            }}
-          />
-        </View>
-        <View style={{width: '85%', alignSelf: 'center'}}>
-          <BrutalButton
-            text="Display Data"
-            iconName="timer-off-outline"
-            color="#FF6B6B"
-            onPress={() => {
-              console.log('data', data);
-            }}
-          />
-        </View>
-        <View style={{width: '85%', alignSelf: 'center'}}>
-          <BrutalButton
-            text="Refresh Data"
-            iconName="sync"
-            color="#FF6B6B"
-            onPress={() => {
-              getUsageData();
-            }}
-          />
-        </View> */
-}

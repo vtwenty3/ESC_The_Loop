@@ -50,6 +50,9 @@ export function Tasks() {
     }
     await updateMyObject(data);
     fetchData();
+    setTimeout(() => {
+      setModalVisible(false);
+    }, 400);
   };
 
   const handleComplete = async (timestamp: string, complete: boolean) => {

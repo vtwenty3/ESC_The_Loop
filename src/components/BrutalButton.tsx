@@ -33,7 +33,7 @@ export default function BrutalButton(props: Props) {
     rotationValue.setValue(0);
     Animated.timing(rotationValue, {
       toValue: 1,
-      duration: 2000,
+      duration: 3400,
       easing: Easing.linear,
       useNativeDriver: true,
     }).start(({finished}) => {

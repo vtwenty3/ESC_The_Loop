@@ -88,9 +88,9 @@ export default function Task(props: Props) {
     toggleStrike();
     setIsPressedTick(!isPressedTick);
     if (isPressedTick) {
-      // setTimeout(() => {
-      //   Vibration.vibrate(13);
-      // }, 300);
+      setTimeout(() => {
+        Vibration.vibrate(13);
+      }, 200);
 
       Animated.spring(animatedValueTask, {
         //duration: 600,
@@ -103,7 +103,6 @@ export default function Task(props: Props) {
         restDisplacementThreshold: 0.5,
         useNativeDriver: true,
       }).start(() => {
-        Vibration.vibrate(12);
         Animated.spring(animatedValueTick, {
           toValue: 0,
           stiffness: 270,

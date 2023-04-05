@@ -26,6 +26,7 @@ type Props = {
 };
 export default function UsageElement(props: Props) {
   const [shadow, setShadow] = useState(-5);
+  const [barColor, setBarColor] = useState('');
   const [isPressed, setIsPressed] = useState(false);
   const animatedValueTask = useRef(
     new Animated.Value(isPressed ? 0 : shadow),
@@ -35,7 +36,6 @@ export default function UsageElement(props: Props) {
     const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
     const totalTime = Number(usageTime) + timeLeft;
     const percentage = (Number(usageTime) / totalTime) * 100;
-
     return percentage;
   };
 
@@ -113,15 +113,9 @@ export default function UsageElement(props: Props) {
                   paddingRight: 5,
                 }}>
                 <Text style={styles.appName}>{props.item.appName}</Text>
-                {props.timers[props.item.packageName]?.timeSet ==
-                null ? null : (
-                  <Text style={styles.appTimeSet}>
-                    Set: {props.timers[props.item.packageName]?.timeSet}s
-                  </Text>
-                )}
               </View>
               <View style={styles.usageBarWrapper}>
-                <View style={styles.usageBar}>
+                <View style={[styles.usageBar]}>
                   <View style={styles.usageTextWrapper}>
                     <Text style={styles.usageText}>
                       Used: {props.item.usageTimeSeconds}s
@@ -130,7 +124,8 @@ export default function UsageElement(props: Props) {
                       ''
                     ) : (
                       <Text style={[styles.usageText, styles.timeLeftText]}>
-                        Left: {props.timers[props.item.packageName]?.timeLeft}s
+                        Left: {props.timers[props.item.packageName]?.timeLeft}s/
+                        {props.timers[props.item.packageName]?.timeSet}s
                       </Text>
                     )}
                   </View>
