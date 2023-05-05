@@ -5,7 +5,7 @@ Escape the endless stream of personalized content and take control of your time 
 ESC the Loop is a smarter app timer that sends you customizable notifications at set intervals instead of fully blocking your apps. The notifications serve as your escape plan - when clicked, you'll be redirected to your "tasks" section. ESC the loop's mission is to give your time back to you by reversing the dark patterns present in today's most popular social media platforms. With its neo-brutalist UI, animations, and haptic feedback, ESC the Loop provides an immersive and engaging mobile experience.
 
 # Docs
-[developer documentation](https://23things.notion.site/ESC-The-Loop-Wiki-Docs-e9e4de77af2246d3824f49d616f5de25)
+[Developer Documentation](https://23things.notion.site/ESC-The-Loop-Wiki-Docs-e9e4de77af2246d3824f49d616f5de25)
 
 ## Installation
 ESC the Loop is built using React Native and TS and can be installed using npm. Before you start, you'll need to have an emulator or a physical device set up. If you're new to React Native, it's recommended following the instructions in the React Native documentation. 
