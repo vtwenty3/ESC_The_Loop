@@ -1,8 +1,11 @@
 # ESC the Loop
 Escape the endless stream of personalized content and take control of your time with ESC the Loop. 
 
-## Introduction
+## What is ESC the loop?
 ESC the Loop is a smarter app timer that sends you customizable notifications at set intervals instead of fully blocking your apps. The notifications serve as your escape plan - when clicked, you'll be redirected to your "tasks" section. ESC the loop's mission is to give your time back to you by reversing the dark patterns present in today's most popular social media platforms. With its neo-brutalist UI, animations, and haptic feedback, ESC the Loop provides an immersive and engaging mobile experience.
+
+# Docs
+[developer documentation](https://23things.notion.site/ESC-The-Loop-Wiki-Docs-e9e4de77af2246d3824f49d616f5de25)
 
 ## Installation
 ESC the Loop is built using React Native and TS and can be installed using npm. Before you start, you'll need to have an emulator or a physical device set up. If you're new to React Native, it's recommended following the instructions in the React Native documentation. 
@@ -24,10 +27,7 @@ ESC the Loop is built using React Native and TS and can be installed using npm. 
 
 
 ## Learn More
-For more information about ESC the Loop, please visit our [Notion page](https://www.notion.so/23things/ESC-The-Loop-fccf49ea661b4752a3980300041aaa63) and [developer documentation](https://23things.notion.site/ESC-The-Loop-Wiki-Docs-e9e4de77af2246d3824f49d616f5de25).
-
-## Contributing
-If you are interested in contributing to the development of ESC the Loop, please contact us at [insert email here].
+If you are interested in ESC the Loop, please visit [Notion page](https://www.notion.so/23things/ESC-The-Loop-fccf49ea661b4752a3980300041aaa63). 
 
 ## License
 ESC the Loop is open source and licensed under the MIT License.
