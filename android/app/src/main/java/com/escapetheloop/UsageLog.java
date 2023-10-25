@@ -78,9 +78,9 @@ public class UsageLog extends ReactContextBaseJavaModule {
         if (powerManager.isInteractive()) {
             if (currentActivity != null) {
                     callBack.invoke(currentActivity);
-                    currentActivity=null;
+                   // currentActivity=null;
             } else {
-                callBack.invoke("no activity");
+              //  callBack.invoke("no activity");
             }
         } else {
             currentActivity="Screen Off!";
