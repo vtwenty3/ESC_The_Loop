@@ -24,21 +24,39 @@ import UsageElement from '../components/UsageElement';
 import BrutalButton from '../components/BrutalButton';
 import NoDataFound from '../components/NoDataFound';
 
-async function openSettings() {
-  // await notifee.requestPermission({});
-  // const settings = await notifee.getNotificationSettings();
-  // console.log(settings.authorizationStatus);
+// async function openSettings() {
+//   // await notifee.requestPermission({});
+//   // const settings = await notifee.getNotificationSettings();
+//   // console.log(settings.authorizationStatus);
 
-  const pNotification = await PermissionsAndroid.check(
-    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  );
-  console.log(pNotification);
-  if (pNotification) {
-    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
-  } else {
-    await PermissionsAndroid.request(
+//   const pNotification = await PermissionsAndroid.check(
+//     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+//   );
+//   console.log(pNotification);
+//   if (pNotification) {
+//     Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+//   } else {
+//     await PermissionsAndroid.request(
+//       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+//     );
+//   }
+// }
+
+async function openSettings() {
+  if (Number(Platform.Version) >= 32) {
+    const pNotification = await PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
+
+    if (pNotification) {
+      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+    } else {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+    }
+  } else {
+    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
   }
 }
 

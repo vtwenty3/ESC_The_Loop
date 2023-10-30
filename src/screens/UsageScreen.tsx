@@ -6,10 +6,7 @@ import {
   NativeModules,
   AppState,
   AppStateStatus,
-  PermissionsAndroid,
   Linking,
-  Platform,
-  Text,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
@@ -26,15 +23,19 @@ import NoDataFound from '../components/NoDataFound';
 import PermissionsScreen from '../screens/PermissionsScreen';
 
 const {UsageLog} = NativeModules;
-let playing = BackgroundService.isRunning();
 
 let activity = '';
-let permission = '';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
 
-async function fetchLocalTimers() {
+type TaskData = {
+  delay: number;
+  screenOffDelay: number;
+  timerExpiredDelay: number;
+};
+
+async function fetchLocalTimers(): Promise<Timers> {
   try {
     const jsonValue = await AsyncStorage.getItem('@local');
     return jsonValue != null ? JSON.parse(jsonValue) : {};
@@ -53,18 +54,15 @@ const storeData = async (timers: Timers) => {
   }
 };
 
-const sleep = (time: any) =>
+const sleep = (time: number) =>
   new Promise<void>(resolve => setTimeout(() => resolve(), time));
-const taskRandom = async (taskData: any) => {
+const taskRandom = async (taskData: TaskData) => {
   await new Promise(async resolve => {
-    const {delay} = taskData;
-    const {screenOffDelay} = taskData;
-    const {timerExpiredDelay} = taskData;
     let once = true;
-    console.log(BackgroundService.isRunning(), delay);
+    console.log(BackgroundService.isRunning(), taskData.delay);
     for (let i = 0; BackgroundService.isRunning(); i++) {
       try {
-        const currentActivityName = await UsageLog.currentActivity();
+        const currentActivityName: string = await UsageLog.currentActivity();
         activity = currentActivityName;
       } catch (error) {
         console.error('Failed to get current activity:', error);
@@ -82,33 +80,33 @@ const taskRandom = async (taskData: any) => {
             onDisplayNotification();
             console.log('Runned -> ', i);
             console.log('activity -> ', activity);
-            await sleep(timerExpiredDelay);
+            await sleep(taskData.timerExpiredDelay);
           } else {
             await BackgroundService.updateNotification({
               taskTitle: `Time Remaining: ${localTimers[activity].timeLeft}s`,
               taskDesc: `Time set: ${localTimers[activity].timeSet} `,
               progressBar: {
                 value:
-                  localTimers[activity].timeSet -
-                  localTimers[activity].timeLeft,
-                max: localTimers[activity].timeSet,
+                  localTimers[activity].timeSet! -
+                  localTimers[activity].timeLeft!,
+                max: localTimers[activity].timeSet!,
                 indeterminate: false,
               },
             });
 
             if (once) {
-              notificationTimeLeft(localTimers[activity].timeLeft);
+              notificationTimeLeft(localTimers[activity].timeLeft!);
               once = false;
             }
 
-            localTimers[activity].timeLeft! -= delay / 1000;
+            localTimers[activity].timeLeft! -= taskData.delay / 1000;
             await storeData(localTimers);
             console.log(
               ` [Timer left]: ${localTimers[activity].timeLeft} seconds`,
             );
             console.log('Runned -> ', i);
             console.log('activity -> ', activity);
-            await sleep(delay);
+            await sleep(taskData.delay);
           }
         } else {
           await BackgroundService.updateNotification({
@@ -118,12 +116,12 @@ const taskRandom = async (taskData: any) => {
           });
           console.log('Runned -> ', i);
           console.log('activity -> ', activity);
-          await sleep(delay);
+          await sleep(taskData.delay);
         }
       } else {
         console.log('Runned -> ', i);
         console.log('activity -> ', activity);
-        await sleep(screenOffDelay);
+        await sleep(taskData.screenOffDelay);
       }
     }
   });
@@ -198,7 +196,7 @@ async function notificationTimeLeft(timeLeft: number) {
 }
 
 export function Usage() {
-  const [data, setData] = useState<any>();
+  const [data, setData] = useState<AppUsageData[] | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [timers, setTimers] = useState<Timers>({});
   const [modalAppName, setModalAppName] = useState('');
@@ -208,9 +206,17 @@ export function Usage() {
     AppState.currentState,
   );
 
+  type AppUsageData = {
+    appName: string;
+    iconBase64: string;
+    packageName: string;
+    usageTimeMinutes: number;
+    usageTimeSeconds: number;
+  };
+
   //Gets the usage data from the native module on app open
   useEffect(() => {
-    if (data === undefined || data.length == 0) {
+    if (!data?.length) {
       getUsageData();
     }
     const subscription = AppState.addEventListener(
@@ -268,33 +274,12 @@ export function Usage() {
     }
   }
 
-  // const toggleBackground = async () => {
-  //   playing = !playing;
-  //   if (playing) {
-  //     try {
-  //       console.log('Trying to start background service');
-  //       await BackgroundService.start(
-  //         taskData => taskRandom(taskData),
-  //         options,
-  //       );
-  //       setRotate(true);
-  //       console.log('Successful start!');
-  //     } catch (e) {
-  //       console.log('Error', e);
-  //     }
-  //   } else {
-  //     console.log('Stop background service');
-  //     await BackgroundService.stop();
-  //     setRotate(false);
-  //   }
-  // };
-
   const toggleBackground = async () => {
     if (BackgroundService.isRunning() === false) {
       try {
         console.log('Trying to start background service');
         await BackgroundService.start(
-          taskData => taskRandom(taskData),
+          taskData => taskRandom(taskData!),
           options,
         );
         setRotate(true);
@@ -321,17 +306,9 @@ export function Usage() {
       toggleBackground();
     }
 
-    // UsageLog.getAppUsageData2((callBack: string) => {
-    //   setData(JSON.parse(callBack));
-    //   //console.log('Data: ', callBack);
-    // });
-
     UsageLog.getAppUsageData2((callBack: string) => {
-      const parsedData = JSON.parse(callBack);
-      parsedData.sort(
-        (a: {usageTimeSeconds: number}, b: {usageTimeSeconds: number}) =>
-          b.usageTimeSeconds - a.usageTimeSeconds,
-      );
+      const parsedData: AppUsageData[] = JSON.parse(callBack);
+      parsedData.sort((a, b) => b.usageTimeSeconds - a.usageTimeSeconds);
       setData(parsedData);
     });
   }
@@ -343,23 +320,6 @@ export function Usage() {
     }
   });
 
-  async function openSettings() {
-    if (Number(Platform.Version) >= 32) {
-      const pNotification = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-
-      if (pNotification) {
-        Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
-      } else {
-        await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        );
-      }
-    } else {
-      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
-    }
-  }
   async function openSpecificApp(packageName: string) {
     // Linking.sendIntent('android.chrome');
     //Linking.openURL('android.chrome');
@@ -447,7 +407,6 @@ export function Usage() {
                   />
                 )}
               />
-
               <ModalSetTimer
                 setVisible={setModalVisible}
                 visible={modalVisible}
