@@ -63,10 +63,13 @@ const taskRandom = async (taskData: any) => {
     let once = true;
     console.log(BackgroundService.isRunning(), delay);
     for (let i = 0; BackgroundService.isRunning(); i++) {
-      UsageLog.currentActivity((callBack: string) => {
-        // get current activity
-        activity = callBack;
-      });
+      try {
+        const currentActivityName = await UsageLog.currentActivity();
+        activity = currentActivityName;
+      } catch (error) {
+        console.error('Failed to get current activity:', error);
+        // Optionally, handle the error or retry the operation here.
+      }
 
       // Fetch the latest timers from storage
       const localTimers = await fetchLocalTimers();

@@ -34,6 +34,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.common.LifecycleState;
 import com.facebook.react.modules.core.ReactChoreographer;
 import com.facebook.react.shell.MainReactPackage;
+import com.facebook.react.bridge.Promise;
 import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,8 +57,13 @@ public class UsageLog extends ReactContextBaseJavaModule {
         return "UsageLog";
     }
 
-    @ReactMethod //hacky way to get the current activity
-    public void currentActivity(Callback callBack) {
+
+
+    private static String lastKnownActivity = null;
+
+    @ReactMethod
+public void currentActivity(Promise promise) {
+    try {
         ReactApplicationContext context = getReactApplicationContext();
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
@@ -73,20 +79,36 @@ public class UsageLog extends ReactContextBaseJavaModule {
             usageEvents.getNextEvent(event);
             if (event.getEventType() == UsageEvents.Event.ACTIVITY_RESUMED) {
                 currentActivity = event.getPackageName();
+                lastKnownActivity = currentActivity;
             }
         }
+
         if (powerManager.isInteractive()) {
             if (currentActivity != null) {
-                    callBack.invoke(currentActivity);
-                   // currentActivity=null;
+                promise.resolve(currentActivity);
+                // currentActivity=null;
             } else {
-              //  callBack.invoke("no activity");
+                promise.resolve(lastKnownActivity);
+                //  callBack.invoke("no activity");
             }
         } else {
-            currentActivity="Screen Off!";
-            callBack.invoke(currentActivity);
+            currentActivity = "Screen Off!";
+            promise.resolve(currentActivity);
         }
+
+//        if (powerManager.isInteractive()) {
+//            if (currentActivity != null) {
+//                promise.resolve("no activity");
+//            } else {
+//                promise.resolve("Screen Off!");
+//            }
+//        } else {
+//            promise.resolve(currentActivity);
+//        }
+    } catch (Exception e) {
+        promise.reject("ACTIVITY_ERROR", "Failed to get current activity", e);
     }
+}
 
     @ReactMethod //this method is better in terms of accuracy
     public void getAppUsageData2(Callback callBack) {
