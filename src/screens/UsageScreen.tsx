@@ -23,6 +23,7 @@ import Esc from '../components/EscElement';
 import UsageElement from '../components/UsageElement';
 import BrutalButton from '../components/BrutalButton';
 import NoDataFound from '../components/NoDataFound';
+import PermissionsScreen from '../screens/PermissionsScreen';
 
 const {UsageLog} = NativeModules;
 let playing = BackgroundService.isRunning();
@@ -394,84 +395,69 @@ export function Usage() {
     setModalVisible(true);
   };
   return (
-    <View style={[globalStyles.root]}>
-      <View style={[globalStyles.header]}>
-        <View style={[globalStyles.headerChildren]}>
-          <Esc onPress={() => console.log('Esc')} />
-          <Title text={'Usage'} fontFamily={'Lexend-Medium'} fontSize={40} />
-        </View>
-      </View>
-      <View style={[globalStyles.body]}>
-        {data === undefined || data.length == 0 ? (
-          <View style={styles.buttonsContainer}>
-            <View style={styles.brutalButton}>
-              <BrutalButton
-                text="Permission"
-                iconName="shield-sync-outline"
-                color="#FF6B6B"
-                onPress={openSettings}
-              />
+    <>
+      {!data?.length ? (
+        <PermissionsScreen />
+      ) : (
+        <>
+          <View style={[globalStyles.root]}>
+            <View style={[globalStyles.header]}>
+              <View style={[globalStyles.headerChildren]}>
+                <Esc onPress={() => console.log('Esc')} />
+                <Title
+                  text={'Usage'}
+                  fontFamily={'Lexend-Medium'}
+                  fontSize={40}
+                />
+              </View>
             </View>
-          </View>
-        ) : (
-          <View style={styles.buttonsContainer}>
-            <View style={styles.brutalButton}>
-              <BrutalButton
-                text="Background"
-                iconName="sync"
-                color="#FF6B6B"
-                rotate={rotate}
-                onPress={toggleBackground}
+            <View style={[globalStyles.body]}>
+              <View style={styles.buttonsContainer}>
+                <View style={styles.brutalButton}>
+                  <BrutalButton
+                    text="Background"
+                    iconName="sync"
+                    color="#FF6B6B"
+                    rotate={rotate}
+                    onPress={toggleBackground}
+                  />
+                </View>
+                <View style={styles.brutalButton}>
+                  <BrutalButton
+                    iconName="timer-sand"
+                    text="Reset Timers"
+                    onPress={resetTimers}
+                  />
+                </View>
+              </View>
+              <FlatList
+                data={data}
+                contentContainerStyle={{paddingTop: 45, gap: 10}}
+                keyExtractor={item => item.appName}
+                renderItem={({item}) => (
+                  <UsageElement
+                    onOpenModal={handleOpenModal}
+                    timers={timers}
+                    setTimers={setTimers}
+                    item={item}
+                    modalVisible={modalVisible}
+                  />
+                )}
               />
-            </View>
 
-            <View style={styles.brutalButton}>
-              <BrutalButton
-                iconName="timer-sand"
-                text="Reset Timers"
-                onPress={resetTimers}
+              <ModalSetTimer
+                setVisible={setModalVisible}
+                visible={modalVisible}
+                name={modalAppName}
+                packageName={modalPackageName}
+                setTimers={setTimers}
+                timers={timers}
               />
             </View>
           </View>
-        )}
-        {data === undefined || data.length == 0 ? (
-          <View style={{paddingTop: 20}}>
-            <NoDataFound
-              boldText="In order to use ESC The Loop you have to grant notification and usage acess permissions:"
-              step1="1. Click on the Permission button above and grant notification acess"
-              step2="2. Click on the Permission button above and find ESC The Loop in the
-          list of apps"
-              step3="3. Toggle usage acess"
-              disclamer="Escape The Loop does not send any data to the cloud, everythis is stored
-        locally on your phone. It uses the data collected to provide you the features of the app."
-            />
-          </View>
-        ) : null}
-        <FlatList
-          data={data}
-          contentContainerStyle={{paddingTop: 45, gap: 10}}
-          keyExtractor={item => item.appName}
-          renderItem={({item}) => (
-            <UsageElement
-              onOpenModal={handleOpenModal}
-              timers={timers}
-              setTimers={setTimers}
-              item={item}
-              modalVisible={modalVisible}
-            />
-          )}
-        />
-
-        <ModalSetTimer
-          setVisible={setModalVisible}
-          visible={modalVisible}
-          name={modalAppName}
-          packageName={modalPackageName}
-          setTimers={setTimers}
-          timers={timers}
-        />
-      </View>
-    </View>
+        </>
+      )}
+    </>
   );
 }
 

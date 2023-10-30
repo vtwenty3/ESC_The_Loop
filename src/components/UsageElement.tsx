@@ -15,10 +15,11 @@ type Props = {
   item: {
     packageName: string;
     appName: string;
-    usageTimeSeconds: string;
-    usageTimeMinutes: string;
+    usageTimeSeconds: number;
+    usageTimeMinutes: number;
     iconBase64: string;
   };
+
   setTimers: React.Dispatch<React.SetStateAction<Timers>>;
   timers: Timers;
   modalVisible: boolean;
@@ -34,8 +35,8 @@ export default function UsageElement(props: Props) {
   const calculateUsagePercentage = () => {
     const usageTime = props.item.usageTimeSeconds || 0;
     const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
-    const totalTime = Number(usageTime) + timeLeft;
-    const percentage = (Number(usageTime) / totalTime) * 100;
+    const totalTime = usageTime + timeLeft;
+    const percentage = (usageTime / totalTime) * 100;
     return percentage;
   };
 
