@@ -24,12 +24,11 @@ import PermissionsScreen from '../screens/PermissionsScreen';
 
 const {UsageLog} = NativeModules;
 
-let activity = '';
 interface Timers {
   [key: string]: {timeLeft?: number; timeSet?: number};
 }
 
-type TaskData = {
+type BackgroundTaskParams = {
   delay: number;
   screenOffDelay: number;
   timerExpiredDelay: number;
@@ -37,6 +36,7 @@ type TaskData = {
 
 async function fetchLocalTimers(): Promise<Timers> {
   try {
+    // console.log('Fetching local timers');
     const jsonValue = await AsyncStorage.getItem('@local');
     return jsonValue != null ? JSON.parse(jsonValue) : {};
   } catch (e) {
@@ -45,87 +45,111 @@ async function fetchLocalTimers(): Promise<Timers> {
   }
 }
 
-const storeData = async (timers: Timers) => {
+async function updateLocalTimers(timers: Timers) {
   try {
     await AsyncStorage.setItem('@local', JSON.stringify(timers));
-    console.log('[storeData]: timers saved to storage.');
+    console.log('[updateLocalTimers]: timers saved to storage.');
   } catch (e) {
     console.log('error saving timers to storage; Details:', e);
   }
-};
+}
 
 const sleep = (time: number) =>
   new Promise<void>(resolve => setTimeout(() => resolve(), time));
-const taskRandom = async (taskData: TaskData) => {
+
+async function handleTimerExpired(
+  i: number,
+  localTimers: Timers,
+  currentActivity: string,
+) {
+  localTimers[currentActivity].timeLeft = 0;
+  onDisplayNotification();
+  console.log('Timer Expired:', currentActivity);
+}
+
+async function handleTimerDecrease(
+  i: number,
+  alertUserTimeLeftOnce: boolean,
+  localTimers: Timers,
+  currentActivity: string,
+  delay: number,
+) {
+  console.log('Runned -> ', i);
+  console.log('activity -> ', currentActivity);
+
+  localTimers[currentActivity].timeLeft! -= delay / 1000;
+  await updateLocalTimers(localTimers);
+  console.log(
+    ` [Timer left]: ${localTimers[currentActivity].timeLeft} seconds`,
+  );
+
+  await BackgroundService.updateNotification({
+    taskTitle: `Time Remaining: ${localTimers[currentActivity].timeLeft}s`,
+    taskDesc: `Time set: ${localTimers[currentActivity].timeSet} `,
+    progressBar: {
+      value:
+        localTimers[currentActivity].timeSet! -
+        localTimers[currentActivity].timeLeft!,
+      max: localTimers[currentActivity].timeSet!,
+      indeterminate: false,
+    },
+  });
+
+  if (alertUserTimeLeftOnce) {
+    notificationTimeLeft(localTimers[currentActivity].timeLeft!);
+    alertUserTimeLeftOnce = false;
+  }
+}
+
+async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
   await new Promise(async resolve => {
-    let once = true;
-    console.log(BackgroundService.isRunning(), taskData.delay);
+    let alertUserTimeLeftOnce = true;
+    let currentActivity = 'default';
+    console.log(BackgroundService.isRunning(), backgroundTaskParams.delay);
     for (let i = 0; BackgroundService.isRunning(); i++) {
       try {
-        const currentActivityName: string = await UsageLog.currentActivity();
-        activity = currentActivityName;
+        currentActivity = await UsageLog.currentActivity();
       } catch (error) {
         console.error('Failed to get current activity:', error);
-        // Optionally, handle the error or retry the operation here.
       }
-
-      // Fetch the latest timers from storage
-      const localTimers = await fetchLocalTimers();
-
-      if (activity !== 'Screen Off!') {
-        if (activity in localTimers) {
-          if (localTimers[activity].timeLeft! <= 0) {
-            //console.log('[Timer]: No time left!');
-            localTimers[activity].timeLeft = 0;
-            onDisplayNotification();
-            console.log('Runned -> ', i);
-            console.log('activity -> ', activity);
-            await sleep(taskData.timerExpiredDelay);
-          } else {
-            await BackgroundService.updateNotification({
-              taskTitle: `Time Remaining: ${localTimers[activity].timeLeft}s`,
-              taskDesc: `Time set: ${localTimers[activity].timeSet} `,
-              progressBar: {
-                value:
-                  localTimers[activity].timeSet! -
-                  localTimers[activity].timeLeft!,
-                max: localTimers[activity].timeSet!,
-                indeterminate: false,
-              },
-            });
-
-            if (once) {
-              notificationTimeLeft(localTimers[activity].timeLeft!);
-              once = false;
-            }
-
-            localTimers[activity].timeLeft! -= taskData.delay / 1000;
-            await storeData(localTimers);
-            console.log(
-              ` [Timer left]: ${localTimers[activity].timeLeft} seconds`,
+      const localTimers = await fetchLocalTimers(); // Fetch the latest timers from storage
+      if (currentActivity === 'Screen Off!') {
+        console.log('Runned -> ', i, 'Current activity:', currentActivity);
+        await sleep(backgroundTaskParams.screenOffDelay);
+      } else {
+        if (currentActivity in localTimers) {
+          if (localTimers[currentActivity].timeLeft! > 0) {
+            handleTimerDecrease(
+              i,
+              alertUserTimeLeftOnce,
+              localTimers,
+              currentActivity,
+              backgroundTaskParams.delay,
             );
-            console.log('Runned -> ', i);
-            console.log('activity -> ', activity);
-            await sleep(taskData.delay);
+          } else {
+            handleTimerExpired(i, localTimers, currentActivity);
           }
         } else {
+          //currentActivity NOT in localTimers
           await BackgroundService.updateNotification({
             taskTitle: 'ESC The Loop',
             taskDesc: 'Current task is not timed.',
             progressBar: undefined,
           });
-          console.log('Runned -> ', i);
-          console.log('activity -> ', activity);
-          await sleep(taskData.delay);
         }
-      } else {
-        console.log('Runned -> ', i);
-        console.log('activity -> ', activity);
-        await sleep(taskData.screenOffDelay);
+        await sleep(backgroundTaskParams.delay);
+        console.log(
+          'Runned -> ',
+          i,
+          'times',
+          'current activity:',
+          currentActivity,
+        );
       }
     }
   });
-};
+}
+
 //initial notification when background service is on.
 //Its required by android when using background service
 //Updated in the taskRandom function
@@ -279,7 +303,7 @@ export function Usage() {
       try {
         console.log('Trying to start background service');
         await BackgroundService.start(
-          taskData => taskRandom(taskData!),
+          taskData => backgroundTimerTask(taskData!),
           options,
         );
         setRotate(true);
