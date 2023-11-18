@@ -1,75 +1,12 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {globalStyles} from '../globalStyles';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import BrutalButton from '../components/BrutalButton';
-interface Timers {
-  [key: string]: {timeLeft?: number; timeSet?: number};
-}
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import { globalStyles } from '../globalStyles'
+import Title from '../components/TitleElement'
+import Esc from '../components/EscElement'
+import BrutalButton from '../components/BrutalButton'
+import * as localStorage from '../services/LocalStorage'
+
 export function Settings() {
-  const [timers, setTimers] = useState<Timers>({});
-
-  async function deleteNotes() {
-    try {
-      await AsyncStorage.clear();
-      const keys = ['@Notes'];
-      try {
-        await AsyncStorage.multiRemove(keys);
-      } catch (e) {
-        // remove error
-      }
-      console.log('Done');
-    } catch (e) {
-      console.log('Erorr: ', e);
-    }
-  }
-
-  async function deleteTasks() {
-    try {
-      await AsyncStorage.clear();
-      const keys = ['@Tasks'];
-      try {
-        await AsyncStorage.multiRemove(keys);
-      } catch (e) {
-        // remove error
-      }
-      console.log('Done');
-    } catch (e) {
-      console.log('Erorr: ', e);
-    }
-  }
-
-  async function deleteTimers() {
-    try {
-      await AsyncStorage.clear();
-      const keys = ['@Timers'];
-      try {
-        await AsyncStorage.multiRemove(keys);
-      } catch (e) {
-        // remove error
-      }
-      console.log('Done');
-    } catch (e) {
-      console.log('Erorr: ', e);
-    }
-  }
-
-  async function deleteAll() {
-    try {
-      await AsyncStorage.clear();
-    } catch (e) {
-      console.log('Erorr: ', e);
-    }
-
-    console.log('Done.');
-  }
-
-  function backupData() {
-    console.log('Saving data at...');
-  }
-
   return (
     <View style={[globalStyles.root]}>
       <View style={[globalStyles.header]}>
@@ -86,7 +23,8 @@ export function Settings() {
             color: 'black',
             alignSelf: 'center',
             textAlign: 'center',
-          }}>
+          }}
+        >
           Under Construction
         </Text>
 
@@ -94,41 +32,41 @@ export function Settings() {
           iconName="timer-sand-empty"
           color="#FF6B6B"
           text="Delete All Timers"
-          onPress={deleteTimers}
+          onPress={localStorage.deleteTimers}
         />
         <BrutalButton
           color="#FF6B6B"
           iconName="delete-circle-outline"
           text="Delete All Data"
           iconSize={30}
-          onPress={deleteAll}
+          onPress={localStorage.deleteAll}
         />
         <BrutalButton
           text="Delete All Notes"
           color="#FF6B6B"
-          onPress={deleteNotes}
+          onPress={localStorage.deleteNotes}
           iconName="note-off-outline"
         />
         <BrutalButton
           iconName="checkbox-blank-off-outline"
           color="#FF6B6B"
           text="Delete All Tasks"
-          onPress={deleteTasks}
+          onPress={localStorage.deleteTasks}
         />
 
         <BrutalButton
           iconName="database-export-outline"
           text="Export Data"
-          onPress={backupData}
+          onPress={() => console.log('Hi')}
         />
         <BrutalButton
           iconName="database-import-outline"
           text="Import Data"
-          onPress={backupData}
+          onPress={() => console.log('Hi')}
         />
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -137,4 +75,4 @@ const styles = StyleSheet.create({
     width: '90%',
     gap: 10,
   },
-});
+})

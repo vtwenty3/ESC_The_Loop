@@ -1,72 +1,62 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Animated,
-  Easing,
-  Vibration,
-} from 'react-native';
-import React, {useState, useRef, useEffect, useCallback} from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { StyleSheet, Text, View, TouchableOpacity, Animated, Easing, Vibration } from 'react-native'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 type Props = {
-  onPress: () => void;
-  text?: string;
-  color?: string;
-  iconName?: string;
-  iconColor?: string;
-  iconSize?: number;
-  rotate?: boolean;
-  getStuck?: boolean;
-};
+  onPress: () => void
+  text?: string
+  color?: string
+  iconName?: string
+  iconColor?: string
+  iconSize?: number
+  rotate?: boolean
+  getStuck?: boolean
+}
 export default function BrutalButton(props: Props) {
-  const [isPressed, setIsPressed] = useState(false);
+  const [isPressed, setIsPressed] = useState(false)
 
-  const animatedValueTask = useRef(
-    new Animated.Value(isPressed ? 0 : -4),
-  ).current;
+  const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : -4)).current
 
-  const rotationValue = useRef(new Animated.Value(0)).current;
+  const rotationValue = useRef(new Animated.Value(0)).current
 
   const startRotationAnimation = useCallback(() => {
-    rotationValue.setValue(0);
+    rotationValue.setValue(0)
     Animated.timing(rotationValue, {
       toValue: 1,
       duration: 3400,
       easing: Easing.linear,
       useNativeDriver: true,
-    }).start(({finished}) => {
+    }).start(({ finished }) => {
       if (finished) {
-        startRotationAnimation();
+        startRotationAnimation()
       }
-    });
-  }, []);
+    })
+  }, [])
 
   useEffect(() => {
     if (props.rotate === true) {
-      startRotationAnimation();
+      startRotationAnimation()
     } else {
-      rotationValue.stopAnimation();
+      rotationValue.stopAnimation()
     }
-  }, [props.rotate, startRotationAnimation]);
+  }, [props.rotate, startRotationAnimation])
 
   useEffect(() => {
     if (props.getStuck === true) {
-      handlePressIn();
+      handlePressIn()
     } else {
-      handlePressOut();
+      handlePressOut()
     }
-  }, [props.getStuck]);
+  }, [props.getStuck])
 
   const rotation = rotationValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '-360deg'],
-  });
+  })
 
   const handlePressIn = () => {
-    Vibration.vibrate(10);
-    setIsPressed(true);
+    Vibration.vibrate(10)
+    setIsPressed(true)
     Animated.spring(animatedValueTask, {
       toValue: 0,
       stiffness: 170,
@@ -75,11 +65,11 @@ export default function BrutalButton(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handlePressOut = () => {
-    setIsPressed(false);
+    setIsPressed(false)
     Animated.spring(animatedValueTask, {
       toValue: -4,
       stiffness: 270,
@@ -88,32 +78,25 @@ export default function BrutalButton(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
   return (
     <TouchableOpacity
       activeOpacity={1}
       onPress={props.onPress}
       onPressIn={handlePressIn}
-      onPressOut={handlePressOut}>
+      onPressOut={handlePressOut}
+    >
       <View style={styles.buttonShadow}>
         <Animated.View
           style={{
-            transform: [
-              {translateX: animatedValueTask},
-              {translateY: animatedValueTask},
-            ],
-          }}>
-          <View
-            style={[
-              styles.button,
-              {backgroundColor: props.color ? props.color : '#7FBC8C'},
-            ]}>
+            transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
+          }}
+        >
+          <View style={[styles.button, { backgroundColor: props.color ? props.color : '#7FBC8C' }]}>
             <Animated.View
-              style={[
-                {transform: [{rotate: rotation}]},
-                {padding: props.text ? 0 : 10},
-              ]}>
+              style={[{ transform: [{ rotate: rotation }] }, { padding: props.text ? 0 : 10 }]}
+            >
               <Icon
                 name={props.iconName ? props.iconName : 'check'}
                 size={props.iconSize ? props.iconSize : 25}
@@ -125,7 +108,7 @@ export default function BrutalButton(props: Props) {
         </Animated.View>
       </View>
     </TouchableOpacity>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -150,4 +133,4 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#7FBC8C',
   },
-});
+})

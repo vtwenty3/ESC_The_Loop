@@ -1,26 +1,19 @@
-import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-} from 'react-native';
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native'
 
 type Props = {
-  name: string;
-  packageName: string;
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-};
+  name: string
+  packageName: string
+  visible: boolean
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>
+}
 
 export const ModalExpired = (props: Props) => {
-  const [code, setCode] = useState<string>(''); // usage limit timer in minutes
+  const [code, setCode] = useState<string>('') // usage limit timer in minutes
   //const [timers, setTimers] = useState<Timers>({});
   function handleClose() {
-    props.setVisible(false);
-    setCode('');
+    props.setVisible(false)
+    setCode('')
   }
 
   return (
@@ -30,8 +23,9 @@ export const ModalExpired = (props: Props) => {
         visible={true}
         transparent={true}
         onRequestClose={() => {
-          handleClose();
-        }}>
+          handleClose()
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
@@ -52,14 +46,16 @@ export const ModalExpired = (props: Props) => {
               <TouchableOpacity
                 style={[styles.button, styles.buttonOpen]}
                 onPress={() => {
-                  setCode(code);
+                  setCode(code)
                   //handleClose();
-                }}>
+                }}
+              >
                 <Text style={styles.textStyle}>Submit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.buttonClose]}
-                onPress={() => handleClose()}>
+                onPress={() => handleClose()}
+              >
                 <Text style={styles.textStyle}>Close</Text>
               </TouchableOpacity>
             </View>
@@ -67,8 +63,8 @@ export const ModalExpired = (props: Props) => {
         </View>
       </Modal>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -133,6 +129,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
   },
-});
+})
 
-export default ModalExpired;
+export default ModalExpired
