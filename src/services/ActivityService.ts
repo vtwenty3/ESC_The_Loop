@@ -30,17 +30,17 @@ export async function handleTimerExpired(localTimers: Timers, currentActivity: s
 }
 
 // Handle timer decrease
-export async function handleTimerDecrease(
-  i: number,
-
-  localTimers: Timers,
-  currentActivity: string,
-  delay: number
-) {
-  console.log('Runned -> ', i)
+export async function handleTimerDecrease(localTimers: Timers, currentActivity: string, delay: number) {
   console.log('activity -> ', currentActivity)
-
   localTimers[currentActivity].timeLeft! -= delay / 1000
   await localStorage.setTimers(localTimers)
   console.log(` [Timer left]: ${localTimers[currentActivity].timeLeft} seconds`)
+}
+
+export async function trackedTimerHandler(trackedTimers: Timers, currentActivity: string, sleepDuration: number) {
+  if (trackedTimers[currentActivity].timeLeft! > 0) {
+    await handleTimerDecrease(trackedTimers, currentActivity, sleepDuration)
+  } else {
+    await handleTimerExpired(trackedTimers, currentActivity)
+  }
 }

@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  NativeModules,
-  AppState,
-  AppStateStatus,
-  Linking,
-} from 'react-native'
+import { View, StyleSheet, FlatList, NativeModules, AppState, AppStateStatus, Linking } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native'
 import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import notifee, { EventType } from '@notifee/react-native'
+import { differenceInSeconds, isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date-fns'
 
 import { globalStyles } from '../globalStyles'
 
@@ -27,9 +20,6 @@ import * as localStorage from '../services/LocalStorage'
 import * as activityService from '../services/ActivityService'
 import * as notifications from '../services/Notifications'
 
-import { getTimers } from '../services/LocalStorage'
-
-const LOCAL_STORAGE_TIMERS = '@local'
 const { UsageLog } = NativeModules as {
   UsageLog: {
     currentActivity: () => Promise<string>
@@ -69,50 +59,69 @@ const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => 
 
 async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
   let userAlerted = false
-  console.log(BackgroundService.isRunning(), backgroundTaskParams.delay)
+  let nextResetTime = getNextResetTime()
+  let iterationCount = 0
+  console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams.delay)
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
-    const currentActivity = await activityService.fetchCurrentActivity()
-    const trackedTimers = await localStorage.getTimers() // Fetch the latest timers from storage
+    if (iterationCount >= 2) {
+      const now = new Date()
+      console.log('Time now:', now)
+      console.log('Reset Time:', nextResetTime)
 
+      // Check if it's time to reset timers
+      if (isAfter(now, nextResetTime)) {
+        console.log('Trying to reset:', now)
+        await localStorage.resetTimers()
+        nextResetTime = getNextResetTime() // Set next reset time for the following day
+      }
+
+      iterationCount = 0 // Reset the counter
+    }
+    iterationCount++
+
+    const currentActivity = await activityService.fetchCurrentActivity()
     if (currentActivity === 'Screen Off!') {
-      console.log('Run -> ', i, 'Current activity:', currentActivity)
       await sleep(backgroundTaskParams.screenOffDelay)
+      console.log('Screen Off. Waiting:', backgroundTaskParams.screenOffDelay)
     } else {
-      //Screen On
+      const trackedTimers = await localStorage.getTimers() // Fetch the latest timers from storage
       if (currentActivity in trackedTimers) {
-        if (trackedTimers[currentActivity].timeLeft! > 0) {
-          await activityService.handleTimerDecrease(
-            i,
-            trackedTimers,
-            currentActivity,
-            backgroundTaskParams.delay
-          )
-          if (!userAlerted) {
-            await notifications.timeLeft(trackedTimers[currentActivity].timeLeft!)
-            userAlerted = true
-          }
-        } else {
-          await activityService.handleTimerExpired(trackedTimers, currentActivity)
+        await activityService.trackedTimerHandler(trackedTimers, currentActivity, backgroundTaskParams.delay)
+        if (!userAlerted) {
+          await notifications.timeLeft(trackedTimers[currentActivity].timeLeft!)
+          userAlerted = true
         }
       } else {
         // currentActivity NOT in localTimers
+        // find a way to remove this notification
         await BackgroundService.updateNotification({
           taskTitle: 'ESC The Loop',
           taskDesc: 'Current task is not timed.',
           progressBar: undefined,
         })
       }
+      // console.log('Current Activity:', currentActivity)
       await sleep(backgroundTaskParams.delay)
-      console.log('Run -> ', i, 'times', 'current activity:', currentActivity)
     }
   }
+}
+
+function getNextResetTime() {
+  const now = new Date()
+  let resetTime = setHours(setMinutes(setSeconds(now, 0), 35), 23) // Set to today's 11:25 PM
+  if (isAfter(now, resetTime)) {
+    resetTime = startOfTomorrow() // If it's past today's 12 AM, set to tomorrow's 12 AM
+  }
+  console.log('Next reset time:', resetTime)
+
+  return resetTime
 }
 
 export function Usage() {
   const [data, setData] = useState<AppUsageData[] | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
-  const [timers, setTimers] = useState<Timers>({})
+  const [timersRN, setTimersRN] = useState<Timers>({})
   const [modalAppName, setModalAppName] = useState('')
   const [modalPackageName, setModalPackageName] = useState('')
   const [rotate, setRotate] = useState(false)
@@ -143,49 +152,33 @@ export function Usage() {
   useEffect(() => {
     const loadTimers = async () => {
       const loadedTimers = await localStorage.getTimers()
-      setTimers(loadedTimers)
+      setTimersRN(loadedTimers)
     }
     loadTimers()
   }, [])
 
   useEffect(() => {
     const updateTimers = async () => {
-      await localStorage.setTimers(timers)
+      await localStorage.setTimers(timersRN)
     }
     updateTimers()
-  }, [timers])
+  }, [timersRN])
 
   async function resetTimers() {
-    const localTimers = await localStorage.getTimers()
-    if (localTimers !== null && Object.keys(localTimers).length > 0) {
-      const updatedTimers = { ...localTimers }
-      console.log('[resetTimers]: Timers before reset: ', updatedTimers)
-      for (const key in updatedTimers) {
-        updatedTimers[key].timeLeft = updatedTimers[key].timeSet
-      }
-      console.log('Updated Timers: ', updatedTimers)
-      await AsyncStorage.setItem(LOCAL_STORAGE_TIMERS, JSON.stringify(updatedTimers))
-      await initTimerState()
-    } else {
-      console.log('[resetTimers]: Local data empty! ')
-    }
+    await localStorage.resetTimers()
+    await initTimerState()
   }
 
   async function initTimerState(): Promise<void> {
-    const localTimers = await getTimers()
+    const localTimers = await localStorage.getTimers()
     if (localTimers !== null && Object.keys(localTimers).length > 0) {
-      setTimers(localTimers)
+      setTimersRN(localTimers)
       console.log('[initTimerState]:localTimers Found!')
     } else {
+      setTimersRN({})
       console.log('[initTimerState]:localTimers empty! ')
     }
   }
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     localStorage.initTimerState()
-  //   }, [])
-  // )
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
     console.log('[handleAppStateChange]')
@@ -265,13 +258,7 @@ export function Usage() {
             <View style={[globalStyles.body]}>
               <View style={styles.buttonsContainer}>
                 <View style={styles.brutalButton}>
-                  <BrutalButton
-                    text="Background"
-                    iconName="sync"
-                    color="#FF6B6B"
-                    rotate={rotate}
-                    onPress={toggleBackground}
-                  />
+                  <BrutalButton text="Background" iconName="sync" color="#FF6B6B" rotate={rotate} onPress={toggleBackground} />
                 </View>
                 <View style={styles.brutalButton}>
                   <BrutalButton iconName="timer-sand" text="Reset Timers" onPress={resetTimers} />
@@ -282,13 +269,7 @@ export function Usage() {
                 contentContainerStyle={{ paddingTop: 45, gap: 10 }}
                 keyExtractor={(item) => item.appName}
                 renderItem={({ item }) => (
-                  <UsageElement
-                    onOpenModal={handleOpenModal}
-                    timers={timers}
-                    setTimers={setTimers}
-                    item={item}
-                    modalVisible={modalVisible}
-                  />
+                  <UsageElement onOpenModal={handleOpenModal} timers={timersRN} item={item} modalVisible={modalVisible} />
                 )}
               />
               <ModalSetTimer
@@ -296,8 +277,8 @@ export function Usage() {
                 visible={modalVisible}
                 name={modalAppName}
                 packageName={modalPackageName}
-                setTimers={setTimers}
-                timers={timers}
+                setTimers={setTimersRN}
+                timers={timersRN}
               />
             </View>
           </View>

@@ -1,54 +1,48 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Animated,
-  Image,
-  Vibration,
-} from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
+import React, { useRef, useState, useEffect } from 'react'
 interface Timers {
-  [key: string]: {timeLeft?: number; timeSet?: number};
+  [key: string]: { timeLeft?: number; timeSet?: number }
 }
 type Props = {
   item: {
-    packageName: string;
-    appName: string;
-    usageTimeSeconds: number;
-    usageTimeMinutes: number;
-    iconBase64: string;
-  };
-
-  setTimers: React.Dispatch<React.SetStateAction<Timers>>;
-  timers: Timers;
-  modalVisible: boolean;
-  onOpenModal: (appName: string, packageName: string) => void;
-};
+    packageName: string
+    appName: string
+    usageTimeSeconds: number
+    usageTimeMinutes: number
+    iconBase64: string
+  }
+  timers: Timers
+  modalVisible: boolean
+  onOpenModal: (appName: string, packageName: string) => void
+}
 export default function UsageElement(props: Props) {
-  const [shadow, setShadow] = useState(-5);
-  const [barColor, setBarColor] = useState('');
-  const [isPressed, setIsPressed] = useState(false);
-  const animatedValueTask = useRef(
-    new Animated.Value(isPressed ? 0 : shadow),
-  ).current;
+  const [shadow, setShadow] = useState(-5)
+  const [isPressed, setIsPressed] = useState(false)
+  const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
+  const calculateUsagePercentageOld = () => {
+    const usageTime = props.item.usageTimeSeconds || 0
+    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0
+    const totalTime = usageTime + timeLeft
+    const percentage = (usageTime / totalTime) * 100
+    return percentage
+  }
+
   const calculateUsagePercentage = () => {
-    const usageTime = props.item.usageTimeSeconds || 0;
-    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0;
-    const totalTime = usageTime + timeLeft;
-    const percentage = (usageTime / totalTime) * 100;
-    return percentage;
-  };
+    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0
+    const timeSet = props.timers[props.item.packageName]?.timeSet || 0
+    const percentage = 100 - Math.round((timeLeft / timeSet) * 100) || 0
+    return 100 - percentage
+  }
 
   useEffect(() => {
-    if (props.modalVisible == false && isPressed == true) {
-      handlePressOut();
+    if (!props.modalVisible && isPressed) {
+      handlePressOut()
     }
-  }, [props.modalVisible]);
+  }, [props.modalVisible])
 
   const handlePressIn = () => {
-    Vibration.vibrate(11);
-    setIsPressed(true);
+    Vibration.vibrate(11)
+    setIsPressed(true)
     Animated.spring(animatedValueTask, {
       toValue: 0,
       stiffness: 170,
@@ -57,14 +51,14 @@ export default function UsageElement(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handlePressOut = () => {
-    setIsPressed(false);
+    setIsPressed(false)
     setTimeout(() => {
-      Vibration.vibrate(10);
-    }, 800);
+      Vibration.vibrate(10)
+    }, 800)
     Animated.spring(animatedValueTask, {
       toValue: shadow,
       delay: 800,
@@ -74,35 +68,30 @@ export default function UsageElement(props: Props) {
       restSpeedThreshold: 0.2,
       restDisplacementThreshold: 0.2,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   return (
-    <View
-      style={[
-        styles.UsageWrapper,
-        {paddingTop: -shadow, paddingLeft: -shadow},
-      ]}>
+    <View style={[styles.UsageWrapper, { paddingTop: -shadow, paddingLeft: -shadow }]}>
       <TouchableOpacity
         activeOpacity={1}
         onPressIn={handlePressIn}
         // onPressOut={handlePressOut}
         onPress={() => {
-          props.onOpenModal(props.item.appName, props.item.packageName);
-        }}>
+          props.onOpenModal(props.item.appName, props.item.packageName)
+        }}
+      >
         <View style={styles.usageShadow}>
           <Animated.View
             style={[
               styles.usageChildrenWrapper,
               {
-                transform: [
-                  {translateX: animatedValueTask},
-                  {translateY: animatedValueTask},
-                ],
+                transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
               },
-            ]}>
+            ]}
+          >
             <Image
-              source={{uri: `data:image/png;base64,${props.item.iconBase64}`}} //important to add the data:image/png;base64, part
+              source={{ uri: `data:image/png;base64,${props.item.iconBase64}` }} //important to add the data:image/png;base64, part
               style={styles.image}
             />
             <View style={styles.textAndBarWrapper}>
@@ -112,15 +101,14 @@ export default function UsageElement(props: Props) {
                   alignContent: 'center',
                   justifyContent: 'space-between',
                   paddingRight: 5,
-                }}>
+                }}
+              >
                 <Text style={styles.appName}>{props.item.appName}</Text>
               </View>
               <View style={styles.usageBarWrapper}>
                 <View style={[styles.usageBar]}>
                   <View style={styles.usageTextWrapper}>
-                    <Text style={styles.usageText}>
-                      Used: {props.item.usageTimeSeconds}s
-                    </Text>
+                    <Text style={styles.usageText}>Used: {props.item.usageTimeSeconds}s</Text>
                     {props.timers[props.item.packageName]?.timeLeft == null ? (
                       ''
                     ) : (
@@ -130,12 +118,7 @@ export default function UsageElement(props: Props) {
                       </Text>
                     )}
                   </View>
-                  <View
-                    style={[
-                      styles.usageBarFill,
-                      {width: `${calculateUsagePercentage()}%`},
-                    ]}
-                  />
+                  <View style={[styles.usageBarFill, { width: `${calculateUsagePercentage()}%` }]} />
                 </View>
               </View>
             </View>
@@ -143,7 +126,7 @@ export default function UsageElement(props: Props) {
         </View>
       </TouchableOpacity>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -231,7 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
   },
-});
+})
 
 {
   /* <View style={styles.appContainerText}>

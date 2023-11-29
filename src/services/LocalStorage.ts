@@ -28,6 +28,36 @@ export async function setTimers(timers: Timers) {
   }
 }
 
+export async function resetTimers() {
+  const localTimers = await getTimers()
+  if (localTimers !== null && Object.keys(localTimers).length > 0) {
+    const updatedTimers = { ...localTimers }
+    console.log('[resetTimers]: Timers before reset: ', updatedTimers)
+    for (const key in updatedTimers) {
+      updatedTimers[key].timeLeft = updatedTimers[key].timeSet
+    }
+    console.log('Updated Timers: ', updatedTimers)
+    await setTimers(updatedTimers)
+  } else {
+    console.log('[resetTimers]: Local data empty! ')
+  }
+}
+
+export async function deleteTimers() {
+  try {
+    await AsyncStorage.clear()
+    const keys = [LOCAL_STORAGE_TIMERS]
+    try {
+      await AsyncStorage.multiRemove(keys)
+    } catch (e) {
+      // remove error
+    }
+    console.log('Done')
+  } catch (e) {
+    console.log('Erorr: ', e)
+  }
+}
+
 export async function deleteNotes() {
   try {
     await AsyncStorage.clear()
@@ -47,21 +77,6 @@ export async function deleteTasks() {
   try {
     await AsyncStorage.clear()
     const keys = [LOCAL_STORAGE_TASKS]
-    try {
-      await AsyncStorage.multiRemove(keys)
-    } catch (e) {
-      // remove error
-    }
-    console.log('Done')
-  } catch (e) {
-    console.log('Erorr: ', e)
-  }
-}
-
-export async function deleteTimers() {
-  try {
-    await AsyncStorage.clear()
-    const keys = [LOCAL_STORAGE_TIMERS]
     try {
       await AsyncStorage.multiRemove(keys)
     } catch (e) {
