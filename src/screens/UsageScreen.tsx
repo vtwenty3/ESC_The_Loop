@@ -27,6 +27,14 @@ const { UsageLog } = NativeModules as {
   }
 }
 
+type AppUsageData = {
+  appName: string
+  iconBase64: string
+  packageName: string
+  usageTimeMinutes: number
+  usageTimeSeconds: number
+}
+
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
@@ -38,7 +46,7 @@ type BackgroundTaskParams = {
 }
 
 const options = {
-  taskName: 'Background Service',
+  taskName: 'ESC The Loop Background Service',
   taskTitle: 'ESC The Loop',
   taskDesc: 'Current task is not timed.',
 
@@ -64,18 +72,15 @@ async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
   console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams.delay)
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
-    if (iterationCount >= 2) {
+    if (iterationCount >= 10) {
       const now = new Date()
-      console.log('Time now:', now)
-      console.log('Reset Time:', nextResetTime)
-
-      // Check if it's time to reset timers
+      // console.log(`[Time now]   : ${now.getHours()}:${now.getMinutes()} ${now.getSeconds()}s`)
+      // console.log(`[Reset Time] : ${nextResetTime.getHours()}:${nextResetTime.getMinutes()} ${nextResetTime.getSeconds()}s`)
       if (isAfter(now, nextResetTime)) {
-        console.log('Trying to reset:', now)
+        // console.log(`[RESETTING...] :  ${now.getHours()}:${now.getMinutes()} ${now.getSeconds()}s`)
         await localStorage.resetTimers()
         nextResetTime = getNextResetTime() // Set next reset time for the following day
       }
-
       iterationCount = 0 // Reset the counter
     }
     iterationCount++
@@ -113,8 +118,7 @@ function getNextResetTime() {
   if (isAfter(now, resetTime)) {
     resetTime = startOfTomorrow() // If it's past today's 12 AM, set to tomorrow's 12 AM
   }
-  console.log('Next reset time:', resetTime)
-
+  console.log('[Next reset time]:', resetTime)
   return resetTime
 }
 
@@ -126,14 +130,6 @@ export function Usage() {
   const [modalPackageName, setModalPackageName] = useState('')
   const [rotate, setRotate] = useState(false)
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState)
-
-  type AppUsageData = {
-    appName: string
-    iconBase64: string
-    packageName: string
-    usageTimeMinutes: number
-    usageTimeSeconds: number
-  }
 
   //Gets the usage data from the native module on app open
   useEffect(() => {
