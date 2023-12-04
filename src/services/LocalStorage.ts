@@ -4,9 +4,36 @@ interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
 
+export type BackgroundTaskParams = {
+  delay: number
+  screenOffDelay: number
+  timerExpiredDelay: number
+}
+
 const LOCAL_STORAGE_TIMERS = '@local_timers'
 const LOCAL_STORAGE_NOTES = '@local_notes'
 const LOCAL_STORAGE_TASKS = '@local_tasks'
+const LOCAL_STORAGE_ACTIVITY_PARAMS = '@local_params'
+
+export async function getParams(): Promise<BackgroundTaskParams | null> {
+  try {
+    const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_ACTIVITY_PARAMS)
+    console.log('[LocalStorage.getParams]: called.')
+    return jsonValue != null ? JSON.parse(jsonValue) : null
+  } catch (e) {
+    console.log('Error fetching timers from storage; Details:', e)
+    return null
+  }
+}
+
+export async function setParams(params: BackgroundTaskParams) {
+  try {
+    await AsyncStorage.setItem(LOCAL_STORAGE_ACTIVITY_PARAMS, JSON.stringify(params))
+    console.log('[LocalStorage.setParams] called.')
+  } catch (e) {
+    console.log('error saving timers to storage; Details:', e)
+  }
+}
 
 export async function getTimers(): Promise<Timers> {
   try {

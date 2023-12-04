@@ -6,7 +6,7 @@ import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import notifee, { EventType } from '@notifee/react-native'
 import { differenceInSeconds, isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date-fns'
-
+import { BackgroundTaskParams } from '../services/LocalStorage'
 import { globalStyles } from '../globalStyles'
 
 import { ModalSetTimer } from '../components/ModalSetTimer'
@@ -37,12 +37,6 @@ type AppUsageData = {
 
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
-}
-
-type BackgroundTaskParams = {
-  delay: number
-  screenOffDelay: number
-  timerExpiredDelay: number
 }
 
 const options = {
@@ -190,10 +184,26 @@ export function Usage() {
     setAppState(nextAppState)
   }
 
+  async function initParams() {
+    const defaultParams: BackgroundTaskParams = {
+      delay: 2000,
+      screenOffDelay: 10000,
+      timerExpiredDelay: 10000,
+    }
+    const params = await localStorage.getParams()
+    if (options) {
+      console.log('[initParams] returning custom')
+      return params
+    }
+    console.log('[initParams] returning default')
+    return defaultParams
+  }
+
   const toggleBackground = async () => {
     if (!BackgroundService.isRunning()) {
       try {
         console.log('Trying to start background service')
+        const params = await initParams()
         await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), options)
         setRotate(true)
         console.log('Successful start!')
