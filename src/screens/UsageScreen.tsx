@@ -39,30 +39,13 @@ interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
 
-const options = {
-  taskName: 'ESC The Loop Background Service',
-  taskTitle: 'ESC The Loop',
-  taskDesc: 'Current task is not timed.',
-
-  taskIcon: {
-    name: 'ic_launcher',
-    type: 'mipmap',
-  },
-
-  linkingURI: 'escapetheloop://',
-
-  parameters: {
-    delay: 2000,
-    screenOffDelay: 10000,
-    timerExpiredDelay: 10000,
-  },
-}
 const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), time))
 
-async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
+export async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
   let userAlerted = false
   let nextResetTime = getNextResetTime()
   let iterationCount = 0
+
   console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams.delay)
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
@@ -100,7 +83,7 @@ async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
           progressBar: undefined,
         })
       }
-      // console.log('Current Activity:', currentActivity)
+      console.log('Current Activity:', currentActivity)
       await sleep(backgroundTaskParams.delay)
     }
   }
@@ -144,6 +127,7 @@ export function Usage() {
       const loadedTimers = await localStorage.getTimers()
       setTimersRN(loadedTimers)
     }
+
     loadTimers()
   }, [])
 
@@ -184,27 +168,24 @@ export function Usage() {
     setAppState(nextAppState)
   }
 
-  async function initParams() {
-    const defaultParams: BackgroundTaskParams = {
-      delay: 2000,
-      screenOffDelay: 10000,
-      timerExpiredDelay: 10000,
-    }
-    const params = await localStorage.getParams()
-    if (options) {
-      console.log('[initParams] returning custom')
-      return params
-    }
-    console.log('[initParams] returning default')
-    return defaultParams
-  }
+  // async function initParams() {
+  //   const params = await localStorage.getParams()
+  //   if (params) {
+  //     options.parameters = params
+  //     console.log('[initParams]  custom')
+  //     // return params
+  //   } else {
+  //     console.log('[initParams]  default')
+  //   }
+  //   // return defaultParams
+  // }
 
   const toggleBackground = async () => {
     if (!BackgroundService.isRunning()) {
       try {
         console.log('Trying to start background service')
-        const params = await initParams()
-        await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), options)
+        const options = await localStorage.getOptions()
+        await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), options!)
         setRotate(true)
         console.log('Successful start!')
       } catch (e) {

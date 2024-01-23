@@ -14,6 +14,68 @@ const LOCAL_STORAGE_TIMERS = '@local_timers'
 const LOCAL_STORAGE_NOTES = '@local_notes'
 const LOCAL_STORAGE_TASKS = '@local_tasks'
 const LOCAL_STORAGE_ACTIVITY_PARAMS = '@local_params'
+const LOCAL_STORAGE_OPTIONS = '@local_options'
+
+type Options = {
+  taskName: string
+  taskTitle: string
+  taskDesc: string
+
+  taskIcon: {
+    name: string
+    type: string
+  }
+
+  linkingURI: string
+
+  parameters: {
+    delay: number
+    screenOffDelay: number
+    timerExpiredDelay: number
+  }
+}
+
+const defaultOptions: Options = {
+  taskName: 'ESC The Loop Background Service',
+  taskTitle: 'ESC The Loop',
+  taskDesc: 'Current task is not timed.',
+
+  taskIcon: {
+    name: 'ic_launcher',
+    type: 'mipmap',
+  },
+
+  linkingURI: 'escapetheloop://',
+
+  parameters: {
+    delay: 2000,
+    screenOffDelay: 10000,
+    timerExpiredDelay: 10000,
+  },
+}
+
+export async function getOptions(): Promise<Options> {
+  try {
+    const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_OPTIONS)
+    console.log('[LocalStorage.getOptions]: called.')
+    if (jsonValue != null) {
+      return JSON.parse(jsonValue)
+    }
+    return defaultOptions
+  } catch (e) {
+    console.log('Error fetching timers from storage; Details:', e)
+    return defaultOptions
+  }
+}
+
+export async function setOptions(options: any) {
+  try {
+    await AsyncStorage.setItem(LOCAL_STORAGE_OPTIONS, JSON.stringify(options))
+    console.log('[LocalStorage.setOptions] called.')
+  } catch (e) {
+    console.log('error saving timers to storage; Details:', e)
+  }
+}
 
 export async function getParams(): Promise<BackgroundTaskParams | null> {
   try {
