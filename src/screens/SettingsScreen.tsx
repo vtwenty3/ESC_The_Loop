@@ -8,72 +8,105 @@ import * as localStorage from '../services/LocalStorage'
 // import Slider from '@react-native-community/slider'
 // import Slider from '@react-native-community/slider'
 import { Slider } from '@miblanchard/react-native-slider'
+import * as activityService from '../services/ActivityService'
+import { useFocusEffect } from '@react-navigation/native'
+import { Options } from '../types'
+
 import BackgroundService from 'react-native-background-actions'
-import { backgroundTimerTask } from './UsageScreen'
-//TODO: Move the reset timers from USageSCreen to here
-// When everything is moved from USage Screen clean it up
-// Then refactor the code below so we modify the options directly setting the
-// params so we can set pooling rate and escape rate and reflect it - e.g.
-// we need to restart the background in order for the new options to take effect
-// also think about unifying the names  - pooling rate and delay; screenOffDelay and escape rate..
-// Add the state to local storage and use local storage for the params.
+import { backgroundTimerTask } from '../services/ActivityService'
 
 export function Settings() {
-  const [poolingRate, setPoolinRate] = useState<number>(4)
-  const [escapeRate, setEscapeRate] = useState<number>(8)
+  const [poolingRate, setPoolingRate] = useState<number>(1)
+  const [escapeRate, setEscapeRate] = useState<number>(4)
   const [rotate, setRotate] = useState(false)
+  const [customOptions, setCustomOptions] = useState<Options | null>(null)
+  const [restartGuard, setRestartGuard] = useState(true)
+  function handleRotate() {
+    if (BackgroundService.isRunning()) {
+      setRotate(true)
+    } else {
+      setRotate(false)
+    }
+  }
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('[Settings Screen]')
+      setRestartGuard(true)
+      handleRotate()
+      async function loadOptions() {
+        //TODO: We need to set the pooling rate and escape but without nessesary restarting the service
+        // we want to restart the service only when we change these settings.
+        // if we havent changed these settings we there is not reason to restart
+        // think about that and see if we actually need to implement this, as its Nice to have, but would it effect the usage? possibly not..?
+        //also just for the cool factor find a way to manage the handlerotate function properly, somehow hook the state of the backround to the rorating background
+
+        const optionsReturned = await localStorage.getOptions()
+        setCustomOptions(optionsReturned)
+        setPoolingRate(optionsReturned.parameters.delay / 1000)
+        setEscapeRate(optionsReturned.parameters.timerExpiredDelay / 1000)
+      }
+      loadOptions()
+    }, [])
+  )
+
+  useEffect(() => {
+    if (!restartGuard) {
+      console.log('restart guard:', restartGuard)
+      customOptions && localStorage.setOptions(customOptions)
+      if (BackgroundService.isRunning()) {
+        console.log('use effect, background running, we try to stop it:')
+        activityService.toggleBackground()
+      }
+      setTimeout(() => {
+        console.log('use effect, timeout we try to start it:')
+        if (!BackgroundService.isRunning()) {
+          activityService.toggleBackground()
+        }
+      }, 4000)
+    }
+
+    return () => {
+      handleRotate()
+      setRestartGuard(true)
+    }
+  }, [customOptions])
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      console.log(`Pooling rate: ${poolingRate}, escapeRate:${escapeRate}`)
+      setRestartGuard(false)
+      setCustomOptions((prevOptions) => {
+        if (!prevOptions) return null
+        return {
+          ...prevOptions, // Spread the previous options to maintain other properties
+          parameters: {
+            ...prevOptions.parameters, // Spread the previous parameters to maintain other properties
+            delay: poolingRate * 1000, // Update the delay property
+          },
+        }
+      })
+    }, 700)
+    return () => {
+      clearTimeout(debounceTimer)
+    }
+  }, [poolingRate, escapeRate])
 
   function updatePoolingRate(value: number) {
     if (escapeRate < poolingRate) {
       setEscapeRate(poolingRate)
     }
-    setPoolinRate(value)
-  }
-  //debounce, executes only if pooling rate hasnt changd for 1s
-
-  // async function initParams() {
-  //   const params = await localStorage.getParams()
-  //   if (params) {
-  //     localStorage.options.parameters = params
-  //     console.log('[initParams]  custom')
-  //     // return params
-  //   } else {
-  //     console.log('[initParams]  default')
-  //   }
-  //   // return defaultParams
-  // }
-  const toggleBackground = async () => {
-    if (!BackgroundService.isRunning()) {
-      try {
-        console.log('Trying to start background service')
-        const options = await localStorage.getOptions()
-        await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), options!)
-        setRotate(true)
-        console.log('Successful start!')
-      } catch (e) {
-        console.log('Error', e)
-      }
-    } else {
-      try {
-        console.log('Stop background service')
-        await BackgroundService.stop()
-        setRotate(false)
-      } catch (e) {
-        console.log('Error', e)
-      }
-    }
+    setPoolingRate(value)
   }
 
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      console.log(`Pooling rate changed to: ${poolingRate}`)
-      localStorage.setParams({ delay: poolingRate * 1000, screenOffDelay: 2, timerExpiredDelay: escapeRate * 1000 })
-    }, 1000)
+  async function onToggleBackground() {
+    const backgroundState = await activityService.toggleBackground()
+    setRotate(backgroundState)
+  }
 
-    return () => {
-      clearTimeout(debounceTimer)
-    }
-  }, [poolingRate, escapeRate])
+  async function onResetTimers() {
+    await localStorage.resetTimers()
+  }
 
   return (
     <View style={[globalStyles.root]}>
@@ -86,10 +119,10 @@ export function Settings() {
       <View style={styles.body}>
         <View style={styles.buttonsContainer}>
           <View style={styles.brutalButton}>
-            <BrutalButton text="Background" iconName="sync" color="#FF6B6B" rotate={rotate} onPress={toggleBackground} />
+            <BrutalButton text="Background" iconName="sync" color="#FF6B6B" rotate={rotate} onPress={onToggleBackground} />
           </View>
           <View style={styles.brutalButton}>
-            <BrutalButton iconName="timer-sand" text="Reset Timers" onPress={() => console.log('you gotta move reset timers')} />
+            <BrutalButton iconName="timer-sand" text="Reset Timers" onPress={onResetTimers} />
           </View>
         </View>
 
@@ -108,7 +141,7 @@ export function Settings() {
           animateTransitions
           minimumTrackTintColor="black"
           onSlidingComplete={(value) => updatePoolingRate(value[0])}
-          onValueChange={(value) => setPoolinRate(value[0])}
+          onValueChange={(value) => setPoolingRate(value[0])}
           thumbStyle={styles.thumb}
           trackStyle={styles.track}
           value={poolingRate}
