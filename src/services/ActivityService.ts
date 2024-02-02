@@ -39,7 +39,7 @@ export async function handleTimerDecrease(localTimers: Timers, currentActivity: 
   debugLogs && console.log('activity -> ', currentActivity)
   localTimers[currentActivity].timeLeft! -= delay / 1000
   await localStorage.setTimers(localTimers)
-  debugLogs && console.log(` [Timer left]: ${localTimers[currentActivity].timeLeft} seconds`)
+  debugLogs && console.log(` [Timer left]: ${localTimers[currentActivity].timeLeft} seconds, decreased with: ${delay / 1000}s`)
 }
 
 export async function trackedTimerHandler(trackedTimers: Timers, currentActivity: string, sleepDuration: number) {
@@ -52,16 +52,24 @@ export async function trackedTimerHandler(trackedTimers: Timers, currentActivity
 
 const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), time))
 
-export async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskParams) {
+export async function backgroundTimerTask(
+  index: number,
+  backgroundTaskParams?: { delay: number; screenOffDelay: number; timerExpiredDelay: number }
+): Promise<void> {
   let userAlerted = false
   let nextResetTime = getNextResetTime()
   let iterationCount = 0
   const optionss = await localStorage.getOptions()
-  debugLogs && console.log('local background options:', optionss)
-  debugLogs && console.log('background task params:', backgroundTaskParams)
-  debugLogs && console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams.delay)
+  debugLogs && console.log('\n \n local background options:  ', optionss)
+  debugLogs && console.log('\n \n background task params:  ', backgroundTaskParams)
+  debugLogs && console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams!.delay)
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
+    if (index !== iteration) {
+      console.log('--------------------------------------GOT IT-------------------------------------------------', { index, iteration })
+      return
+    }
+
     if (iterationCount >= 10) {
       const now = new Date()
       debugLogs && console.log(`[Time now]   : ${now.getHours()}:${now.getMinutes()} ${now.getSeconds()}s`)
@@ -77,12 +85,12 @@ export async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskPa
 
     const currentActivity = await fetchCurrentActivity()
     if (currentActivity === 'Screen Off!') {
-      await sleep(backgroundTaskParams.screenOffDelay)
-      debugLogs && console.log('Screen Off. Waiting:', backgroundTaskParams.screenOffDelay)
+      await sleep(backgroundTaskParams!.screenOffDelay)
+      debugLogs && console.log('Screen Off. Waiting:', backgroundTaskParams!.screenOffDelay)
     } else {
       const trackedTimers = await localStorage.getTimers() // Fetch the latest timers from storage
       if (currentActivity in trackedTimers) {
-        await trackedTimerHandler(trackedTimers, currentActivity, backgroundTaskParams.delay)
+        await trackedTimerHandler(trackedTimers, currentActivity, backgroundTaskParams!.delay)
         if (!userAlerted) {
           await notifications.timeLeft(trackedTimers[currentActivity].timeLeft!)
           userAlerted = true
@@ -97,10 +105,12 @@ export async function backgroundTimerTask(backgroundTaskParams: BackgroundTaskPa
         })
       }
       debugLogs && console.log('Current Activity:', currentActivity)
-      await sleep(backgroundTaskParams.delay)
+      await sleep(backgroundTaskParams!.delay)
     }
   }
 }
+
+//all the changes happened today 01/02 so you can revert back to the end of yesterday if its foked
 
 function getNextResetTime() {
   const now = new Date()
@@ -111,13 +121,21 @@ function getNextResetTime() {
   debugLogs && console.log('[Next reset time]:', resetTime)
   return resetTime
 }
+export let iteration = 0
 
 export async function toggleBackground() {
   if (!BackgroundService.isRunning()) {
     try {
-      debugLogs && console.log('Trying to start background service')
+      iteration++
       const localOptions = await localStorage.getOptions()
-      await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), localOptions)
+
+      // Use an arrow function to capture the current iteration and pass it along with taskData
+      await BackgroundService.start(backgroundTimerTask.bind(null, iteration), localOptions)
+
+      // iteration++
+      // debugLogs && console.log('Trying to start background service')
+      // // const localOptions = await localStorage.getOptions()
+      // await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), localOptions)
 
       debugLogs && console.log('Successful start!')
     } catch (e) {
