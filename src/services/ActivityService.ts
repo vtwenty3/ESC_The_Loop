@@ -1,5 +1,6 @@
 import { NativeModules } from 'react-native'
 import * as localStorage from './LocalStorage'
+import {Parameters, Options} from '../types'
 import * as notifications from './Notifications'
 import { BackgroundTaskParams } from './LocalStorage'
 import BackgroundService from 'react-native-background-actions'
@@ -83,17 +84,24 @@ export async function toggleBackground() {
   }
 }
 
-
-
 export async function backgroundTimerTask(
   index: number,
-  backgroundTaskParams?: { delay: number; screenOffDelay: number; timerExpiredDelay: number }
+  backgroundTaskParams?: Parameters,
+  options?: Options
 ): Promise<void> {
+  if (options !== undefined && options !== null) {
+    backgroundTaskParams = {
+      delay: options.parameters.delay,
+      screenOffDelay: options.parameters.screenOffDelay,
+      timerExpiredDelay: options.parameters.timerExpiredDelay,
+    };
+  }
   let userAlerted = false
   let nextResetTime = getNextResetTime()
   let iterationCount = 0
-  const optionss = await localStorage.getOptions()
-  debugLogs && console.log('\n \n local background options:  ', optionss)
+  const localOptions = await localStorage.getOptions()
+
+  debugLogs && console.log('\n \n local background options:  ', localOptions)
   debugLogs && console.log('\n \n background task params:  ', backgroundTaskParams)
   debugLogs && console.log('Background Service On:', BackgroundService.isRunning(), ' Every: ', backgroundTaskParams!.delay)
 
@@ -130,7 +138,6 @@ export async function backgroundTimerTask(
         }
       } else {
         // currentActivity NOT in localTimers
-        // TODO: find a way to remove this notification
         await BackgroundService.updateNotification({
           taskTitle: 'ESC The Loop',
           taskDesc: 'Current task is not timed.',
@@ -143,7 +150,6 @@ export async function backgroundTimerTask(
   }
 }
 
-//all the changes happened today 01/02 so you can revert back to the end of yesterday if its foked
 
 function getNextResetTime() {
   const now = new Date()

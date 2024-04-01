@@ -36,16 +36,7 @@ export function Settings() {
       setRestartGuard(true)
       handleRotate()
       async function loadOptions() {
-        //TODO: We need to set the pooling rate and escape but without nessesary restarting the service
-        // we want to restart the service only when we change these settings.
-        // if we havent changed these settings we there is not reason to restart
-        // think about that and see if we actually need to implement this, as its Nice to have, but would it effect the usage? possibly not..?
-
-        // also just for the cool factor find a way to manage the handlerotate function properly, somehow hook the state of the backround to the rorating background
-
-        //TODO: bugfix decrease the timer with pooling rate rather than with 2 everytime.
-        // once thats done its time for end to end test it on your device
-
+      //TODO: fix the background rotation or find a way to bind it with the state. Also maybe include Restarting... text somewhere
         const optionsReturned = await localStorage.getOptions()
         setCustomOptions(optionsReturned)
         setPoolingRate(optionsReturned.parameters.delay / 1000)
@@ -58,7 +49,6 @@ export function Settings() {
   useEffect(() => {
     if (!restartGuard) {
       console.log('restart guard:', restartGuard)
-      customOptions && localStorage.setOptions(customOptions)
       if (BackgroundService.isRunning()) {
         console.log('use effect, background running, we try to stop it:')
         activityService.toggleBackground()
@@ -91,6 +81,7 @@ export function Settings() {
           },
         }
       })
+      customOptions && localStorage.setOptions(customOptions)
     }, 700)
     return () => {
       clearTimeout(debounceTimer)

@@ -16,6 +16,9 @@ export type Options = {
     timerExpiredDelay: number
   }
 }
+
+export type Parameters = Options['parameters'];
+
 export type AppUsageData = {
     appName: string
     iconBase64: string
