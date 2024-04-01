@@ -54,6 +54,37 @@ export async function trackedTimerHandler(trackedTimers: Timers, currentActivity
 
 const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), time))
 
+export let iteration = 0;
+
+
+export async function toggleBackground() {
+  if (!BackgroundService.isRunning()) {
+    try {
+      iteration++;
+      const localOptions = await localStorage.getOptions();
+
+      // Start the background service with the current iteration
+      // Bind the iteration to ensure the background task stops correctly if it's outdated
+      await BackgroundService.start(backgroundTimerTask.bind(null, iteration), localOptions);
+
+      if (debugLogs) console.log('Successful start!');
+    } catch (e) {
+      if (debugLogs) console.log('Error', e);
+    }
+    return true;
+  } else {
+    try {
+      if (debugLogs) console.log('Stop background service');
+      await BackgroundService.stop();
+    } catch (e) {
+      if (debugLogs) console.log('Error', e);
+    }
+    return false;
+  }
+}
+
+
+
 export async function backgroundTimerTask(
   index: number,
   backgroundTaskParams?: { delay: number; screenOffDelay: number; timerExpiredDelay: number }
@@ -68,8 +99,8 @@ export async function backgroundTimerTask(
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
     if (index !== iteration) {
-      console.log('--------------------------------------GOT IT-------------------------------------------------', { index, iteration })
-      return
+      console.log('[This should stop the duplicate function] Stopping outdated background task', { index, iteration });
+      return; 
     }
 
     if (iterationCount >= 10) {
@@ -106,7 +137,7 @@ export async function backgroundTimerTask(
           progressBar: undefined,
         })
       }
-      debugLogs && console.log('Current Activity:', currentActivity)
+      debugLogs && console.log('Current Activity:', currentActivity, { index, iteration })
       await sleep(backgroundTaskParams!.delay)
     }
   }
@@ -123,33 +154,4 @@ function getNextResetTime() {
   debugLogs && console.log('[Next reset time]:', resetTime)
   return resetTime
 }
-export let iteration = 0
 
-export async function toggleBackground() {
-  if (!BackgroundService.isRunning()) {
-    try {
-      iteration++
-      const localOptions = await localStorage.getOptions()
-
-      // Use an arrow function to capture the current iteration and pass it along with taskData
-      await BackgroundService.start(backgroundTimerTask.bind(null, iteration), localOptions)
-
-      // iteration++
-      // debugLogs && console.log('Trying to start background service')
-      // // const localOptions = await localStorage.getOptions()
-      // await BackgroundService.start((taskData) => backgroundTimerTask(taskData!), localOptions)
-
-      debugLogs && console.log('Successful start!')
-    } catch (e) {
-      debugLogs && console.log('Error', e)
-    }
-    return true
-  }
-  try {
-    debugLogs && console.log('Stop background service')
-    await BackgroundService.stop()
-  } catch (e) {
-    debugLogs && console.log('Error', e)
-  }
-  return false
-}

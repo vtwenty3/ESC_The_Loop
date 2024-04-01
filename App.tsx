@@ -1,26 +1,26 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import {StyleSheet, View, Dimensions, StatusBar} from 'react-native'
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
-import {NavigationContainer} from '@react-navigation/native'
-import {Tasks} from './src/screens/TasksScreen'
-import {Notes} from './src/screens/NotesScreen'
-import {Settings} from './src/screens/SettingsScreen'
-import {Usage} from './src/screens/UsageScreen'
-import {Create} from './src/screens/CreateScreen'
+import { View, Dimensions, StatusBar } from 'react-native'
+import { createBottomTabNavigator  } from '@react-navigation/bottom-tabs'
+import { NavigationContainer } from '@react-navigation/native'
+import { Tasks } from './src/screens/TasksScreen' 
+import { Notes } from './src/screens/NotesScreen'   
+import { Settings } from './src/screens/SettingsScreen'
+import { Usage } from './src/screens/UsageScreen'
+import { Create } from './src/screens/CreateScreen'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const {width, height} = Dimensions.get('window')
+const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
-
+ 
 function App(): JSX.Element {
-  const [iconSize, setIconSize] = useState(37)
+  const [iconSize] = useState(37)
   // const radius = (iconSize + 14) / 2;
   const MyTheme = {
-    dark: false,  
-    colors: {
+    dark: false,    
+    colors: {  
       primary: 'black',
-      background: '#FBF4E7',
+      background: '#FBF4E7', 
       card: '#E8E0D1',
       text: '#000000',
       border: 'black',
@@ -132,7 +132,7 @@ function App(): JSX.Element {
             options={{
               tabBarLabel: 'Usage',
               lazy: false,
-              tabBarIcon: ({color, size}) => (
+              tabBarIcon: ({color}) => (
                 <Icon name="chart-donut" size={iconSize} color={color} />
               ),
             }}
@@ -142,7 +142,7 @@ function App(): JSX.Element {
             component={Tasks}
             options={{
               tabBarLabel: 'Tasks',
-              tabBarIcon: ({color, size}) => (
+              tabBarIcon: ({color}) => (
                 <Icon
                   name="checkbox-marked-circle-outline"
                   size={iconSize}
@@ -156,7 +156,7 @@ function App(): JSX.Element {
             component={Create}
             options={{
               tabBarLabel: 'Create',
-              tabBarIcon: ({color, size}) => (
+              tabBarIcon: () => (
                 <Icon
                   style={{
                     backgroundColor: 'black',
@@ -176,7 +176,7 @@ function App(): JSX.Element {
             options={{
               tabBarLabel: 'Notes',
 
-              tabBarIcon: ({color, size}) => (
+              tabBarIcon: ({color}) => (
                 <Icon
                   name="circle-edit-outline"
                   size={iconSize}
@@ -190,7 +190,7 @@ function App(): JSX.Element {
             component={Settings}
             options={{
               tabBarLabel: 'Settings',
-              tabBarIcon: ({color, size}) => (
+              tabBarIcon: ({color}) => (
                 <Icon
                   name="dots-vertical-circle-outline"
                   size={iconSize}
@@ -206,4 +206,4 @@ function App(): JSX.Element {
 }
 export default App
 
-const styles = StyleSheet.create({})
+

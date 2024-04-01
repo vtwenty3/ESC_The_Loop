@@ -5,12 +5,12 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 type Props = {
   onPress: () => void
   text?: string
-  color?: string
+  color?: string      
   iconName?: string
   iconColor?: string
   iconSize?: number
   rotate?: boolean
-  getStuck?: boolean
+  getStuck?: boolean 
 }
 export default function BrutalButton(props: Props) {
   const [isPressed, setIsPressed] = useState(false)
