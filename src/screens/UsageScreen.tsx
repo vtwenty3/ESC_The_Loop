@@ -1,36 +1,25 @@
-import React, { useState, useEffect } from 'react'
-import { View, FlatList, NativeModules, AppState, AppStateStatus, Linking } from 'react-native'
+import React, {useEffect, useState} from 'react'
+import {AppState, AppStateStatus, FlatList, Linking, NativeModules, View} from 'react-native'
 
 import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import notifee, { EventType } from '@notifee/react-native'
-import { globalStyles } from '../globalStyles'
-import { ModalSetTimer } from '../components/ModalSetTimer'
+import notifee, {EventType} from '@notifee/react-native'
+import {globalStyles} from '../globalStyles'
+import {ModalSetTimer} from '../components/ModalSetTimer'
 import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import UsageElement from '../components/UsageElement'
 import PermissionsScreen from '../screens/PermissionsScreen'
 import * as localStorage from '../services/LocalStorage'
 import * as activityService from '../services/ActivityService'
-import { useFocusEffect } from '@react-navigation/native'
+import {useFocusEffect} from '@react-navigation/native'
+import {AppUsageData, Timers} from '../types'
 
 const { UsageLog } = NativeModules as {
   UsageLog: {
     currentActivity: () => Promise<string>
     getAppUsageData2: (callback: (callBackData: string) => void) => void
   }
-}
-
-type AppUsageData = {
-  appName: string
-  iconBase64: string
-  packageName: string
-  usageTimeMinutes: number
-  usageTimeSeconds: number
-}
-
-interface Timers {
-  [key: string]: { timeLeft?: number; timeSet?: number }
 }
 
 export function Usage() {

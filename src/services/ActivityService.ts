@@ -5,6 +5,8 @@ import { BackgroundTaskParams } from './LocalStorage'
 import BackgroundService from 'react-native-background-actions'
 import { isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date-fns'
 
+//TODO: Refactor the toggle background to use the delay and pooling rate set in settings screen.
+
 const debugLogs = true //reload the app on change
 
 const { UsageLog } = NativeModules as {

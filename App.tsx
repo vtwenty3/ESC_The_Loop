@@ -17,7 +17,7 @@ function App(): JSX.Element {
   const [iconSize, setIconSize] = useState(37)
   // const radius = (iconSize + 14) / 2;
   const MyTheme = {
-    dark: false,
+    dark: false,  
     colors: {
       primary: 'black',
       background: '#FBF4E7',

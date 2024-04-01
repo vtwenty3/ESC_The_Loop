@@ -19,13 +19,6 @@ export default function UsageElement(props: Props) {
   const [shadow, setShadow] = useState(-5)
   const [isPressed, setIsPressed] = useState(false)
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
-  const calculateUsagePercentageOld = () => {
-    const usageTime = props.item.usageTimeSeconds || 0
-    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0
-    const totalTime = usageTime + timeLeft
-    const percentage = (usageTime / totalTime) * 100
-    return percentage
-  }
 
   const calculateUsagePercentage = () => {
     const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0
@@ -215,31 +208,3 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 })
-
-{
-  /* <View style={styles.appContainerText}>
-                <Text style={{color: 'black'}}>
-                  <Text style={{fontWeight: 'bold'}}>Usage: </Text>
-                  {props.item.usageTimeMinutes} Minutes
-                </Text>
-                <Text style={{color: 'black'}}>
-                  {props.item.usageTimeSeconds} Seconds
-                </Text>
-              </View>
-              <View style={styles.appContainerText}>
-                <Text style={{color: 'red'}}>
-                  <Text style={{fontWeight: 'bold'}}>Timers: </Text>
-                  {props.timers[props.item.packageName]?.timeLeft}
-                </Text>
-                <Text style={{color: 'red'}}>
-                  {props.timers[props.item.packageName]?.timeSet} set
-                </Text>
-              </View> */
-}
-// appContainerText: {
-//   color: 'black',
-//   fontSize: 16,
-//   fontWeight: 'bold',
-//   flexDirection: 'row',
-//   justifyContent: 'space-between',
-// },

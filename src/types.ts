@@ -16,3 +16,14 @@ export type Options = {
     timerExpiredDelay: number
   }
 }
+export type AppUsageData = {
+    appName: string
+    iconBase64: string
+    packageName: string
+    usageTimeMinutes: number
+    usageTimeSeconds: number
+}
+
+export interface Timers {
+    [key: string]: { timeLeft?: number; timeSet?: number }
+}
