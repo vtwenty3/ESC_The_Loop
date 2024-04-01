@@ -1,8 +1,8 @@
-import {Modal, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import InputFiled from './InputFiledElement';
-import BrutalButton from './BrutalButton';
-import ToggleButtons from './ToggleButtons';
+import {Modal, StyleSheet, Text, View} from 'react-native'
+import React, {useEffect, useState} from 'react'
+import InputFiled from './InputFiledElement'
+import BrutalButton from './BrutalButton'
+import ToggleButtons from './ToggleButtons'
 
 type Props = {
   item: any;
@@ -15,24 +15,24 @@ type Props = {
   autofocusDescription: boolean;
 };
 export default function EditModal(props: Props) {
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [type, setType] = useState<string>('note');
-  const [pop, setPop] = useState<boolean>(false);
-  const [timestampOld, setTimestampOld] = useState<string>('');
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [title, setTitle] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [type, setType] = useState<string>('note')
+  const [pop, setPop] = useState<boolean>(false)
+  const [timestampOld, setTimestampOld] = useState<string>('')
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
 
   function close() {
-    props.setVisible(false);
-    setDeleteConfirm(false);
+    props.setVisible(false)
+    setDeleteConfirm(false)
   }
   useEffect(() => {
-    setTitle(props.item.title);
-    setDescription(props.item.description);
-    setType(props.item.type);
-    setTimestampOld(props.item.timestamp);
-    setDeleteConfirm(false);
-  }, [props.item]);
+    setTitle(props.item.title)
+    setDescription(props.item.description)
+    setType(props.item.type)
+    setTimestampOld(props.item.timestamp)
+    setDeleteConfirm(false)
+  }, [props.item])
 
   return (
     <Modal animationType="fade" visible={props.visible} transparent={true}>
@@ -56,9 +56,9 @@ export default function EditModal(props: Props) {
               }
               onPress={() => {
                 if (deleteConfirm) {
-                  props.onDelete(timestampOld);
+                  props.onDelete(timestampOld)
                 }
-                setDeleteConfirm(true);
+                setDeleteConfirm(true)
               }}
             />
           </View>
@@ -82,7 +82,7 @@ export default function EditModal(props: Props) {
                 color="#FF6B6B"
                 iconName="close-circle-outline"
                 onPress={() => {
-                  close();
+                  close()
                 }}
               />
             </View>
@@ -98,9 +98,9 @@ export default function EditModal(props: Props) {
                     tags: '',
                     timestamp: new Date().toISOString(),
                     complete: false,
-                  };
-                  props.onSave(itemUpdated, timestampOld);
-                  close();
+                  }
+                  props.onSave(itemUpdated, timestampOld)
+                  close()
                 }}
               />
             </View>
@@ -108,7 +108,7 @@ export default function EditModal(props: Props) {
         </View>
       </View>
     </Modal>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -144,4 +144,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-});
+})

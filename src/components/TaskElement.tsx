@@ -6,9 +6,9 @@ import {
   Animated,
   Easing,
   Vibration,
-} from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+} from 'react-native'
+import React, {useState, useRef, useEffect} from 'react'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 type Props = {
   onPressTick: (timestamp: string, complete: boolean) => void;
   onPressDelete: (timestamp: string) => void;
@@ -26,32 +26,32 @@ type Props = {
   modalVisible: boolean;
 };
 export default function Task(props: Props) {
-  const [shadow, setShadow] = useState(-5);
-  const [isPressedTick, setIsPressedTick] = useState(false);
-  const [isPressedTask, setIsPressedTask] = useState(false);
-  const [normalTextOpacity] = useState(new Animated.Value(1));
-  const [strikethroughTextOpacity] = useState(new Animated.Value(0));
-  const animatedValueTick = useRef(new Animated.Value(0)).current;
-  const animatedValueTask = useRef(new Animated.Value(0)).current;
-  const animatedOut = useRef(new Animated.Value(0)).current;
+  const [shadow, setShadow] = useState(-5)
+  const [isPressedTick, setIsPressedTick] = useState(false)
+  const [isPressedTask, setIsPressedTask] = useState(false)
+  const [normalTextOpacity] = useState(new Animated.Value(1))
+  const [strikethroughTextOpacity] = useState(new Animated.Value(0))
+  const animatedValueTick = useRef(new Animated.Value(0)).current
+  const animatedValueTask = useRef(new Animated.Value(0)).current
+  const animatedOut = useRef(new Animated.Value(0)).current
 
-  const [strike, setStrike] = useState(false);
-  const [complete, setComplete] = useState(props.item.complete);
-  const [animatedColor] = useState(new Animated.Value(0));
+  const [strike, setStrike] = useState(false)
+  const [complete, setComplete] = useState(props.item.complete)
+  const [animatedColor] = useState(new Animated.Value(0))
 
   useEffect(() => {
     if (props.modalVisible == false && props.item.complete == false) {
-      handlePressOutTask();
+      handlePressOutTask()
     }
-  }, [props.modalVisible]);
+  }, [props.modalVisible])
 
   useEffect(() => {
     if (props.item.complete == true) {
-      setStrike(true);
-      handlePressInTick();
-      toggleStrike();
+      setStrike(true)
+      handlePressInTick()
+      toggleStrike()
     }
-  }, []);
+  }, [])
 
   const toggleStrike = () => {
     if (strike) {
@@ -60,37 +60,37 @@ export default function Task(props: Props) {
         delay: 150,
         duration: 500,
         useNativeDriver: true,
-      }).start();
+      }).start()
       Animated.timing(normalTextOpacity, {
         toValue: 1,
         delay: 50,
         duration: 500,
         useNativeDriver: true,
-      }).start(() => setStrike(false));
+      }).start(() => setStrike(false))
     } else {
-      setStrike(true);
+      setStrike(true)
       Animated.timing(normalTextOpacity, {
         toValue: 0,
         delay: 150,
         duration: 500,
         useNativeDriver: true,
-      }).start();
+      }).start()
       Animated.timing(strikethroughTextOpacity, {
         toValue: 1,
         delay: 50,
         duration: 500,
         useNativeDriver: true,
-      }).start();
+      }).start()
     }
-  };
+  }
 
   const handlePressInTick = () => {
-    toggleStrike();
-    setIsPressedTick(!isPressedTick);
+    toggleStrike()
+    setIsPressedTick(!isPressedTick)
     if (isPressedTick) {
       setTimeout(() => {
-        Vibration.vibrate(13);
-      }, 200);
+        Vibration.vibrate(13)
+      }, 200)
 
       Animated.spring(animatedValueTask, {
         //duration: 600,
@@ -111,8 +111,8 @@ export default function Task(props: Props) {
           restSpeedThreshold: 1,
           restDisplacementThreshold: 0.5,
           useNativeDriver: true,
-        }).start();
-      });
+        }).start()
+      })
     } else {
       Animated.timing(animatedValueTick, {
         duration: 800,
@@ -125,21 +125,21 @@ export default function Task(props: Props) {
           toValue: -shadow,
           easing: Easing.out(Easing.circle),
           useNativeDriver: true,
-        }).start();
-      });
+        }).start()
+      })
     }
-  };
+  }
 
   const handlePressInTask = () => {
-    setIsPressedTask(true);
-    Vibration.vibrate(10);
+    setIsPressedTask(true)
+    Vibration.vibrate(10)
     Animated.timing(animatedValueTask, {
       duration: 300,
       toValue: -shadow,
       easing: Easing.out(Easing.circle),
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handleDeleteAnimation = () => {
     Animated.timing(animatedOut, {
@@ -148,8 +148,8 @@ export default function Task(props: Props) {
       toValue: 500,
       easing: Easing.out(Easing.circle),
       useNativeDriver: true,
-    }).start(() => props.onPressDelete(props.item.timestamp));
-  };
+    }).start(() => props.onPressDelete(props.item.timestamp))
+  }
 
   const handlePressOutTask = () => {
     Animated.spring(animatedValueTask, {
@@ -161,8 +161,8 @@ export default function Task(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   return (
     <Animated.View
@@ -185,12 +185,12 @@ export default function Task(props: Props) {
             <TouchableOpacity
               onPress={() => {
                 if (complete == false) {
-                  props.onOpenModal(props.item);
+                  props.onOpenModal(props.item)
                 } else {
-                  setComplete(false);
-                  setIsPressedTick(!isPressedTick);
-                  handlePressInTick();
-                  props.onPressTick(props.item.timestamp, true);
+                  setComplete(false)
+                  setIsPressedTick(!isPressedTick)
+                  handlePressInTick()
+                  props.onPressTick(props.item.timestamp, true)
                 }
               }}
               onPressIn={handlePressInTask}
@@ -244,15 +244,15 @@ export default function Task(props: Props) {
                 },
               ]}
               onPressIn={() => {
-                handlePressInTick();
+                handlePressInTick()
               }}
               onPress={() => {
                 if (complete) {
                   // console.log('delete');
-                  handleDeleteAnimation(); //also delete from database
+                  handleDeleteAnimation() //also delete from database
                 } else {
-                  setComplete(!complete);
-                  props.onPressTick(props.item.timestamp, complete);
+                  setComplete(!complete)
+                  props.onPressTick(props.item.timestamp, complete)
                 }
               }}>
               <Icon
@@ -265,7 +265,7 @@ export default function Task(props: Props) {
         </View>
       </View>
     </Animated.View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -321,4 +321,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Lexend-Medium',
     color: 'black',
   },
-});
+})

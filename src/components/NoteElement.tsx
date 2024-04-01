@@ -6,8 +6,8 @@ import {
   Animated,
   Easing,
   Vibration,
-} from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+} from 'react-native'
+import React, {useState, useRef, useEffect} from 'react'
 
 type Props = {
   item: {
@@ -20,33 +20,33 @@ type Props = {
 };
 
 export default function Note(props: Props) {
-  const [shadow, setShadow] = useState(-5);
-  const [isPressed, setIsPressed] = useState(false);
-  const animatedValueNote = useRef(new Animated.Value(shadow)).current;
+  const [shadow, setShadow] = useState(-5)
+  const [isPressed, setIsPressed] = useState(false)
+  const animatedValueNote = useRef(new Animated.Value(shadow)).current
 
   useEffect(() => {
     if (props.modalVisible == false && isPressed == true) {
-      handlePressOutNote();
+      handlePressOutNote()
     }
-  }, [props.modalVisible]);
+  }, [props.modalVisible])
 
   const handlePressInNote = () => {
-    setIsPressed(true);
+    setIsPressed(true)
     setTimeout(() => {
-      Vibration.vibrate(12);
-    }, 60);
+      Vibration.vibrate(12)
+    }, 60)
     Animated.timing(animatedValueNote, {
       duration: 300,
       toValue: 0,
       easing: Easing.out(Easing.circle),
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   const handlePressOutNote = () => {
     setTimeout(() => {
-      Vibration.vibrate(14);
-    }, 600);
+      Vibration.vibrate(14)
+    }, 600)
 
     Animated.spring(animatedValueNote, {
       toValue: shadow,
@@ -57,8 +57,8 @@ export default function Note(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
+    }).start()
+  }
 
   return (
     <View
@@ -101,7 +101,7 @@ export default function Note(props: Props) {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -178,4 +178,4 @@ const styles = StyleSheet.create({
     color: 'black',
     minWidth: '95%',
   },
-});
+})

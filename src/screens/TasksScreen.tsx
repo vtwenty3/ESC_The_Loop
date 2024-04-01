@@ -1,91 +1,91 @@
-import React, {useState, useEffect} from 'react';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {globalStyles} from '../globalStyles';
-import {StyleSheet, View, FlatList, Text} from 'react-native';
-import ModalEdit from '../components/ModalEdit';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import Task from '../components/TaskElement';
-import NoDataFound from '../components/NoDataFound';
+import React, {useState, useEffect} from 'react'
+import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {globalStyles} from '../globalStyles'
+import {StyleSheet, View, FlatList, Text} from 'react-native'
+import ModalEdit from '../components/ModalEdit'
+import Title from '../components/TitleElement'
+import Esc from '../components/EscElement'
+import Task from '../components/TaskElement'
+import NoDataFound from '../components/NoDataFound'
 
 export function Tasks() {
-  const [data, setData] = useState<any>();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalObject, setModalObject] = useState({});
+  const [data, setData] = useState<any>()
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalObject, setModalObject] = useState({})
 
   async function getMyObject() {
     try {
-      const jsonValue = await AsyncStorage.getItem('@Task');
-      return jsonValue != null ? await JSON.parse(jsonValue) : null;
+      const jsonValue = await AsyncStorage.getItem('@Task')
+      return jsonValue != null ? await JSON.parse(jsonValue) : null
     } catch (e) {
-      console.log(' Error: ', e);
+      console.log(' Error: ', e)
     }
-    console.log('Data Loaded.');
+    console.log('Data Loaded.')
   }
 
   async function updateMyObject(updatedData: any) {
     try {
-      await AsyncStorage.setItem('@Task', JSON.stringify(updatedData));
+      await AsyncStorage.setItem('@Task', JSON.stringify(updatedData))
     } catch (e) {
-      console.log('Error: ', e);
+      console.log('Error: ', e)
     }
   }
   const handleSave = async (itemUpdated: object, timestampOld: string) => {
     const findIndex = data.findIndex(
       (obj: any) => obj.timestamp === timestampOld,
-    );
+    )
     if (findIndex !== -1) {
-      data.splice(findIndex, 1); // Remove the object at the found index
-      data.push(itemUpdated); // Append the new object to the end of the array
+      data.splice(findIndex, 1) // Remove the object at the found index
+      data.push(itemUpdated) // Append the new object to the end of the array
     }
-    await updateMyObject(data);
-    setModalVisible(false);
-  };
+    await updateMyObject(data)
+    setModalVisible(false)
+  }
 
   const handleDelete = async (timestamp: string) => {
-    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp);
+    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp)
     if (findIndex !== -1) {
-      data.splice(findIndex, 1); // Remove the object at the found index
+      data.splice(findIndex, 1) // Remove the object at the found index
     }
-    await updateMyObject(data);
-    fetchData();
+    await updateMyObject(data)
+    fetchData()
     setTimeout(() => {
-      setModalVisible(false);
-    }, 400);
-  };
+      setModalVisible(false)
+    }, 400)
+  }
 
   const handleComplete = async (timestamp: string, complete: boolean) => {
-    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp);
+    const findIndex = data.findIndex((obj: any) => obj.timestamp === timestamp)
     if (findIndex !== -1) {
-      data[findIndex].complete = !complete;
+      data[findIndex].complete = !complete
     }
-    await updateMyObject(data);
-  };
+    await updateMyObject(data)
+  }
 
-  let isActive = true;
+  const isActive = true
 
   const fetchData = async () => {
     try {
-      const data = await getMyObject();
+      const data = await getMyObject()
       if (isActive) {
-        setData(data);
+        setData(data)
       }
     } catch (e) {
-      console.log('Error fetchData:', e);
+      console.log('Error fetchData:', e)
     }
-  };
+  }
   useFocusEffect(
     React.useCallback(() => {
-      let isActive = true;
+      let isActive = true
 
-      fetchData();
+      fetchData()
 
       return () => {
-        isActive = false;
-      };
+        isActive = false
+      }
     }, []),
-  );
+  )
 
   return (
     <View style={[globalStyles.root]}>
@@ -111,8 +111,8 @@ export function Tasks() {
             renderItem={({item}) => (
               <Task
                 onOpenModal={() => {
-                  setModalObject(item);
-                  setModalVisible(true);
+                  setModalObject(item)
+                  setModalVisible(true)
                 }}
                 item={item}
                 modalVisible={modalVisible}
@@ -134,7 +134,7 @@ export function Tasks() {
         />
       </View>
     </View>
-  );
+  )
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({})

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react'
 import {
   View,
   StyleSheet,
@@ -10,19 +10,19 @@ import {
   Linking,
   Platform,
   Text,
-} from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+} from 'react-native'
+import {useFocusEffect, useNavigation} from '@react-navigation/native'
 
-import BackgroundService from 'react-native-background-actions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {ModalSetTimer} from '../components/ModalSetTimer';
-import {globalStyles} from '../globalStyles';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import UsageElement from '../components/UsageElement';
-import BrutalButton from '../components/BrutalButton';
-import NoDataFound from '../components/NoDataFound';
+import BackgroundService from 'react-native-background-actions'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import notifee, {AndroidImportance, EventType} from '@notifee/react-native'
+import {ModalSetTimer} from '../components/ModalSetTimer'
+import {globalStyles} from '../globalStyles'
+import Title from '../components/TitleElement'
+import Esc from '../components/EscElement'
+import UsageElement from '../components/UsageElement'
+import BrutalButton from '../components/BrutalButton'
+import NoDataFound from '../components/NoDataFound'
 
 // async function openSettings() {
 //   // await notifee.requestPermission({});
@@ -46,17 +46,17 @@ async function openSettings() {
   if (Number(Platform.Version) >= 32) {
     const pNotification = await PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-    );
+    )
 
     if (pNotification) {
-      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+      Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS')
     } else {
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
+      )
     }
   } else {
-    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS');
+    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS')
   }
 }
 
@@ -98,7 +98,7 @@ export default function Permissions() {
         </View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
   brutalButton: {
     width: '48%',
   },
-});
+})

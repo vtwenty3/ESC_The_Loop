@@ -1,20 +1,20 @@
-import {StyleSheet, View, TouchableOpacity, Vibration} from 'react-native';
-import React, {useState} from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {StyleSheet, View, TouchableOpacity, Vibration} from 'react-native'
+import React, {useState} from 'react'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 type Props = {
   onPress: () => void;
 };
 export default function Esc(props: Props) {
-  const [isPressed, setIsPressed] = useState(false);
+  const [isPressed, setIsPressed] = useState(false)
   const handlePressIn = () => {
-    Vibration.vibrate(11);
-    setIsPressed(true);
-  };
+    Vibration.vibrate(11)
+    setIsPressed(true)
+  }
 
   const handlePressOut = () => {
-    setIsPressed(false);
-  };
+    setIsPressed(false)
+  }
   return (
     <TouchableOpacity
       activeOpacity={1}
@@ -35,7 +35,7 @@ export default function Esc(props: Props) {
         </View>
       </View>
     </TouchableOpacity>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -73,4 +73,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+})

@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {StyleSheet, Text, View} from 'react-native'
+import React from 'react'
 
 type Props = {
   boldText: string;
@@ -55,7 +55,7 @@ export default function NoDataFound(props: Props) {
         </Text>
       ) : null}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -67,4 +67,4 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     justifyContent: 'space-between',
   },
-});
+})

@@ -6,28 +6,28 @@ import {
   TextInput,
   Animated,
   Easing,
-} from 'react-native';
-import React, {useState, useRef} from 'react';
+} from 'react-native'
+import React, {useState, useRef} from 'react'
 
 type Props = {
   type: string;
   setType: React.Dispatch<React.SetStateAction<string>>;
 };
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 export default function ToggleButtons(props: Props) {
-  const [title, onChangeTitle] = React.useState('');
-  const [task, setTask] = useState(true);
-  const [note, setNote] = useState(false);
+  const [title, onChangeTitle] = React.useState('')
+  const [task, setTask] = useState(true)
+  const [note, setNote] = useState(false)
 
-  const [firstButtonClicked, setFirstButtonClicked] = useState(false);
+  const [firstButtonClicked, setFirstButtonClicked] = useState(false)
 
-  const animatedValueTask = useRef(new Animated.Value(task ? 0 : -4)).current;
-  const animatedValueNote = useRef(new Animated.Value(note ? 0 : -4)).current;
+  const animatedValueTask = useRef(new Animated.Value(task ? 0 : -4)).current
+  const animatedValueNote = useRef(new Animated.Value(note ? 0 : -4)).current
 
   const firstAnimatedValue = useRef(
     new Animated.Value(firstButtonClicked ? 0 : -4),
-  ).current;
+  ).current
 
   return (
     <View style={styles.buttonsWrapper}>
@@ -42,13 +42,13 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setType('Task');
+              props.setType('Task')
               Animated.timing(animatedValueTask, {
                 duration: 600,
                 toValue: 0,
                 easing: Easing.out(Easing.circle),
                 useNativeDriver: true,
-              }).start();
+              }).start()
               Animated.spring(animatedValueNote, {
                 toValue: -4,
                 stiffness: 270,
@@ -58,7 +58,7 @@ export default function ToggleButtons(props: Props) {
                 restSpeedThreshold: 1,
                 restDisplacementThreshold: 0.5,
                 useNativeDriver: true,
-              }).start();
+              }).start()
             }}
             style={styles.button}>
             <Icon
@@ -81,13 +81,13 @@ export default function ToggleButtons(props: Props) {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => {
-              props.setType('Note');
+              props.setType('Note')
               Animated.timing(animatedValueNote, {
                 duration: 600,
                 toValue: 0,
                 easing: Easing.out(Easing.circle),
                 useNativeDriver: true,
-              }).start();
+              }).start()
               Animated.spring(animatedValueTask, {
                 toValue: -4,
                 stiffness: 270,
@@ -97,7 +97,7 @@ export default function ToggleButtons(props: Props) {
                 restSpeedThreshold: 1,
                 restDisplacementThreshold: 0.5,
                 useNativeDriver: true,
-              }).start();
+              }).start()
             }}
             style={styles.button}>
             <Icon name="circle-edit-outline" size={25} color={'black'} />
@@ -107,7 +107,7 @@ export default function ToggleButtons(props: Props) {
         </Animated.View>
       </View>
     </View>
-  );
+  )
 }
 const styles = StyleSheet.create({
   button: {
@@ -140,4 +140,4 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-});
+})

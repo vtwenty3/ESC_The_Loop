@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {StyleSheet, Text, View} from 'react-native'
+import React from 'react'
 type Props = {
   text: string;
   fontFamily: string;
@@ -29,7 +29,7 @@ export default function Title(props: Props) {
         </Text>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -42,4 +42,4 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
   },
-});
+})

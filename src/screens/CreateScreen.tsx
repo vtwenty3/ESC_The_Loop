@@ -1,35 +1,35 @@
-import {StyleSheet, View, Modal, Text, Keyboard} from 'react-native';
-import React, {useState} from 'react';
-import InputFiled from '../components/InputFiledElement';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import ToggleButtons from '../components/ToggleButtons';
-import BrutalButton from '../components/BrutalButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {StyleSheet, View, Modal, Text, Keyboard} from 'react-native'
+import React, {useState} from 'react'
+import InputFiled from '../components/InputFiledElement'
+import Title from '../components/TitleElement'
+import Esc from '../components/EscElement'
+import ToggleButtons from '../components/ToggleButtons'
+import BrutalButton from '../components/BrutalButton'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export function Create() {
-  const [title, setTitle] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [type, setType] = useState('Task');
-  const [modalEmpty, setModalEmpty] = useState(false);
-  const [modalCreated, setModalCreated] = useState(false);
-  const [pop, setPop] = useState(false);
+  const [title, setTitle] = React.useState('')
+  const [description, setDescription] = React.useState('')
+  const [type, setType] = useState('Task')
+  const [modalEmpty, setModalEmpty] = useState(false)
+  const [modalCreated, setModalCreated] = useState(false)
+  const [pop, setPop] = useState(false)
   function complete() {
-    Keyboard.dismiss();
+    Keyboard.dismiss()
     setTimeout(function () {
-      setModalCreated(true);
-    }, 200);
+      setModalCreated(true)
+    }, 200)
   }
 
   function clearInputs() {
-    setTitle('');
-    setDescription('');
+    setTitle('')
+    setDescription('')
   }
 
   async function SaveData() {
     if (title === '') {
-      setModalEmpty(true);
-      return;
+      setModalEmpty(true)
+      return
     }
     const data = {
       title,
@@ -38,26 +38,26 @@ export function Create() {
       tags: '',
       complete: false,
       timestamp: new Date().toISOString(),
-    };
+    }
 
     // Get the current data in storage
 
-    const currentDataString = await AsyncStorage.getItem('@' + type);
+    const currentDataString = await AsyncStorage.getItem('@' + type)
     // If there is no current data, create a new array and add the new data
     if (!currentDataString) {
-      const newDataString = JSON.stringify([data]);
-      await AsyncStorage.setItem('@' + type, newDataString);
+      const newDataString = JSON.stringify([data])
+      await AsyncStorage.setItem('@' + type, newDataString)
     } else {
       // If there is current data, parse it and add the new data to the array
-      const currentData = JSON.parse(currentDataString);
-      currentData.push(data);
-      const newDataString = JSON.stringify(currentData);
-      await AsyncStorage.setItem('@' + type, newDataString);
+      const currentData = JSON.parse(currentDataString)
+      currentData.push(data)
+      const newDataString = JSON.stringify(currentData)
+      await AsyncStorage.setItem('@' + type, newDataString)
     }
 
     // Log the saved data and navigate back to previous screen
     // console.log('Saved:', data);
-    complete();
+    complete()
   }
 
   return (
@@ -108,7 +108,7 @@ export function Create() {
               text={'OK'}
               onPress={() =>
                 setTimeout(function () {
-                  setModalEmpty(false);
+                  setModalEmpty(false)
                 }, 350)
               }
             />
@@ -127,17 +127,17 @@ export function Create() {
               text={'OK'}
               onPress={() => {
                 setTimeout(function () {
-                  setPop(true);
-                  clearInputs();
-                  setModalCreated(false);
-                }, 350);
+                  setPop(true)
+                  clearInputs()
+                  setModalCreated(false)
+                }, 350)
               }}
             />
           </View>
         </View>
       </Modal>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -197,4 +197,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Lexend-SemiBold',
     color: 'black',
   },
-});
+})

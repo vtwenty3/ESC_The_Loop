@@ -1,5 +1,5 @@
-import {StyleSheet, View, TextInput, Animated, Easing} from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import {StyleSheet, View, TextInput, Animated, Easing} from 'react-native'
+import React, {useState, useRef, useEffect} from 'react'
 
 type Props = {
   placeholder: string;
@@ -17,9 +17,9 @@ type Props = {
 export default function InputFiled(props: Props) {
   useEffect(() => {
     if (props.pop == true) {
-      handlePressOut();
+      handlePressOut()
     }
-  }, [props.pop]);
+  }, [props.pop])
 
   const handlePressOut = () => {
     Animated.spring(animatedValue, {
@@ -31,11 +31,11 @@ export default function InputFiled(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start();
-  };
-  const [title, onChangeTitle] = React.useState('');
-  const [focused, setFocused] = useState(false);
-  const animatedValue = useRef(new Animated.Value(focused ? 0 : -4)).current;
+    }).start()
+  }
+  const [title, onChangeTitle] = React.useState('')
+  const [focused, setFocused] = useState(false)
+  const animatedValue = useRef(new Animated.Value(focused ? 0 : -4)).current
   return (
     <View>
       <View style={styles.inputTitleShadow}>
@@ -68,16 +68,16 @@ export default function InputFiled(props: Props) {
             textAlignVertical={props.multiline ? 'top' : undefined}
             placeholder={props.placeholder}
             onFocus={() => {
-              setFocused(true);
+              setFocused(true)
               Animated.timing(animatedValue, {
                 duration: 600,
                 toValue: 0,
                 easing: Easing.out(Easing.circle),
                 useNativeDriver: true,
-              }).start();
+              }).start()
             }}
             onBlur={() => {
-              setFocused(false);
+              setFocused(false)
               // Animated.spring(animatedValue, {
               //   toValue: -4,
               //   stiffness: 270,
@@ -93,7 +93,7 @@ export default function InputFiled(props: Props) {
         </Animated.View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -114,4 +114,4 @@ const styles = StyleSheet.create({
     width: '100%',
     zIndex: 2,
   },
-});
+})
