@@ -1,74 +1,44 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Modal} from 'react-native';
-import InputFiled from '../components/InputFiledElement';
-import BrutalButton from './BrutalButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, Modal } from 'react-native'
+import InputFiled from '../components/InputFiledElement'
+import BrutalButton from './BrutalButton'
 
 interface Timers {
-  [key: string]: {timeLeft?: number; timeSet?: number};
+  [key: string]: { timeLeft?: number; timeSet?: number }
 }
 
 type Props = {
-  name: string;
-  packageName: string;
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setTimers: React.Dispatch<React.SetStateAction<Timers>>;
-  timers: Timers;
-};
-const storeData = async (timers: Timers) => {
-  try {
-    await AsyncStorage.setItem('@local', JSON.stringify(timers));
-    console.log('[storeData]: timers saved to storage.');
-  } catch (e) {
-    console.log('error saving timers to storage; Details:', e);
-  }
-};
+  name: string
+  packageName: string
+  visible: boolean
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>
+  setTimers: React.Dispatch<React.SetStateAction<Timers>>
+  timers: Timers
+}
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<string>('');
-  const [pop, setPop] = useState<boolean>(false);
-  // usage limit timer in minutes
-  //const [timers, setTimers] = useState<Timers>({});
+  const [timeLimit, setTimeLimit] = useState<string>('')
+  const [pop, setPop] = useState<boolean>(false)
   function handleClose() {
-    setTimeLimit('');
+    setTimeLimit('')
 
     setTimeout(function () {
-      props.setVisible(false);
-    }, 250);
+      props.setVisible(false)
+    }, 250)
   }
 
-  useEffect(() => {
-    if (Object.keys(props.timers).length !== 0) {
-      console.log('[useEffect Modal]: Setting local data... ');
-      storeData(props.timers);
-    }
-  }, [props.timers]);
-
-  function setButton() {
-    setPop(false);
-    setTimeLimit(timeLimit);
+  async function setButton() {
+    setPop(false)
+    setTimeLimit(timeLimit)
     props.setTimers({
       ...props.timers,
       [props.packageName]: {
         timeLeft: Number(timeLimit),
         timeSet: Number(timeLimit),
       },
-
       // set the initial timer value to the item's usageDuration
-    });
-
-    // props.setTimers2([
-    //   ...props.timers2,
-    //   {
-    //     packageName: props.packageName,
-    //     timeSet: parseInt(timeLimit),
-    //     timeLeft: parseInt(timeLimit),
-    //   },
-    // ]);
-    // storeData(props.timers);
-
-    handleClose();
+    })
+    handleClose()
   }
 
   return (
@@ -80,24 +50,20 @@ export function ModalSetTimer(props: Props) {
               fontFamily: 'Lexend-SemiBold',
               fontSize: 20,
               color: 'black',
-            }}>
+            }}
+          >
             Timer for{' '}
             <Text
               style={{
                 fontFamily: 'Lexend-SemiBold',
                 color: 'black',
-              }}>
+              }}
+            >
               {props.name}
             </Text>
           </Text>
 
           <View style={styles.modalInpuit}>
-            {/* <TextInput
-              style={styles.input}
-              onChangeText={setTimeLimit}
-              value={timeLimit}
-              keyboardType="numeric"
-            /> */}
             <InputFiled
               autofocus={true}
               placeholder=""
@@ -112,13 +78,14 @@ export function ModalSetTimer(props: Props) {
                 fontSize: 18,
                 paddingLeft: 5,
                 color: 'black',
-              }}>
+              }}
+            >
               Seconds
             </Text>
           </View>
 
           <View style={styles.modalButtons}>
-            <View style={{width: 120}}>
+            <View style={{ width: 120 }}>
               <BrutalButton
                 onPress={handleClose}
                 text="Close"
@@ -126,32 +93,14 @@ export function ModalSetTimer(props: Props) {
                 iconName="close-circle-outline"
               />
             </View>
-            <View style={{width: 120}}>
-              <BrutalButton
-                onPress={setButton}
-                text="Set"
-                iconName="timer-sand"
-              />
+            <View style={{ width: 120 }}>
+              <BrutalButton onPress={setButton} text="Set" iconName="timer-sand" />
             </View>
-
-            {/* <TouchableOpacity
-              style={[styles.button, styles.buttonOpen]}
-              onPress={() => {
-                setButton();
-                setPop(true);
-              }}>
-              <Text style={styles.textStyle}>Set</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => handleClose()}>
-              <Text style={styles.textStyle}>Close</Text>
-            </TouchableOpacity> */}
           </View>
         </View>
       </View>
     </Modal>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -211,4 +160,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
   },
-});
+})

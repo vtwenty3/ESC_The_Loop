@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native'
 
 export const globalStyles = StyleSheet.create({
   root: {
@@ -26,4 +26,4 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-});
+})

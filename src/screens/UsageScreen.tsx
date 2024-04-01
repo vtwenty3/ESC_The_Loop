@@ -1,362 +1,112 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  NativeModules,
-  AppState,
-  AppStateStatus,
-  Linking,
-} from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import React, { useState, useEffect } from 'react'
+import { View, FlatList, NativeModules, AppState, AppStateStatus, Linking } from 'react-native'
 
-import BackgroundService from 'react-native-background-actions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {ModalSetTimer} from '../components/ModalSetTimer';
-import {globalStyles} from '../globalStyles';
-import Title from '../components/TitleElement';
-import Esc from '../components/EscElement';
-import UsageElement from '../components/UsageElement';
-import BrutalButton from '../components/BrutalButton';
-import NoDataFound from '../components/NoDataFound';
-import PermissionsScreen from '../screens/PermissionsScreen';
+import BackgroundService from 'react-native-background-actions'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import notifee, { EventType } from '@notifee/react-native'
+import { globalStyles } from '../globalStyles'
+import { ModalSetTimer } from '../components/ModalSetTimer'
+import Title from '../components/TitleElement'
+import Esc from '../components/EscElement'
+import UsageElement from '../components/UsageElement'
+import PermissionsScreen from '../screens/PermissionsScreen'
+import * as localStorage from '../services/LocalStorage'
+import * as activityService from '../services/ActivityService'
+import { useFocusEffect } from '@react-navigation/native'
 
-const {UsageLog} = NativeModules;
+const { UsageLog } = NativeModules as {
+  UsageLog: {
+    currentActivity: () => Promise<string>
+    getAppUsageData2: (callback: (callBackData: string) => void) => void
+  }
+}
 
-let activity = '';
+type AppUsageData = {
+  appName: string
+  iconBase64: string
+  packageName: string
+  usageTimeMinutes: number
+  usageTimeSeconds: number
+}
+
 interface Timers {
-  [key: string]: {timeLeft?: number; timeSet?: number};
-}
-
-type TaskData = {
-  delay: number;
-  screenOffDelay: number;
-  timerExpiredDelay: number;
-};
-
-async function fetchLocalTimers(): Promise<Timers> {
-  try {
-    const jsonValue = await AsyncStorage.getItem('@local');
-    return jsonValue != null ? JSON.parse(jsonValue) : {};
-  } catch (e) {
-    console.log('Error fetching timers from storage; Details:', e);
-    return {};
-  }
-}
-
-const storeData = async (timers: Timers) => {
-  try {
-    await AsyncStorage.setItem('@local', JSON.stringify(timers));
-    console.log('[storeData]: timers saved to storage.');
-  } catch (e) {
-    console.log('error saving timers to storage; Details:', e);
-  }
-};
-
-const sleep = (time: number) =>
-  new Promise<void>(resolve => setTimeout(() => resolve(), time));
-const taskRandom = async (taskData: TaskData) => {
-  await new Promise(async resolve => {
-    let once = true;
-    console.log(BackgroundService.isRunning(), taskData.delay);
-    for (let i = 0; BackgroundService.isRunning(); i++) {
-      try {
-        const currentActivityName: string = await UsageLog.currentActivity();
-        activity = currentActivityName;
-      } catch (error) {
-        console.error('Failed to get current activity:', error);
-        // Optionally, handle the error or retry the operation here.
-      }
-
-      // Fetch the latest timers from storage
-      const localTimers = await fetchLocalTimers();
-
-      if (activity !== 'Screen Off!') {
-        if (activity in localTimers) {
-          if (localTimers[activity].timeLeft! <= 0) {
-            //console.log('[Timer]: No time left!');
-            localTimers[activity].timeLeft = 0;
-            onDisplayNotification();
-            console.log('Runned -> ', i);
-            console.log('activity -> ', activity);
-            await sleep(taskData.timerExpiredDelay);
-          } else {
-            await BackgroundService.updateNotification({
-              taskTitle: `Time Remaining: ${localTimers[activity].timeLeft}s`,
-              taskDesc: `Time set: ${localTimers[activity].timeSet} `,
-              progressBar: {
-                value:
-                  localTimers[activity].timeSet! -
-                  localTimers[activity].timeLeft!,
-                max: localTimers[activity].timeSet!,
-                indeterminate: false,
-              },
-            });
-
-            if (once) {
-              notificationTimeLeft(localTimers[activity].timeLeft!);
-              once = false;
-            }
-
-            localTimers[activity].timeLeft! -= taskData.delay / 1000;
-            await storeData(localTimers);
-            console.log(
-              ` [Timer left]: ${localTimers[activity].timeLeft} seconds`,
-            );
-            console.log('Runned -> ', i);
-            console.log('activity -> ', activity);
-            await sleep(taskData.delay);
-          }
-        } else {
-          await BackgroundService.updateNotification({
-            taskTitle: 'ESC The Loop',
-            taskDesc: 'Current task is not timed.',
-            progressBar: undefined,
-          });
-          console.log('Runned -> ', i);
-          console.log('activity -> ', activity);
-          await sleep(taskData.delay);
-        }
-      } else {
-        console.log('Runned -> ', i);
-        console.log('activity -> ', activity);
-        await sleep(taskData.screenOffDelay);
-      }
-    }
-  });
-};
-//initial notification when background service is on.
-//Its required by android when using background service
-//Updated in the taskRandom function
-const options = {
-  taskName: 'Background Service',
-  taskTitle: 'ESC The Loop',
-  taskDesc: 'Current task is not timed.',
-
-  taskIcon: {
-    name: 'ic_launcher',
-    type: 'mipmap',
-  },
-  linkingURI: 'escapetheloop://',
-  parameters: {
-    delay: 2000,
-    screenOffDelay: 10000,
-    timerExpiredDelay: 10000,
-  },
-};
-
-//this notification is displayied when the timer has expired
-async function onDisplayNotification() {
-  const channelId = await notifee.createChannel({
-    id: 'main',
-    name: 'Main',
-    sound: 'default',
-    vibration: true,
-    importance: AndroidImportance.HIGH, // <-- here
-  });
-
-  notifee.displayNotification({
-    title: 'ESC',
-    body: 'Timer expired!',
-    id: '123',
-    android: {
-      importance: AndroidImportance.HIGH,
-      channelId,
-      ongoing: true,
-      pressAction: {
-        id: 'default',
-      },
-    },
-  });
-}
-
-async function notificationTimeLeft(timeLeft: number) {
-  const channelId = await notifee.createChannel({
-    id: 'main',
-    name: 'Main',
-    sound: 'none',
-    vibration: false,
-    importance: AndroidImportance.HIGH, // <-- here
-  });
-
-  notifee.displayNotification({
-    title: 'Just a heads up',
-    body: `Time remaining: ${timeLeft} seconds`,
-    id: '123',
-    android: {
-      importance: AndroidImportance.HIGH,
-      channelId,
-      ongoing: false,
-      pressAction: {
-        id: 'default',
-      },
-    },
-  });
+  [key: string]: { timeLeft?: number; timeSet?: number }
 }
 
 export function Usage() {
-  const [data, setData] = useState<AppUsageData[] | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [timers, setTimers] = useState<Timers>({});
-  const [modalAppName, setModalAppName] = useState('');
-  const [modalPackageName, setModalPackageName] = useState('');
-  const [rotate, setRotate] = useState(false);
-  const [appState, setAppState] = useState<AppStateStatus>(
-    AppState.currentState,
-  );
+  const [data, setData] = useState<AppUsageData[] | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [timersRN, setTimersRN] = useState<Timers>({})
+  const [modalAppName, setModalAppName] = useState('')
+  const [modalPackageName, setModalPackageName] = useState('')
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState)
 
-  type AppUsageData = {
-    appName: string;
-    iconBase64: string;
-    packageName: string;
-    usageTimeMinutes: number;
-    usageTimeSeconds: number;
-  };
+  function setAppUsageData() {
+    console.log('Getting data from Android')
+    UsageLog.getAppUsageData2((androidUsageData: string) => {
+      const parsedData: AppUsageData[] = JSON.parse(androidUsageData)
+      parsedData.sort((a, b) => b.usageTimeSeconds - a.usageTimeSeconds)
+      setData(parsedData)
+    })
+  }
 
-  //Gets the usage data from the native module on app open
   useEffect(() => {
-    if (!data?.length) {
-      getUsageData();
+    const appStateListener = AppState.addEventListener('change', handleAppStateChange)
+    if (!BackgroundService.isRunning()) {
+      activityService.toggleBackground()
     }
-    const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-
+    setAppUsageData()
     return () => {
       // Remove AppState listener
-      subscription.remove();
-    };
-  }, [appState]);
-
-  //checks if timers state is empty and if so, fetches local data
-  useEffect(() => {
-    if (Object.keys(timers).length === 0) {
-      // Check if the timers state is empty
-      initTimerState();
+      appStateListener.remove()
     }
-  }, [timers]);
+  }, [appState])
 
+  //Do not remove the code duplication above, this hook executes on focusing the current screen
   useFocusEffect(
     React.useCallback(() => {
-      let isActive = true;
+      const loadTimers = async () => {
+        const loadedTimers = await localStorage.getTimers()
+        setTimersRN(loadedTimers)
+      }
+      setAppUsageData()
+      loadTimers()
+    }, [])
+  )
 
-      initTimerState();
-
-      return () => {
-        isActive = false;
-      };
-    }, []),
-  );
+  useEffect(() => {
+    const updateTimers = async () => {
+      await localStorage.setTimers(timersRN)
+    }
+    updateTimers()
+  }, [timersRN])
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    console.log('[handleAppStateChange]')
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
-      getUsageData();
-      initTimerState();
+      const localTimers = await localStorage.getTimers()
+      setTimersRN(localTimers)
     }
     try {
-      await AsyncStorage.setItem('@appState', nextAppState);
+      await AsyncStorage.setItem('@appState', nextAppState)
     } catch (e) {
-      console.error('Error saving app state:', e);
+      console.error('Error saving app state:', e)
     }
-    setAppState(nextAppState);
-  };
-
-  async function initTimerState() {
-    console.log('[useEffect]: TimersState is empty, fetching local data...');
-    const localTimers = await fetchLocalTimers();
-    if (localTimers !== null && Object.keys(localTimers).length > 0) {
-      console.log('[useEffect]:localTimers Found! setTimers(localTimers)');
-      setTimers(localTimers);
-    } else {
-      console.log('[useEffect]: Local data empty! ');
-    }
+    setAppState(nextAppState)
   }
 
-  const toggleBackground = async () => {
-    if (BackgroundService.isRunning() === false) {
-      try {
-        console.log('Trying to start background service');
-        await BackgroundService.start(
-          taskData => taskRandom(taskData!),
-          options,
-        );
-        setRotate(true);
-        console.log('Successful start!');
-      } catch (e) {
-        console.log('Error', e);
-      }
-    } else {
-      try {
-        console.log('Stop background service');
-        await BackgroundService.stop();
-        setRotate(false);
-      } catch (e) {
-        console.log('Error', e);
-      }
-    }
-  };
-
-  function getUsageData() {
-    console.log('Getting data from Android');
-    if (BackgroundService.isRunning() == true) {
-      setRotate(true);
-    } else {
-      toggleBackground();
-    }
-
-    UsageLog.getAppUsageData2((callBack: string) => {
-      const parsedData: AppUsageData[] = JSON.parse(callBack);
-      parsedData.sort((a, b) => b.usageTimeSeconds - a.usageTimeSeconds);
-      setData(parsedData);
-    });
-  }
-
-  notifee.onBackgroundEvent(async ({type, detail}) => {
+  notifee.onBackgroundEvent(async ({ type }) => {
     if (type === EventType.PRESS) {
-      console.log('Background Press action');
-      await Linking.openURL('escapetheloop://tasks');
+      console.log('Background Press action')
+      await Linking.openURL('escapetheloop://tasks')
     }
-  });
-
-  async function openSpecificApp(packageName: string) {
-    // Linking.sendIntent('android.chrome');
-    //Linking.openURL('android.chrome');
-    //   Linking.openURL('getmimo://');
-    //  await Linking.sendIntent('android.intent.action.VIEW', {
-    //    package: "getmimo",
-    //  });
-    // Linking.canOpenURL('mimo://').then(supported => {
-    //   if (supported) {
-    //     Linking.openURL('mimo://');
-    //   } else {
-    //     console.log('sorry invalid url');
-    //   }
-    // });
-  }
-
-  async function resetTimers() {
-    const localTimers = await fetchLocalTimers();
-    if (localTimers !== null && Object.keys(localTimers).length > 0) {
-      const updatedTimers = {...localTimers};
-      console.log('Timers before reset: ', updatedTimers);
-      for (const key in updatedTimers) {
-        updatedTimers[key].timeLeft = updatedTimers[key].timeSet;
-      }
-      console.log('Updated Timers: ', updatedTimers);
-      await AsyncStorage.setItem('@local', JSON.stringify(updatedTimers));
-      initTimerState();
-    } else {
-      console.log('[useEffect]: Local data empty! ');
-    }
-  }
+  })
 
   const handleOpenModal = (appName: string, packageName: string) => {
-    setModalAppName(appName);
-    setModalPackageName(packageName);
-    setModalVisible(true);
-  };
+    setModalAppName(appName)
+    setModalPackageName(packageName)
+    setModalVisible(true)
+  }
   return (
     <>
       {!data?.length ? (
@@ -367,44 +117,17 @@ export function Usage() {
             <View style={[globalStyles.header]}>
               <View style={[globalStyles.headerChildren]}>
                 <Esc onPress={() => console.log('Esc')} />
-                <Title
-                  text={'Usage'}
-                  fontFamily={'Lexend-Medium'}
-                  fontSize={40}
-                />
+                <Title text={'Usage'} fontFamily={'Lexend-Medium'} fontSize={40} />
               </View>
             </View>
+
             <View style={[globalStyles.body]}>
-              <View style={styles.buttonsContainer}>
-                <View style={styles.brutalButton}>
-                  <BrutalButton
-                    text="Background"
-                    iconName="sync"
-                    color="#FF6B6B"
-                    rotate={rotate}
-                    onPress={toggleBackground}
-                  />
-                </View>
-                <View style={styles.brutalButton}>
-                  <BrutalButton
-                    iconName="timer-sand"
-                    text="Reset Timers"
-                    onPress={resetTimers}
-                  />
-                </View>
-              </View>
               <FlatList
                 data={data}
-                contentContainerStyle={{paddingTop: 45, gap: 10}}
-                keyExtractor={item => item.appName}
-                renderItem={({item}) => (
-                  <UsageElement
-                    onOpenModal={handleOpenModal}
-                    timers={timers}
-                    setTimers={setTimers}
-                    item={item}
-                    modalVisible={modalVisible}
-                  />
+                contentContainerStyle={{ gap: 10, paddingTop: 20 }}
+                keyExtractor={(item) => item.appName}
+                renderItem={({ item }) => (
+                  <UsageElement onOpenModal={handleOpenModal} timers={timersRN} item={item} modalVisible={modalVisible} />
                 )}
               />
               <ModalSetTimer
@@ -412,30 +135,13 @@ export function Usage() {
                 visible={modalVisible}
                 name={modalAppName}
                 packageName={modalPackageName}
-                setTimers={setTimers}
-                timers={timers}
+                setTimers={setTimersRN}
+                timers={timersRN}
               />
             </View>
           </View>
         </>
       )}
     </>
-  );
+  )
 }
-
-const styles = StyleSheet.create({
-  buttonsContainer: {
-    flexDirection: 'row',
-    position: 'absolute',
-    width: '90%',
-    paddingLeft: 3,
-    alignSelf: 'center',
-    top: 0,
-    marginTop: -20,
-    justifyContent: 'space-between',
-    zIndex: 3,
-  },
-  brutalButton: {
-    width: '48%',
-  },
-});
