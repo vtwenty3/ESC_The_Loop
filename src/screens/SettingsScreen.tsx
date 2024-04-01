@@ -21,6 +21,7 @@ export function Settings() {
   const [rotate, setRotate] = useState(false)
   const [customOptions, setCustomOptions] = useState<Options | null>(null)
   const [restartGuard, setRestartGuard] = useState(true)
+  const [triggerRestart, setTriggerRestart] = useState(0)
   function handleRotate() {
     if (BackgroundService.isRunning()) {
       setRotate(true)
@@ -39,6 +40,7 @@ export function Settings() {
         // we want to restart the service only when we change these settings.
         // if we havent changed these settings we there is not reason to restart
         // think about that and see if we actually need to implement this, as its Nice to have, but would it effect the usage? possibly not..?
+
         // also just for the cool factor find a way to manage the handlerotate function properly, somehow hook the state of the backround to the rorating background
 
         //TODO: bugfix decrease the timer with pooling rate rather than with 2 everytime.
@@ -73,7 +75,7 @@ export function Settings() {
       handleRotate()
       setRestartGuard(true)
     }
-  }, [customOptions])
+  }, [triggerRestart])
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -100,6 +102,7 @@ export function Settings() {
       setEscapeRate(poolingRate)
     }
     setPoolingRate(value)
+    setTriggerRestart(prevState => prevState + 1)
   }
 
   async function onToggleBackground() {
