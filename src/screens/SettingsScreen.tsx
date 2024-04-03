@@ -5,23 +5,16 @@ import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import BrutalButton from '../components/BrutalButton'
 import * as localStorage from '../services/LocalStorage'
-// import Slider from '@react-native-community/slider'
-// import Slider from '@react-native-community/slider'
 import { Slider } from '@miblanchard/react-native-slider'
 import * as activityService from '../services/ActivityService'
 import { useFocusEffect } from '@react-navigation/native'
-import { Options } from '../types'
-
 import BackgroundService from 'react-native-background-actions'
-import { backgroundTimerTask } from '../services/ActivityService'
+
 
 export function Settings() {
   const [poolingRate, setPoolingRate] = useState<number>(1)
   const [escapeRate, setEscapeRate] = useState<number>(4)
   const [rotate, setRotate] = useState(false)
-  const [customOptions, setCustomOptions] = useState<Options | null>(null)
-  const [restartGuard, setRestartGuard] = useState(true)
-  const [triggerRestart, setTriggerRestart] = useState(0)
   function handleRotate() {
     if (BackgroundService.isRunning()) {
       setRotate(true)
@@ -30,72 +23,40 @@ export function Settings() {
     }
   }
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotate(BackgroundService.isRunning())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+
+  async function loadOptions() {
+    const options = await localStorage.getOptions()
+    setPoolingRate(options.parameters.delay / 1000)
+    setEscapeRate(options.parameters.timerExpiredDelay / 1000)
+  }
+
+
   useFocusEffect(
     React.useCallback(() => {
       console.log('[Settings Screen]')
-      setRestartGuard(true)
       handleRotate()
-      async function loadOptions() {
-      //TODO: fix the background rotation or find a way to bind it with the state. Also maybe include Restarting... text somewhere
-        const optionsReturned = await localStorage.getOptions()
-        setCustomOptions(optionsReturned)
-        setPoolingRate(optionsReturned.parameters.delay / 1000)
-        setEscapeRate(optionsReturned.parameters.timerExpiredDelay / 1000)
-      }
       loadOptions()
     }, [])
   )
 
-  useEffect(() => {
-    if (!restartGuard) {
-      console.log('restart guard:', restartGuard)
-      if (BackgroundService.isRunning()) {
-        console.log('use effect, background running, we try to stop it:')
-        activityService.toggleBackground()
-      }
-      setTimeout(() => {
-        console.log('use effect, timeout we try to start it:')
-        if (!BackgroundService.isRunning()) {
-          activityService.toggleBackground()
-        }
-      }, 4000)
-    }
 
-    return () => {
-      handleRotate()
-      setRestartGuard(true)
-    }
-  }, [triggerRestart])
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      console.log(`Pooling rate: ${poolingRate}, escapeRate:${escapeRate}`)
-      setRestartGuard(false)
-      setCustomOptions((prevOptions) => {
-        if (!prevOptions) return null
-        return {
-          ...prevOptions, // Spread the previous options to maintain other properties
-          parameters: {
-            ...prevOptions.parameters, // Spread the previous parameters to maintain other properties
-            delay: poolingRate * 1000, // Update the delay property
-          },
-        }
-      })
-      customOptions && localStorage.setOptions(customOptions)
-    }, 700)
-    return () => {
-      clearTimeout(debounceTimer)
-    }
-  }, [poolingRate, escapeRate])
 
   function updatePoolingRate(value: number) {
     if (escapeRate < poolingRate) {
       setEscapeRate(poolingRate)
     }
     setPoolingRate(value)
-    setTriggerRestart(prevState => prevState + 1)
   }
 
+
+  //Todo: Refactor so this is executed onyl once even if pressed several times, like debouncer
   async function onToggleBackground() {
     const backgroundState = await activityService.toggleBackground()
     setRotate(backgroundState)
@@ -104,6 +65,35 @@ export function Settings() {
   async function onResetTimers() {
     await localStorage.resetTimers()
   }
+
+  // Restarts the background service if it is running, and sets a 5-second timeout to ensure it has restarted successfully
+  async function restartBackgroundService() {
+    if (BackgroundService.isRunning()) {
+      activityService.toggleBackground()
+    } else { return }
+    setTimeout(() => {
+      if (!BackgroundService.isRunning()) {
+        activityService.toggleBackground()
+      }
+    }, 5000)
+  }
+
+  //  restarts starts, applies the options, restarts finishes
+  async function onOptionsApply() {
+    restartBackgroundService()
+    const options = await localStorage.getOptions()
+    options.parameters.delay = poolingRate * 1000
+    await localStorage.setOptions(options)
+  }
+
+  async function onOptionsReset() {
+    restartBackgroundService()
+    const options = await localStorage.getOptions()
+    options.parameters = localStorage.defaultOptions.parameters
+    await localStorage.setOptions(options)
+    loadOptions()
+  }
+
 
   return (
     <View style={[globalStyles.root]}>
@@ -132,7 +122,7 @@ export function Settings() {
             marginTop: 50,
           }}
         >
-          Pooling Rate: {poolingRate}s
+          Background Update Interval: every {poolingRate}s
         </Text>
         <Slider
           animateTransitions
@@ -155,7 +145,7 @@ export function Settings() {
             alignSelf: 'flex-end',
           }}
         >
-          Escape Rate: {escapeRate}s
+          Escape Notification Interval: every {escapeRate}s
         </Text>
         <Slider
           animateTransitions
@@ -169,6 +159,14 @@ export function Settings() {
           maximumValue={60}
           step={4}
         />
+        <View style={styles.applyButtonContainer}>
+          <View style={styles.brutalButton}>
+            <BrutalButton color="#FF6B6B" iconName="content-save-off" text="Reset" onPress={onOptionsReset} />
+          </View>
+          <View style={styles.brutalButton}>
+            <BrutalButton iconName="content-save-cog" text="Apply" onPress={onOptionsApply} />
+          </View>
+        </View>
 
         <BrutalButton iconName="timer-sand-empty" color="#FF6B6B" text="Delete All Timers" onPress={localStorage.deleteTimers} />
         <BrutalButton
@@ -233,5 +231,12 @@ const styles = StyleSheet.create({
   },
   brutalButton: {
     width: '48%',
+  },
+  applyButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingBottom: 20,
+    zIndex: 3,
   },
 })

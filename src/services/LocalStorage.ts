@@ -1,25 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Options } from '../types'
+import { Options, Timers } from '../types'
+
 
 const debugLogs = false //reload the app on change
-
-interface Timers {
-  [key: string]: { timeLeft?: number; timeSet?: number }
-}
-
-export type BackgroundTaskParams = {
-  delay: number
-  screenOffDelay: number
-  timerExpiredDelay: number
-}
 
 const LOCAL_STORAGE_TIMERS = '@local_timers'
 const LOCAL_STORAGE_NOTES = '@local_notes'
 const LOCAL_STORAGE_TASKS = '@local_tasks'
-// const LOCAL_STORAGE_ACTIVITY_PARAMS = '@local_params'
 const LOCAL_STORAGE_OPTIONS = '@local_options'
 
-// type Params = Pick<Options, 'parameters'>;
 
 export const defaultOptions: Options = {
   taskName: 'ESC The Loop Background Service',
@@ -65,36 +54,6 @@ export async function setOptions(customOptions: Options) {
   }
 }
 
-// export async function setParams(params: BackgroundTaskParams) {
-//   try {
-//     await AsyncStorage.setItem(LOCAL_STORAGE_ACTIVITY_PARAMS, JSON.stringify(params))
-//     debugLogs &&  console.log('[LocalStorage.setParams] called.')
-//   } catch (e) {
-//     debugLogs &&  console.log('error saving timers to storage; Details:', e)
-//   }
-// }
-
-//
-
-// export async function setParams(customParams: Params) {
-//   try {
-//     await AsyncStorage.setItem(LOCAL_STORAGE_OPTIONS, JSON.stringify(customOptions))
-//     debugLogs &&  console.log('[LocalStorage.setOptions] called with these options:', customOptions)
-//   } catch (e) {
-//     debugLogs &&  console.log('error saving timers to storage; Details:', e)
-//   }
-// }
-
-// export async function getParams(): Promise<BackgroundTaskParams | null> {
-//   try {
-//     const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_ACTIVITY_PARAMS)
-//     debugLogs &&  console.log('[LocalStorage.getParams]: called.')
-//     return jsonValue != null ? JSON.parse(jsonValue) : null
-//   } catch (e) {
-//     debugLogs &&  console.log('Error fetching timers from storage; Details:', e)
-//     return null
-//   }
-// }
 
 export async function getTimers(): Promise<Timers> {
   try {
@@ -182,6 +141,5 @@ export async function deleteAll() {
   } catch (e) {
     debugLogs && console.log('Erorr: ', e)
   }
-
   debugLogs && console.log('Done.')
 }

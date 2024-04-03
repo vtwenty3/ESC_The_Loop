@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "android-emulator": "echo no && start npx react-native run-android",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
@@ -43,7 +44,6 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-n": "^16.3.1",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-native": "^4.1.0",
     "jest": "^29.2.1",
     "metro-react-native-babel-preset": "0.73.7",

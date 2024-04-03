@@ -1,8 +1,7 @@
 import { NativeModules } from 'react-native'
 import * as localStorage from './LocalStorage'
-import {Parameters, Options} from '../types'
 import * as notifications from './Notifications'
-import { BackgroundTaskParams } from './LocalStorage'
+import {Parameters, Options, Timers} from '../types'
 import BackgroundService from 'react-native-background-actions'
 import { isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date-fns'
 
@@ -16,9 +15,6 @@ const { UsageLog } = NativeModules as {
   }
 }
 
-interface Timers {
-  [key: string]: { timeLeft?: number; timeSet?: number }
-}
 
 // Fetch the current activity
 export async function fetchCurrentActivity() {
@@ -53,36 +49,19 @@ export async function trackedTimerHandler(trackedTimers: Timers, currentActivity
   }
 }
 
-const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), time))
 
-export let iteration = 0;
-
-
-export async function toggleBackground() {
-  if (!BackgroundService.isRunning()) {
-    try {
-      iteration++;
-      const localOptions = await localStorage.getOptions();
-
-      // Start the background service with the current iteration
-      // Bind the iteration to ensure the background task stops correctly if it's outdated
-      await BackgroundService.start(backgroundTimerTask.bind(null, iteration), localOptions);
-
-      if (debugLogs) console.log('Successful start!');
-    } catch (e) {
-      if (debugLogs) console.log('Error', e);
-    }
-    return true;
-  } else {
-    try {
-      if (debugLogs) console.log('Stop background service');
-      await BackgroundService.stop();
-    } catch (e) {
-      if (debugLogs) console.log('Error', e);
-    }
-    return false;
+function getNextResetTime() {
+  const now = new Date()
+  let resetTime = setHours(setMinutes(setSeconds(now, 0), 35), 23) // Set to today's 11:25 PM
+  if (isAfter(now, resetTime)) {
+    resetTime = startOfTomorrow() // If it's past today's 12 AM, set to tomorrow's 12 AM
   }
+  debugLogs && console.log('[Next reset time]:', resetTime)
+  return resetTime
 }
+
+const sleep = (time: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), time))
+export let iteration = 0
 
 export async function backgroundTimerTask(
   index: number,
@@ -90,11 +69,12 @@ export async function backgroundTimerTask(
   options?: Options
 ): Promise<void> {
   if (options !== undefined && options !== null) {
+    debugLogs && console.log('in options')
     backgroundTaskParams = {
       delay: options.parameters.delay,
       screenOffDelay: options.parameters.screenOffDelay,
       timerExpiredDelay: options.parameters.timerExpiredDelay,
-    };
+    }
   }
   let userAlerted = false
   let nextResetTime = getNextResetTime()
@@ -107,8 +87,8 @@ export async function backgroundTimerTask(
 
   for (let i = 0; BackgroundService.isRunning(); i++) {
     if (index !== iteration) {
-      console.log('[This should stop the duplicate function] Stopping outdated background task', { index, iteration });
-      return; 
+      console.log('[This should stop the duplicate function] Stopping outdated background task', { index, iteration })
+      return 
     }
 
     if (iterationCount >= 10) {
@@ -150,14 +130,32 @@ export async function backgroundTimerTask(
   }
 }
 
+export async function toggleBackground() {
+  if (!BackgroundService.isRunning()) {
+    try {
+      iteration++
+      const localOptions = await localStorage.getOptions()
 
-function getNextResetTime() {
-  const now = new Date()
-  let resetTime = setHours(setMinutes(setSeconds(now, 0), 35), 23) // Set to today's 11:25 PM
-  if (isAfter(now, resetTime)) {
-    resetTime = startOfTomorrow() // If it's past today's 12 AM, set to tomorrow's 12 AM
+      // Start the background service with the current iteration
+      // Bind the iteration to ensure the background task stops correctly if it's outdated
+      await BackgroundService.start(backgroundTimerTask.bind(null, iteration), localOptions)
+
+      if (debugLogs) console.log('Successful start!')
+    } catch (e) {
+      if (debugLogs) console.log('Error', e)
+    }
+    return true
+  } else {
+    try {
+      if (debugLogs) console.log('Stop background service')
+      await BackgroundService.stop()
+    } catch (e) {
+      if (debugLogs) console.log('Error', e)
+    }
+    return false
   }
-  debugLogs && console.log('[Next reset time]:', resetTime)
-  return resetTime
 }
+
+
+
 
