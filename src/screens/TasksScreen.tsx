@@ -78,9 +78,7 @@ export function Tasks() {
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true
-
       fetchData()
-
       return () => {
         isActive = false
       }
