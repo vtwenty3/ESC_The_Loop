@@ -12,6 +12,7 @@ type Props = {
   fontFamily?: string;
   pop: boolean;
   autofocus?: boolean;
+  editable?: boolean
 };
 
 export default function InputFiled(props: Props) {
@@ -89,6 +90,7 @@ export default function InputFiled(props: Props) {
               //   useNativeDriver: true,
               // }).start();
             }}
+            editable={props.editable}
           />
         </Animated.View>
       </View>

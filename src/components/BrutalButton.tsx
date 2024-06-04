@@ -3,16 +3,17 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 type Props = {
-  onPress: () => void
+  onPress?: () => void
   text?: string
   color?: string      
   iconName?: string
   iconColor?: string
   iconSize?: number
   rotate?: boolean
-  getStuck?: boolean 
+  getStuck?: boolean
+  disabled?: boolean
 }
-export default function BrutalButton(props: Props) {
+export default function BrutalButton(props: Props = {disabled: false}) {
   const [isPressed, setIsPressed] = useState(false)
 
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : -4)).current
@@ -82,6 +83,7 @@ export default function BrutalButton(props: Props) {
   }
   return (
     <TouchableOpacity
+      disabled={props.disabled}
       style={styles.buttonRoot}
       activeOpacity={1}
       onPress={props.onPress}

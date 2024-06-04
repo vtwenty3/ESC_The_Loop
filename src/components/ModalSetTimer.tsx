@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Modal } from 'react-native'
 import InputFiled from '../components/InputFiledElement'
 import BrutalButton from './BrutalButton'
@@ -17,26 +17,47 @@ type Props = {
 }
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<string>('')
+  const [timeLimit, setTimeLimit] = useState<number | undefined>(undefined)
   const [pop, setPop] = useState<boolean>(false)
-  function handleClose() {
-    setTimeLimit('')
 
-    setTimeout(function () {
+  const [initialTimerValueSet, setInitialTimerValueSet] = useState(false)
+
+  useEffect(() => {
+    const initialValue = props.timers[props.packageName]?.timeSet
+    setTimeLimit(initialValue)
+    setInitialTimerValueSet(initialValue !== undefined)
+  }, [props.visible, props.packageName, props.timers])
+
+  function addFiveMinutes() {
+    if (timeLimit !== undefined) {
+      setTimeLimit(timeLimit + 300)
+      props.setTimers({
+        ...props.timers,
+        [props.packageName]: {
+          timeLeft: (props.timers[props.packageName]?.timeLeft || 0) + 300,
+          timeSet: timeLimit + 300,
+        },
+      })
+    }
+  }
+
+  function handleClose() {
+    setTimeLimit(undefined)
+    setTimeout(() => {
       props.setVisible(false)
     }, 250)
   }
 
+
+
   async function setButton() {
     setPop(false)
-    setTimeLimit(timeLimit)
     props.setTimers({
       ...props.timers,
       [props.packageName]: {
-        timeLeft: Number(timeLimit),
-        timeSet: Number(timeLimit),
+        timeLeft: timeLimit,
+        timeSet: timeLimit,
       },
-      // set the initial timer value to the item's usageDuration
     })
     handleClose()
   }
@@ -52,7 +73,7 @@ export function ModalSetTimer(props: Props) {
               color: 'black',
             }}
           >
-            Timer for{' '}
+              Timer for{' '}
             <Text
               style={{
                 fontFamily: 'Lexend-SemiBold',
@@ -63,14 +84,25 @@ export function ModalSetTimer(props: Props) {
             </Text>
           </Text>
 
-          <View style={styles.modalInpuit}>
+          <View style={styles.modalInput}>
+            <BrutalButton
+              onPress={() => {
+                const updatedTimers = { ...props.timers }
+                delete updatedTimers[props.packageName]
+                props.setTimers(updatedTimers)
+                handleClose()
+              }}
+              color="#FF6B6B"
+              iconName="delete-outline"
+            />
             <InputFiled
               autofocus={true}
               placeholder=""
-              value={timeLimit}
-              setValue={setTimeLimit}
+              value={timeLimit?.toString() ?? ''}
+              setValue={(value) => setTimeLimit(Number(value))}
               pop={pop}
               numeric={true}
+              editable={!initialTimerValueSet}
             />
             <Text
               style={{
@@ -80,10 +112,17 @@ export function ModalSetTimer(props: Props) {
                 color: 'black',
               }}
             >
-              Seconds
+                Seconds
             </Text>
           </View>
-
+          <View>
+            <BrutalButton
+              disabled={timeLimit === undefined}
+              onPress={addFiveMinutes}
+              text="5 minutes"
+              iconName="close-circle-outline"
+            />
+          </View>
           <View style={styles.modalButtons}>
             <View style={{ width: 120 }}>
               <BrutalButton
@@ -94,7 +133,7 @@ export function ModalSetTimer(props: Props) {
               />
             </View>
             <View style={{ width: 120 }}>
-              <BrutalButton onPress={setButton} text="Set" iconName="timer-sand" />
+              <BrutalButton disabled={timeLimit === undefined} onPress={setButton} text="Set" iconName="timer-sand" />
             </View>
           </View>
         </View>
@@ -149,7 +188,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 20,
   },
-  modalInpuit: {
+  modalInput: {
     flexDirection: 'row',
     alignItems: 'center',
   },
