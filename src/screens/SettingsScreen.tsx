@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import {ScrollView, StyleSheet, Text, View} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { globalStyles } from '../globalStyles'
 import Title from '../components/TitleElement'
@@ -112,74 +112,75 @@ export function Settings() {
             <BrutalButton iconName="timer-sand" text="Reset Timers" onPress={onResetTimers} />
           </View>
         </View>
-
-        <Text
-          style={{
-            fontFamily: 'Lexend-Medium',
-            fontSize: 12,
-            color: 'black',
-            alignSelf: 'flex-end',
-            marginTop: 50,
-          }}
-        >
+        <ScrollView contentContainerStyle={{rowGap: 13, paddingBottom: 20}} >
+          <Text
+            style={{
+              fontFamily: 'Lexend-Medium',
+              fontSize: 12,
+              color: 'black',
+              alignSelf: 'flex-end',
+              marginTop: 50,
+            }}
+          >
           Background Update Interval: every {poolingRate}s
-        </Text>
-        <Slider
-          animateTransitions
-          minimumTrackTintColor="black"
-          onSlidingComplete={(value) => updatePoolingRate(value[0])}
-          onValueChange={(value) => setPoolingRate(value[0])}
-          thumbStyle={styles.thumb}
-          trackStyle={styles.track}
-          value={poolingRate}
-          minimumValue={1}
-          maximumValue={8}
-          step={1}
-        />
+          </Text>
+          <Slider
+            animateTransitions
+            minimumTrackTintColor="black"
+            onSlidingComplete={(value) => updatePoolingRate(value[0])}
+            onValueChange={(value) => setPoolingRate(value[0])}
+            thumbStyle={styles.thumb}
+            trackStyle={styles.track}
+            value={poolingRate}
+            minimumValue={1}
+            maximumValue={8}
+            step={1}
+          />
 
-        <Text
-          style={{
-            fontFamily: 'Lexend-Medium',
-            fontSize: 12,
-            color: 'black',
-            alignSelf: 'flex-end',
-          }}
-        >
+          <Text
+            style={{
+              fontFamily: 'Lexend-Medium',
+              fontSize: 12,
+              color: 'black',
+              alignSelf: 'flex-end',
+            }}
+          >
           Escape Notification Interval: every {escapeRate}s
-        </Text>
-        <Slider
-          animateTransitions
-          minimumTrackTintColor="black"
-          onSlidingComplete={(value2) => setEscapeRate(value2[0])}
-          onValueChange={(value2) => setEscapeRate(value2[0])}
-          value={escapeRate}
-          thumbStyle={styles.thumb}
-          trackStyle={styles.track}
-          minimumValue={Math.max(poolingRate, 4)}
-          maximumValue={60}
-          step={4}
-        />
-        <View style={styles.applyButtonContainer}>
-          <View style={styles.brutalButton}>
-            <BrutalButton color="#FF6B6B" iconName="content-save-off" text="Reset" onPress={onOptionsReset} />
+          </Text>
+          <Slider
+            animateTransitions
+            minimumTrackTintColor="black"
+            onSlidingComplete={(value2) => setEscapeRate(value2[0])}
+            onValueChange={(value2) => setEscapeRate(value2[0])}
+            value={escapeRate}
+            thumbStyle={styles.thumb}
+            trackStyle={styles.track}
+            minimumValue={Math.max(poolingRate, 4)}
+            maximumValue={60}
+            step={4}
+          />
+          <View style={styles.applyButtonContainer}>
+            <View style={styles.brutalButton}>
+              <BrutalButton color="#FF6B6B" iconName="content-save-off" text="Reset" onPress={onOptionsReset} />
+            </View>
+            <View style={styles.brutalButton}>
+              <BrutalButton iconName="content-save-cog" text="Apply" onPress={onOptionsApply} />
+            </View>
           </View>
-          <View style={styles.brutalButton}>
-            <BrutalButton iconName="content-save-cog" text="Apply" onPress={onOptionsApply} />
-          </View>
-        </View>
 
-        <BrutalButton iconName="timer-sand-empty" color="#FF6B6B" text="Delete All Timers" onPress={localStorage.deleteTimers} />
-        <BrutalButton
-          color="#FF6B6B"
-          iconName="delete-circle-outline"
-          text="Delete All Data"
-          iconSize={30}
-          onPress={localStorage.deleteAll}
-        />
-        <BrutalButton text="Delete All Notes" color="#FF6B6B" onPress={localStorage.deleteNotes} iconName="note-off-outline" />
-        <BrutalButton iconName="checkbox-blank-off-outline" color="#FF6B6B" text="Delete All Tasks" onPress={localStorage.deleteTasks} />
-        <BrutalButton iconName="database-export-outline" text="Export Data" onPress={() => console.log('Hi')} />
-        <BrutalButton iconName="database-import-outline" text="Import Data" onPress={() => console.log('Hi')} />
+          <BrutalButton iconName="timer-sand-empty" color="#FF6B6B" text="Delete All Timers" onPress={localStorage.deleteTimers} />
+          <BrutalButton
+            color="#FF6B6B"
+            iconName="delete-circle-outline"
+            text="Delete All Data"
+            iconSize={30}
+            onPress={localStorage.deleteAll}
+          />
+          <BrutalButton text="Delete All Notes" color="#FF6B6B" onPress={localStorage.deleteNotes} iconName="note-off-outline" />
+          <BrutalButton iconName="checkbox-blank-off-outline" color="#FF6B6B" text="Delete All Tasks" onPress={localStorage.deleteTasks} />
+          {/*<BrutalButton iconName="database-export-outline" text="Export Data" onPress={() => console.log('Hi')} />*/}
+          {/*<BrutalButton iconName="database-import-outline" text="Import Data" onPress={() => console.log('Hi')} />*/}
+        </ScrollView>
       </View>
     </View>
   )
@@ -188,8 +189,9 @@ export function Settings() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    width: '80%',
-    gap: 10,
+    paddingHorizontal: 25,
+    width: '100%',
+
   },
   thumb: {
     backgroundColor: '#9723C9',

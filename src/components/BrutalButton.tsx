@@ -82,6 +82,7 @@ export default function BrutalButton(props: Props) {
   }
   return (
     <TouchableOpacity
+      style={styles.buttonRoot}
       activeOpacity={1}
       onPress={props.onPress}
       onPressIn={handlePressIn}
@@ -112,6 +113,9 @@ export default function BrutalButton(props: Props) {
 }
 
 const styles = StyleSheet.create({
+  buttonRoot: {
+    marginLeft: 6
+  },
   buttonShadow: {
     borderRadius: 10,
     backgroundColor: 'black',

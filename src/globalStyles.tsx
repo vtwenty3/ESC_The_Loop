@@ -25,5 +25,6 @@ export const globalStyles = StyleSheet.create({
   body: {
     flex: 1,
     width: '100%',
+
   },
 })
