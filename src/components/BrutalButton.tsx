@@ -2,6 +2,8 @@ import { StyleSheet, Text, View, TouchableOpacity, Animated, Easing, Vibration }
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
+//TODO: If disabled background grey and popped in
+
 type Props = {
   onPress?: () => void
   text?: string
@@ -129,11 +131,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 10
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     borderWidth: 2,
     zIndex: 3,
     borderRadius: 10,

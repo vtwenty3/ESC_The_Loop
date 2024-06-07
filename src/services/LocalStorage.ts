@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Options, Timers } from '../types'
 
 
-const debugLogs = false //reload the app on change
+const debugLogs = true //reload the app on change
 
 const LOCAL_STORAGE_TIMERS = '@local_timers'
 const LOCAL_STORAGE_NOTES = '@local_notes'
@@ -69,7 +69,7 @@ export async function getTimers(): Promise<Timers> {
 export async function setTimers(timers: Timers) {
   try {
     await AsyncStorage.setItem(LOCAL_STORAGE_TIMERS, JSON.stringify(timers))
-    debugLogs && console.log('[LocalStorage.setTimers]: timers saved to storage.')
+    debugLogs && console.log('[LocalStorage.setTimers]: timers saved to storage. : ', timers)
   } catch (e) {
     debugLogs && console.log('error saving timers to storage; Details:', e)
   }

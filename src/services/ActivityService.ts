@@ -7,7 +7,7 @@ import { isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date
 
 //TODO: Refactor the toggle background to use the delay and pooling rate set in settings screen.
 
-const debugLogs = true //reload the app on change
+const debugLogs = false //reload the app on change
 
 const { UsageLog } = NativeModules as {
   UsageLog: {

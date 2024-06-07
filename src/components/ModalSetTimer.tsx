@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Modal } from 'react-native'
 import InputFiled from '../components/InputFiledElement'
 import BrutalButton from './BrutalButton'
+import { TimerPicker } from 'react-native-timer-picker'
+import { LinearGradient } from 'react-native-linear-gradient'
+import {timeLeft} from '../services/Notifications' // or `import LinearGradient from "react-native-linear-gradient"`
+
+//TODO: Picker cleanup, finish the implementation and delete the unused libraries
 
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
@@ -17,15 +22,21 @@ type Props = {
 }
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<number | undefined>(undefined)
+  const [showPicker, setShowPicker] = useState(false)
+  const [alarmString, setAlarmString] = useState<string | null>(null)
+  const [timeLimit, setTimeLimit] = useState<number>(0)
   const [pop, setPop] = useState<boolean>(false)
+  const [date, setDate] = useState(new Date())
+  const [selectedLanguage, setSelectedLanguage] = useState()
 
   const [initialTimerValueSet, setInitialTimerValueSet] = useState(false)
 
+
+
   useEffect(() => {
     const initialValue = props.timers[props.packageName]?.timeSet
-    setTimeLimit(initialValue)
-    setInitialTimerValueSet(initialValue !== undefined)
+    setTimeLimit(props.timers[props.packageName]?.timeSet ?? 0)
+    setInitialTimerValueSet(initialValue !== 0)
   }, [props.visible, props.packageName, props.timers])
 
   function addFiveMinutes() {
@@ -34,29 +45,34 @@ export function ModalSetTimer(props: Props) {
       props.setTimers({
         ...props.timers,
         [props.packageName]: {
-          timeLeft: (props.timers[props.packageName]?.timeLeft || 0) + 300,
-          timeSet: timeLimit + 300,
+          timeLeft: 300,
+          ...props.timers[props.packageName],
         },
       })
     }
   }
 
   function handleClose() {
-    setTimeLimit(undefined)
+    setTimeLimit(0)
     setTimeout(() => {
       props.setVisible(false)
     }, 250)
   }
 
+  function handleDurationChange (duration: { hours: number, minutes: number, seconds: number }) {
+    const totalSeconds = duration.minutes * 60 + duration.seconds
+    setTimeLimit(totalSeconds)
+  }
 
 
   async function setButton() {
+    console.log()
     setPop(false)
     props.setTimers({
       ...props.timers,
       [props.packageName]: {
-        timeLeft: timeLimit,
-        timeSet: timeLimit,
+        ...props.timers[props.packageName],
+        timeLeft: (props.timers[props.packageName]?.timeLeft || 0) + 300,
       },
     })
     handleClose()
@@ -83,46 +99,42 @@ export function ModalSetTimer(props: Props) {
               {props.name}
             </Text>
           </Text>
+          <TimerPicker
+            padWithNItems={2}
+            hideHours
+            minuteLabel="min"
+            secondLabel="sec"
+            LinearGradient={LinearGradient}
+            initialValue={{minutes: Math.floor(timeLimit / 60), seconds: timeLimit % 60}}
+            onDurationChange={(duration) => handleDurationChange(duration)}
+            styles={{
+              theme: 'light',
+              backgroundColor: '#FFFFFF',
+              pickerItem: {
+                fontSize: 24,
+              },
+              pickerLabel: {
+                fontSize: 20,
+                right: -20,
+              },
+              pickerLabelContainer: {
+                width: 40,
+              },
+              pickerItemContainer: {
+                width: 120,
+              },
+            }}
+          />
 
-          <View style={styles.modalInput}>
+          <View style={{ width: 265 }}>
             <BrutalButton
-              onPress={() => {
-                const updatedTimers = { ...props.timers }
-                delete updatedTimers[props.packageName]
-                props.setTimers(updatedTimers)
-                handleClose()
-              }}
-              color="#FF6B6B"
-              iconName="delete-outline"
-            />
-            <InputFiled
-              autofocus={true}
-              placeholder=""
-              value={timeLimit?.toString() ?? ''}
-              setValue={(value) => setTimeLimit(Number(value))}
-              pop={pop}
-              numeric={true}
-              editable={!initialTimerValueSet}
-            />
-            <Text
-              style={{
-                fontFamily: 'Lexend-SemiBold',
-                fontSize: 18,
-                paddingLeft: 5,
-                color: 'black',
-              }}
-            >
-                Seconds
-            </Text>
-          </View>
-          <View>
-            <BrutalButton
-              disabled={timeLimit === undefined}
-              onPress={addFiveMinutes}
-              text="5 minutes"
-              iconName="close-circle-outline"
+              disabled={ initialTimerValueSet }
+              onPress={ addFiveMinutes }
+              text="Add 5 min to time left"
+              iconName="plus-circle-outline"
             />
           </View>
+
           <View style={styles.modalButtons}>
             <View style={{ width: 120 }}>
               <BrutalButton
@@ -132,8 +144,8 @@ export function ModalSetTimer(props: Props) {
                 iconName="close-circle-outline"
               />
             </View>
-            <View style={{ width: 120 }}>
-              <BrutalButton disabled={timeLimit === undefined} onPress={setButton} text="Set" iconName="timer-sand" />
+            <View style={{ width: 140 }}>
+              <BrutalButton disabled={timeLimit === undefined} onPress={setButton} text="Confirm" iconName="timer-sand" />
             </View>
           </View>
         </View>
@@ -186,10 +198,11 @@ const styles = StyleSheet.create({
 
   modalButtons: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 10,
   },
   modalInput: {
     flexDirection: 'row',
+    gap: 5,
     alignItems: 'center',
   },
 
