@@ -1,7 +1,8 @@
 import {StyleSheet, View, TouchableOpacity, Vibration} from 'react-native'
 import React, {useState} from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-
+import tw from 'twrnc'
+// TODO: configure intelisense https://github.com/jaredh159/tailwind-react-native-classnames?tab=readme-ov-file#vs-code-intellisense
 type Props = {
   onPress: () => void;
 };
@@ -21,15 +22,10 @@ export default function Esc(props: Props) {
       onPress={props.onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}>
-      <View style={styles.escShadow}>
-        <View
-          style={[
-            styles.escRoot,
-            isPressed && {
-              transform: [{translateX: 4}, {translateY: 4}, {scale: 0.99}],
-            },
-          ]}>
-          <View style={styles.escTop}>
+      <View style={tw`bg-black w-20 h-20 rounded-lg border-2 border-black`}>
+        <View style={[ tw`bg-red-700 w-20 h-20 rounded-lg ml-[-7px] mt-[-7px] border-2 border-black`,
+          isPressed && { transform: [{translateX: 4}, {translateY: 4}, {scale: 0.99}]}]}>
+          <View style={tw`bg-red-500 w-15 h-15 justify-center items-center rounded-lg ml-2 mt-1.5 border-2 border-black shadow-2xl`}>
             <Icon name="keyboard-esc" size={45} color={'black'} />
           </View>
         </View>
@@ -37,40 +33,3 @@ export default function Esc(props: Props) {
     </TouchableOpacity>
   )
 }
-
-const styles = StyleSheet.create({
-  escShadow: {
-    width: 80,
-    height: 80,
-    borderRadius: 7,
-    backgroundColor: 'black',
-    borderWidth: 2.5,
-  },
-  escRoot: {
-    width: 80,
-    height: 80,
-    borderRadius: 7,
-    marginTop: -7,
-    marginLeft: -7,
-    backgroundColor: '#B22525',
-    borderWidth: 2.5,
-  },
-  escTop: {
-    marginLeft: 8,
-    marginTop: 5,
-    width: 60,
-    height: 60,
-    borderRadius: 8.5,
-    backgroundColor: '#E95B5B',
-    borderWidth: 2.5,
-    borderColor: '#000000',
-    zIndex: 2,
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
-    shadowOpacity: 0.75,
-    shadowRadius: 10,
-    elevation: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-})
