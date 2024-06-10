@@ -36,9 +36,9 @@ export default function EditModal(props: Props) {
 
   return (
     <Modal animationType="fade" visible={props.visible} transparent={true}>
-      <View style={styles.modalBackground}>
-        <View style={styles.modalChildren}>
-          <View style={styles.noteDeleteWrapper}>
+      <View className='flex-1 flex justify-center items-center bg-modalBgColor'>
+        <View className='w-[92%] bg-[#D9D9D9] rounded-xl py-5 px-2.5 border-2 border-black flex flex-col gap-y-4'  >
+          <View  className='flex flex-row items-center justify-center'>
             <View style={{flex: 1}}>
               <InputFiled
                 autofocus={props.autofocusTitle}
@@ -62,21 +62,22 @@ export default function EditModal(props: Props) {
               }}
             />
           </View>
-
-          <InputFiled
-            autofocus={props.autofocusDescription}
-            pop={pop}
-            placeholder="Description"
-            value={description}
-            setValue={setDescription}
-            multiline={true}
-            numberOfLines={13}
-            fontFamily={'Lexend-Regular'}
-            fontSize={16}
-          />
+          <View>
+            <InputFiled
+              autofocus={props.autofocusDescription}
+              pop={pop}
+              placeholder="Description"
+              value={description}
+              setValue={setDescription}
+              multiline={true}
+              numberOfLines={13}
+              fontFamily={'Lexend-Regular'}
+              fontSize={16}
+            />
+          </View>
           {/* <ToggleButtons type={type} setType={setType} /> */}
-          <View style={styles.brutalButtonWrapper}>
-            <View style={styles.brutalButton}>
+          <View className='flex flex-row w-full justify-between self-center ml-1'>
+            <View className='w-[45%]'>
               <BrutalButton
                 text="Close"
                 color="#FF6B6B"
@@ -87,7 +88,7 @@ export default function EditModal(props: Props) {
               />
             </View>
 
-            <View style={styles.brutalButton}>
+            <View className='w-[45%]'>
               <BrutalButton
                 text={'Save'}
                 onPress={() => {
@@ -110,38 +111,3 @@ export default function EditModal(props: Props) {
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  brutalButtonWrapper: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-    alignSelf: 'center',
-    marginLeft: 4,
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#00000063',
-  },
-  modalChildren: {
-    width: '92%',
-    //height: '94%',
-    gap: 20,
-    backgroundColor: '#D9D9D9',
-    borderRadius: 10,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    borderColor: 'black',
-    borderWidth: 2,
-    flexDirection: 'column',
-  },
-  brutalButton: {
-    width: '45%',
-  },
-  noteDeleteWrapper: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-})

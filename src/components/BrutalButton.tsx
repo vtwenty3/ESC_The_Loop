@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Animated, Easing, Vibration } from 'react-native'
+import { Text, View, TouchableOpacity, Animated, Easing, Vibration } from 'react-native'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
@@ -86,19 +86,19 @@ export default function BrutalButton(props: Props = {disabled: false}) {
   return (
     <TouchableOpacity
       disabled={props.disabled}
-      style={styles.buttonRoot}
+      className='ml-1.5'
       activeOpacity={1}
       onPress={props.onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <View style={styles.buttonShadow}>
+      <View className='rounded-xl bg-black w-full'>
         <Animated.View
           style={{
             transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
           }}
         >
-          <View style={[styles.button, { backgroundColor: props.color ? props.color : '#7FBC8C' }]}>
+          <View className='flex flex-row items-center justify-center border-2 relative z-3 rounded-xl' style={[{ backgroundColor: props.color ? props.color : '#7FBC8C' }]}>
             <Animated.View
               style={[{ transform: [{ rotate: rotation }] }, { padding: props.text ? 0 : 10 }]}
             >
@@ -108,38 +108,10 @@ export default function BrutalButton(props: Props = {disabled: false}) {
                 color={props.iconColor ? props.iconColor : 'black'}
               />
             </Animated.View>
-            {props.text ? <Text style={styles.text}>{props.text}</Text> : null}
+            {props.text ? <Text className='text-black font-[Lexend-Regular] text-xl text-center py-2.5 px-2.5'>{props.text}</Text> : null}
           </View>
         </Animated.View>
       </View>
     </TouchableOpacity>
   )
 }
-
-const styles = StyleSheet.create({
-  buttonRoot: {
-    marginLeft: 6
-  },
-  buttonShadow: {
-    borderRadius: 10,
-    backgroundColor: 'black',
-    width: '100%',
-  },
-  text: {
-    color: 'black',
-    fontFamily: 'Lexend-Regular',
-    fontSize: 18,
-    textAlign: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 10
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    zIndex: 3,
-    borderRadius: 10,
-    backgroundColor: '#7FBC8C',
-  },
-})
