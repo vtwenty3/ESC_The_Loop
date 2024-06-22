@@ -15,6 +15,10 @@ type Props = {
 };
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
+//TODO: Convert to tailwind
+//TODO: Make them configurable (e.g. button text and types)
+
+
 export default function ToggleButtons(props: Props) {
   const [title, onChangeTitle] = React.useState('')
   const [task, setTask] = useState(true)
