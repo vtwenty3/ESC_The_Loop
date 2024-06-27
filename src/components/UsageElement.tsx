@@ -11,18 +11,18 @@ type Props = {
     usageTimeMinutes: number
     iconBase64: string
   }
-  timers: Timers
+  timer: { timeLeft?: number; timeSet?: number }
   modalVisible: boolean
   onOpenModal: (appName: string, packageName: string) => void
 }
 export default function UsageElement(props: Props) {
-  const [shadow, setShadow] = useState(-5)
+  const shadow = -5
   const [isPressed, setIsPressed] = useState(false)
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
 
   const calculateUsagePercentage = () => {
-    const timeLeft = props.timers[props.item.packageName]?.timeLeft || 0
-    const timeSet = props.timers[props.item.packageName]?.timeSet || 0
+    const timeLeft = props.timer?.timeLeft || 0
+    const timeSet = props.timer?.timeSet || 0
     const percentage = 100 - Math.round((timeLeft / timeSet) * 100) || 0
     return 100 - percentage
   }
@@ -33,7 +33,7 @@ export default function UsageElement(props: Props) {
     }
   }, [props.modalVisible])
 
-  const handlePressIn = () => {
+  const handlePressIn = async () => {
     Vibration.vibrate(11)
     setIsPressed(true)
     Animated.spring(animatedValueTask, {
@@ -44,8 +44,11 @@ export default function UsageElement(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start()
+    }).start(() => {
+      props.onOpenModal(props.item.appName, props.item.packageName)
+    })
   }
+
 
   const handlePressOut = () => {
     setIsPressed(false)
@@ -65,53 +68,35 @@ export default function UsageElement(props: Props) {
   }
 
   return (
-    <View style={[styles.UsageWrapper, { paddingTop: -shadow, paddingLeft: -shadow }]}>
+    <View className=' w-11/12 mx-auto' style={[ { paddingTop: -shadow, paddingLeft: -shadow }]}>
       <TouchableOpacity
         activeOpacity={1}
-        onPressIn={handlePressIn}
-        // onPressOut={handlePressOut}
-        onPress={() => {
-          props.onOpenModal(props.item.appName, props.item.packageName)
-        }}
+        onPress={handlePressIn}
       >
-        <View style={styles.usageShadow}>
+        <View className='flex items-center bg-black rounded-lg' >
           <Animated.View
-            style={[
-              styles.usageChildrenWrapper,
-              {
-                transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
-              },
-            ]}
-          >
-            <Image
-              source={{ uri: `data:image/png;base64,${props.item.iconBase64}` }} //important to add the data:image/png;base64, part
-              style={styles.image}
-            />
-            <View style={styles.textAndBarWrapper}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignContent: 'center',
-                  justifyContent: 'space-between',
-                  paddingRight: 5,
-                }}
-              >
-                <Text style={styles.appName}>{props.item.appName}</Text>
-              </View>
-              <View style={styles.usageBarWrapper}>
-                <View style={[styles.usageBar]}>
-                  <View style={styles.usageTextWrapper}>
-                    <Text style={styles.usageText}>Used: {props.item.usageTimeSeconds}s</Text>
-                    {props.timers[props.item.packageName]?.timeLeft == null ? (
-                      ''
-                    ) : (
-                      <Text style={[styles.usageText, styles.timeLeftText]}>
-                        Left: {props.timers[props.item.packageName]?.timeLeft}s/
-                        {props.timers[props.item.packageName]?.timeSet}s
-                      </Text>
-                    )}
+            className='flex flex-row items-center bg-yellow-100 rounded-lg border-2 border-black p-2 z-20'
+            style={[{ gap: 8, transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }]}]}>
+            <View className='w-14 h-14 border-2 border-black rounded-full'>
+              <Image className='w-full h-full'
+                source={{ uri: `data:image/png;base64,${props.item.iconBase64}` }}/>
+            </View>
+
+            <View className='flex-grow flex flex-col'>
+              <Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>
+              <View className='w-full h-7 border-2 border-black rounded-lg overflow-hidden'>
+                <View className='bg-red-400 w-full h-full'>
+                  <View className='absolute z-10 flex font-lexend flex-row justify-between items-center pb-px w-full h-full px-1.5'>
+                    <Text className='text-15 text-black font-lexend' >Used: {props.item.usageTimeSeconds}s</Text>
+                    {props.timer?.timeLeft === undefined ?
+                      ('')
+                      :
+                      ( <Text className='text-15 text-black font-lexend'>
+                        Left: {props.timer?.timeLeft}s/
+                        {props.timer?.timeSet}s
+                      </Text> )}
                   </View>
-                  <View style={[styles.usageBarFill, { width: `${calculateUsagePercentage()}%` }]} />
+                  <View className='bg-pink-200 w-full h-full' style={{ width: `${calculateUsagePercentage()}%` }} />
                 </View>
               </View>
             </View>
@@ -121,90 +106,3 @@ export default function UsageElement(props: Props) {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  UsageWrapper: {
-    width: '90%',
-    alignSelf: 'center',
-  },
-  usageShadow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'black',
-    borderRadius: 10,
-    borderColor: 'black',
-  },
-  usageChildrenWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FDF2AD',
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: 'black',
-    padding: 9,
-    gap: 8,
-    zIndex: 20,
-  },
-  image: {
-    width: 54,
-    height: 54,
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 27,
-  },
-
-  textAndBarWrapper: {
-    flexDirection: 'column',
-    flex: 1,
-  },
-  appName: {
-    fontFamily: 'Lexend-SemiBold',
-    fontSize: 17,
-    color: 'black',
-    paddingBottom: 5,
-  },
-  usageBar: {
-    backgroundColor: '#DE6464',
-    width: '100%',
-    height: '100%',
-  },
-  usageBarFill: {
-    backgroundColor: '#FFB5C6',
-    height: '100%',
-    width: '100%',
-  },
-  usageText: {
-    fontSize: 15,
-    color: 'black',
-    fontFamily: 'Lexend-Regular',
-  },
-  appTimeSet: {
-    fontSize: 15,
-    color: 'black',
-    fontFamily: 'Lexend-Regular',
-    marginTop: 2,
-  },
-
-  timeLeftText: {
-    right: 0,
-  },
-  usageTextWrapper: {
-    position: 'absolute',
-    zIndex: 10,
-
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-    paddingHorizontal: 5,
-  },
-  usageBarWrapper: {
-    width: '100%',
-    height: 29,
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-})

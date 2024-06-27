@@ -116,7 +116,7 @@ export function Usage() {
                 contentContainerStyle={{ gap: 10, paddingTop: 20 }}
                 keyExtractor={(item) => item.appName}
                 renderItem={({ item }) => (
-                  <UsageElement onOpenModal={handleOpenModal} timers={timersRN} item={item} modalVisible={modalVisible} />
+                  <UsageElement item={item}  timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
                 )}
               />
               <ModalSetTimer
