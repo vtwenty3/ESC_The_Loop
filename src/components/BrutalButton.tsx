@@ -108,8 +108,8 @@ export default function BrutalButton(props: Props = {disabled: false}) {
             transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
           }}
         >
-          <View className='flex flex-row items-center justify-center border-2 z-3 rounded-xl px-2.5'
-            style={[{ backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }]}
+          <View className='flex flex-row items-center justify-center border-2 z-3 rounded-xl py-2.5 px-3'
+            style={[{ gap: 5, backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }]}
           >
             <Animated.View
               style={[{ transform: [{ rotate: rotation }] }, { padding: props.text ? 0 : 10 }]}
@@ -120,7 +120,7 @@ export default function BrutalButton(props: Props = {disabled: false}) {
                 color={props.iconColor ? props.iconColor : 'black'}
               />
             </Animated.View>
-            {props.text ? <Text style={{ color: props.disabled ? '#3a3a3a' : 'black' }} className='font-[Lexend-Regular] text-xl text-center py-2.5 pl-1.5'>{props.text}</Text> : null}
+            {props.text ? <Text style={{ color: props.disabled ? '#3a3a3a' : 'black' }} className='font-[Lexend-Regular] text-xl text-center'>{props.text}</Text> : null}
           </View>
         </Animated.View>
       </View>
