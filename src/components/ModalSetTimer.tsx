@@ -7,7 +7,6 @@ import { LinearGradient } from 'react-native-linear-gradient'
 
 //TODO: Add the toggle buttons so you can set individually timeSet and timeLeft?
 //When setting a timer we should account for the amount of time the app is used today
-//TODO: Come up with a better standard for handling subbmisions of timers/things like in Podftr: pass a props object and if changes enable the confirm
 
 
 interface Timers {
@@ -83,8 +82,8 @@ export function ModalSetTimer(props: Props) {
   return (
     <Modal animationType="fade" visible={props.visible} transparent>
       <View className="flex-1 justify-center items-center bg-black/40">
-        <View className="bg-white rounded-lg pb-4 px-4 border-2 border-black items-center justify-center gap-y-5">
-          <View className='flex items-center pb-2'>
+        <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:20}}>
+          <View className='flex items-center'>
             <Text className="text-lg text-black font-[Lexend-Medium]">{props.name}</Text>
             <Text className="text-sm text-black font-[Lexend-Medium]">Timer set: {props.timers[props.packageName]?.timeSet}s</Text>
             <Text className="text-sm text-black font-[Lexend-Medium]">Time left: {props.timers[props.packageName]?.timeLeft}s</Text>
@@ -115,24 +114,26 @@ export function ModalSetTimer(props: Props) {
               },
             }}
           />
-          <View className="w-[270]">
+          <View className='w-[295]'>
             <BrutalButton
               disabled={isFiveMinDisabled}
               onPress={addFiveMinutesClick}
-              text="5 mins to time left"
+              text="5 min to time left"
               color='#FDF298'
               iconName="plus-circle-outline"
             />
           </View>
-          <View className="flex-row">
-            <View className='w-32 mr-2'>
+          <View className="flex-row" style={{gap:8}}>
+            <View className='w-36'>
               <BrutalButton
                 onPress={handleClose}
                 text="Close"
                 color="#FF6B6B"
                 iconName="close-circle-outline" />
             </View>
-            <BrutalButton disabled={!change} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
+            <View className='w-36'>
+              <BrutalButton disabled={!change} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
+            </View>
           </View>
         </View>
       </View>

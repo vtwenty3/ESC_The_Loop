@@ -38,7 +38,7 @@ export default function UsageElement(props: Props) {
     setIsPressed(true)
     Animated.spring(animatedValueTask, {
       toValue: 0,
-      stiffness: 170,
+      stiffness: 70,
       damping: 6.7,
       mass: 0.2,
       restSpeedThreshold: 1,
@@ -57,10 +57,10 @@ export default function UsageElement(props: Props) {
     }, 800)
     Animated.spring(animatedValueTask, {
       toValue: shadow,
-      delay: 800,
+      delay: 650,
       stiffness: 470,
-      damping: 5.4,
-      mass: 0.8,
+      damping: 15,
+      mass: 1.5,
       restSpeedThreshold: 0.2,
       restDisplacementThreshold: 0.2,
       useNativeDriver: true,
@@ -73,9 +73,9 @@ export default function UsageElement(props: Props) {
         activeOpacity={1}
         onPress={handlePressIn}
       >
-        <View className='flex items-center bg-black rounded-lg' >
+        <View className='flex items-center bg-black rounded-xl' >
           <Animated.View
-            className='flex flex-row items-center bg-yellow-100 rounded-lg border-2 border-black p-2 z-20'
+            className='flex flex-row items-center bg-yellow-100 rounded-xl border-2 border-black p-2 z-20'
             style={[{ gap: 8, transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }]}]}>
             <View className='w-14 h-14 border-2 border-black rounded-full'>
               <Image className='w-full h-full'
