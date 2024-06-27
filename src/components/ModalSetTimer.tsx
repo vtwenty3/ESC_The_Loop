@@ -6,6 +6,9 @@ import { LinearGradient } from 'react-native-linear-gradient'
 
 
 //TODO: Add the toggle buttons so you can set individually timeSet and timeLeft?
+//When setting a timer we should account for the amount of time the app is used today
+//TODO: Come up with a better standard for handling subbmisions of timers/things like in Podftr: pass a props object and if changes enable the confirm
+
 
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
@@ -25,6 +28,7 @@ export function ModalSetTimer(props: Props) {
   const [pop, setPop] = useState<boolean>(false)
   const [isFiveMinDisabled, setIsFiveMinDisabled] = useState(true)
   const [addFiveMinutes, setAddFiveMinutes] = useState(false)
+  const [change, setChange] = useState(false)
 
 
 
@@ -35,6 +39,13 @@ export function ModalSetTimer(props: Props) {
       setIsFiveMinDisabled(false)
     }
   }, [props.visible, props.packageName, props.timers])
+
+
+  useEffect(() => {
+    if (props.timers[props.packageName]?.timeSet !== timeLimit) {
+      setChange(true)
+    }
+  }, [timeLimit])
 
   function addFiveMinutesClick() {
     setAddFiveMinutes(true)
@@ -121,7 +132,7 @@ export function ModalSetTimer(props: Props) {
                 color="#FF6B6B"
                 iconName="close-circle-outline" />
             </View>
-            <BrutalButton disabled={timeLimit === undefined} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
+            <BrutalButton disabled={!change} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
           </View>
         </View>
       </View>
