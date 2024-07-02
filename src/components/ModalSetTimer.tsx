@@ -16,9 +16,8 @@ interface Timers {
 type Props = {
   name: string
   packageName: string
-  visible: boolean
   setVisible: React.Dispatch<React.SetStateAction<boolean>>
-  setTimers: React.Dispatch<React.SetStateAction<Timers>>
+  setTimers: React.Dispatch<React.SetStateAction<Timers>> //also updates the local storage automatically
   timers: Timers
 }
 
@@ -32,12 +31,13 @@ export function ModalSetTimer(props: Props) {
 
 
   useEffect(() => {
+    console.log('test')
     const initialValue = props.timers[props.packageName]?.timeSet
     setTimeLimit(props.timers[props.packageName]?.timeSet ?? 0)
     if (initialValue && initialValue < 60) {
       setIsFiveMinDisabled(false)
     }
-  }, [props.visible, props.packageName, props.timers])
+  }, [])
 
 
   useEffect(() => {
@@ -69,18 +69,27 @@ export function ModalSetTimer(props: Props) {
     const newTimeLeft = currentTimeLeft !== undefined ? currentTimeLeft : timeLimit
     const additionalTime = addFiveMinutes ? 300 : 0
 
-    props.setTimers({
+
+
+    let newTimers = {
       ...props.timers,
       [props.packageName]: {
         timeLeft: newTimeLeft + additionalTime,
         timeSet: timeLimit,
       },
-    })
+    }
+
+    if (timeLimit === 0) {
+      delete newTimers[props.packageName]
+    }
+
+    props.setTimers(newTimers) 
+
     handleClose()
   }
 
   return (
-    <Modal animationType="fade" visible={props.visible} transparent>
+    <Modal animationType="fade" transparent>
       <View className="flex-1 justify-center items-center bg-black/40">
         <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:20}}>
           <View className='flex items-center'>

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Options, Timers } from '../types'
+import RNFS from 'react-native-fs'
 
 
 const debugLogs = true //reload the app on change
@@ -143,3 +144,99 @@ export async function deleteAll() {
   }
   debugLogs && console.log('Done.')
 }
+
+// export async function exportData() {
+//   try {
+//     const notes = await AsyncStorage.getItem(LOCAL_STORAGE_NOTES)
+//     const tasks = await AsyncStorage.getItem(LOCAL_STORAGE_TASKS)
+//     const options = await AsyncStorage.getItem(LOCAL_STORAGE_OPTIONS)
+//
+//     const data = {
+//       notes: notes ? JSON.parse(notes) : {},
+//       tasks: tasks ? JSON.parse(tasks) : {},
+//       options: options ? JSON.parse(options) : defaultOptions,
+//     }
+//
+//     const path = RNFS.DocumentDirectoryPath + '/appData.json'
+//     await RNFS.writeFile(path, JSON.stringify(data), 'utf8')
+//
+//     debugLogs && console.log('Data exported successfully to: ' + path)
+//     return path
+//   } catch (e) {
+//     debugLogs && console.log('Error exporting data: ', e)
+//   }
+// }
+
+
+
+
+export async function importData(filePath:any) {
+  try {
+    // Read the file
+    const jsonString = await RNFS.readFile(filePath, 'utf8')
+
+    // Parse the JSON
+    const importedData = JSON.parse(jsonString)
+
+    // Save the data to AsyncStorage
+    if (importedData.timers) await setTimers(importedData.timers)
+    if (importedData.notes) await AsyncStorage.setItem(LOCAL_STORAGE_NOTES, JSON.stringify(importedData.notes))
+    if (importedData.tasks) await AsyncStorage.setItem(LOCAL_STORAGE_TASKS, JSON.stringify(importedData.tasks))
+    if (importedData.options) await setOptions(importedData.options)
+
+    console.log('Data imported successfully')
+  } catch (error) {
+    console.error('Error importing data:', error)
+    throw error
+  }
+}
+
+export async function exportData() {
+  try {
+    // Fetch all data
+    const timers = await getTimers()
+    const notes = await AsyncStorage.getItem(LOCAL_STORAGE_NOTES)
+    const tasks = await AsyncStorage.getItem(LOCAL_STORAGE_TASKS)
+    const options = await getOptions()
+
+    // Combine all data into one object
+    const exportData = {
+      timers,
+      notes: notes ? JSON.parse(notes) : null,
+      tasks: tasks ? JSON.parse(tasks) : null,
+      options
+    }
+
+    // Convert to JSON string
+    const jsonString = JSON.stringify(exportData)
+
+    // Get the default directory for documents
+    const path = RNFS.DocumentDirectoryPath + '/appData.json'
+
+    // Write the file
+    await RNFS.writeFile(path, jsonString, 'utf8')
+
+    console.log('Data exported successfully to:', path)
+    return path
+  } catch (error) {
+    console.error('Error exporting data:', error)
+    throw error
+  }
+}
+
+
+// export async function importData(filePath:any) {
+//   try {
+//     const data = await RNFS.readFile(filePath, 'utf8')
+//     const parsedData = JSON.parse(data)
+//
+//     // await AsyncStorage.setItem(LOCAL_STORAGE_TIMERS, JSON.stringify(parsedData.timers));
+//     await AsyncStorage.setItem(LOCAL_STORAGE_NOTES, JSON.stringify(parsedData.notes))
+//     await AsyncStorage.setItem(LOCAL_STORAGE_TASKS, JSON.stringify(parsedData.tasks))
+//     await AsyncStorage.setItem(LOCAL_STORAGE_OPTIONS, JSON.stringify(parsedData.options))
+//
+//     debugLogs && console.log('Data imported successfully from: ' + filePath)
+//   } catch (e) {
+//     debugLogs && console.log('Error importing data: ', e)
+//   }
+// }

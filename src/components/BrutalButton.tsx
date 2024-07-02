@@ -57,9 +57,10 @@ export default function BrutalButton(props: Props = {disabled: false}) {
   useEffect(() => {
     if (props.disabled == true) {
       handlePressIn()
-      console.log('disabled')
+    } else if (props.disabled === false) {
+      handlePressOut()
     }
-  }, [])
+  }, [props.disabled])
 
 
   const rotation = rotationValue.interpolate({

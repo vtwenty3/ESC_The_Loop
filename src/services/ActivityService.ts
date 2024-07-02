@@ -7,7 +7,7 @@ import { isAfter, setHours, setMinutes, setSeconds, startOfTomorrow } from 'date
 
 //TODO: Refactor the toggle background to use the delay and pooling rate set in settings screen.
 
-const debugLogs = false //reload the app on change
+const debugLogs = true //reload the app on change
 
 const { UsageLog } = NativeModules as {
   UsageLog: {
@@ -52,7 +52,7 @@ export async function trackedTimerHandler(trackedTimers: Timers, currentActivity
 
 function getNextResetTime() {
   const now = new Date()
-  let resetTime = setHours(setMinutes(setSeconds(now, 0), 35), 23) // Set to today's 11:25 PM
+  let resetTime = setHours(setMinutes(setSeconds(now, 0), 1), 24) // Set to today's 12:01 PM
   if (isAfter(now, resetTime)) {
     resetTime = startOfTomorrow() // If it's past today's 12 AM, set to tomorrow's 12 AM
   }

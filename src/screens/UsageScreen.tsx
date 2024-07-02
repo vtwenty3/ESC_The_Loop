@@ -119,14 +119,15 @@ export function Usage() {
                   <UsageElement item={item}  timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
                 )}
               />
-              <ModalSetTimer
-                setVisible={setModalVisible}
-                visible={modalVisible}
-                name={modalAppName}
-                packageName={modalPackageName}
-                setTimers={setTimersRN}
-                timers={timersRN}
-              />
+              {modalVisible ? (
+                <ModalSetTimer
+                  setVisible={setModalVisible}
+                  name={modalAppName}
+                  packageName={modalPackageName}
+                  setTimers={setTimersRN}
+                  timers={timersRN}
+                />
+              ) : null}
             </View>
           </View>
         </>
