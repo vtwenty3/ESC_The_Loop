@@ -9,10 +9,11 @@ import { Settings } from './src/screens/SettingsScreen'
 import { Usage } from './src/screens/UsageScreen'
 import { Create } from './src/screens/CreateScreen'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import { Note, Task } from 'src/types'
 const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
- 
+import * as localStorage from './src/services/LocalStorage'
+
 function App(): JSX.Element {
   const [iconSize] = useState(37)
   // const radius = (iconSize + 14) / 2;
@@ -37,7 +38,7 @@ function App(): JSX.Element {
   }
 
   async function Init() {
-    const note = {
+    const note: Note = {
       title: 'Im a sample note!',
       description: 'Click me to edit or delete me.',
       type: 'Note',
@@ -45,7 +46,7 @@ function App(): JSX.Element {
       complete: false,
       timestamp: 1,
     }
-    const task1 = {
+    const task1: Task = {
       title: 'I\'m a sample task!',
       description: '',
       type: 'Task',
@@ -53,25 +54,29 @@ function App(): JSX.Element {
       complete: false,
       timestamp: 2,
     }
-    const task2 = {
+    const task2: Task = {
       title: 'Mark me as complete...',
       description: '',
-      type: 'task',
+      type: 'Task',
       tags: '',
       complete: false,
       timestamp: 3,
     }
-    const task3 = {
+    const task3 : Task = {
       title: '...or click me to edit!',
       description: '',
-      type: 'task',
+      type: 'Task',
       tags: '',
       complete: false,
       timestamp: 4,
     }
 
-    await AsyncStorage.setItem('@Note', JSON.stringify([note]))
-    await AsyncStorage.setItem('@Task', JSON.stringify([task1, task2, task3]))
+    // await AsyncStorage.setItem('@Note', JSON.stringify([note]))
+    await localStorage.setDataByKey('@local_notes' , note )
+    //fix these
+    await localStorage.setDataByKey('@local_tasks' , [task1, task2, task3] )
+
+    // await AsyncStorage.setItem('@Task', JSON.stringify([task1, task2, task3]))
   }
 
   useEffect(() => {
@@ -81,7 +86,7 @@ function App(): JSX.Element {
 
       if (isFlagSet === null) {
         // the flag is not set, perform the action here
-        Init()
+        await Init()
         // set the flag in AsyncStorage
         await AsyncStorage.setItem('myFlag', 'true')
       } else {

@@ -55,7 +55,7 @@ export function Usage() {
   useFocusEffect(
     React.useCallback(() => {
       const loadTimers = async () => {
-        const loadedTimers = await localStorage.getTimers()
+        const loadedTimers = await localStorage.getDataByKey('@local_timers') as Timers
         setTimersRN(loadedTimers)
       }
       setAppUsageData()
@@ -65,7 +65,7 @@ export function Usage() {
 
   useEffect(() => {
     const updateTimers = async () => {
-      await localStorage.setTimers(timersRN)
+      await localStorage.setDataByKey('@local_timers', timersRN)
     }
     updateTimers()
   }, [timersRN])
@@ -73,7 +73,7 @@ export function Usage() {
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
     console.log('[handleAppStateChange]')
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
-      const localTimers = await localStorage.getTimers()
+      const localTimers = await localStorage.getDataByKey('@local_timers') as Timers
       setTimersRN(localTimers)
     }
     try {

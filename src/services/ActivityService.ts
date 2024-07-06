@@ -37,7 +37,7 @@ export async function handleTimerExpired(localTimers: Timers, currentActivity: s
 export async function handleTimerDecrease(localTimers: Timers, currentActivity: string, delay: number) {
   debugLogs && console.log('activity -> ', currentActivity)
   localTimers[currentActivity].timeLeft! -= delay / 1000
-  await localStorage.setTimers(localTimers)
+  await localStorage.setDataByKey('@local_timers', localTimers)
   debugLogs && console.log(` [Timer left]: ${localTimers[currentActivity].timeLeft} seconds, decreased with: ${delay / 1000}s`)
 }
 
@@ -109,7 +109,7 @@ export async function backgroundTimerTask(
       await sleep(backgroundTaskParams!.screenOffDelay)
       debugLogs && console.log('Screen Off. Waiting:', backgroundTaskParams!.screenOffDelay)
     } else {
-      const trackedTimers = await localStorage.getTimers() // Fetch the latest timers from storage
+      const trackedTimers = await localStorage.getDataByKey('@local_timers') as Timers // Fetch the latest timers from storage
       if (currentActivity in trackedTimers) {
         await trackedTimerHandler(trackedTimers, currentActivity, backgroundTaskParams!.delay)
         if (!userAlerted) {

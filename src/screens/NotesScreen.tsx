@@ -1,37 +1,20 @@
-import React, { useState, useEffect } from 'react'
-import InputFiled from '../components/InputFiledElement'
+import React, { useState } from 'react'
 import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import NoteElement from '../components/NoteElement'
 import { useFocusEffect } from '@react-navigation/native'
 import ModalEdit from '../components/ModalEdit'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { globalStyles } from '../globalStyles'
-import { StyleSheet, View, FlatList } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import NoDataFound from '../components/NoDataFound'
+import * as localStorage from '../services/LocalStorage'
+import { setDataByKey } from '../services/LocalStorage'
 
 export function Notes() {
   const [data, setData] = useState<any>()
   const [modalVisible, setModalVisible] = useState(false)
   const [modalObject, setModalObject] = useState({})
 
-  async function getMyObject() {
-    try {
-      const jsonValue = await AsyncStorage.getItem('@Note')
-      return jsonValue != null ? await JSON.parse(jsonValue) : null
-    } catch (e) {
-      console.log(' Error: ', e)
-    }
-    console.log('Data Loaded.')
-  }
-
-  async function updateMyObject(updatedData: any) {
-    try {
-      await AsyncStorage.setItem('@Note', JSON.stringify(updatedData))
-    } catch (e) {
-      console.log('Error: ', e)
-    }
-  }
 
   const handleSave = async (itemUpdated: object, timestampOld: string) => {
     const findIndex = data.findIndex((obj: any) => obj.timestamp === timestampOld)
@@ -39,7 +22,7 @@ export function Notes() {
       data.splice(findIndex, 1) // Remove the object at the found index
       data.push(itemUpdated) // Append the new object to the end of the array
     }
-    await updateMyObject(data)
+    await setDataByKey('@local_notes', data)
     setModalVisible(false)
   }
 
@@ -48,7 +31,7 @@ export function Notes() {
     if (findIndex !== -1) {
       data.splice(findIndex, 1) // Remove the object at the found index
     }
-    await updateMyObject(data)
+    await setDataByKey('@local_notes', data)
     fetchData()
 
     setTimeout(() => {
@@ -59,7 +42,7 @@ export function Notes() {
 
   const fetchData = async () => {
     try {
-      const data = await getMyObject()
+      const data = await localStorage.getDataByKey('@local_notes')
       if (isActive) {
         setData(data)
         // console.log('data:', data, typeof data);

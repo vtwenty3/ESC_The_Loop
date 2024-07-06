@@ -30,3 +30,21 @@ export type AppUsageData = {
 export interface Timers {
     [key: string]: { timeLeft?: number; timeSet?: number }
 }
+
+export interface Note {
+  title: string,
+  description: string,
+  type: 'Note'
+  tags: string,
+  complete: boolean,
+  timestamp: number
+}
+
+export interface Task {
+  title: string,
+  description: string,
+  type: 'Task'
+  tags: string,
+  complete: boolean,
+  timestamp: number
+}

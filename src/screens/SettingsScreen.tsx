@@ -10,8 +10,10 @@ import * as activityService from '../services/ActivityService'
 import { useFocusEffect } from '@react-navigation/native'
 import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import Share from 'react-native-share'
+import RNFS from 'react-native-fs'
+import RNBlobUtil from 'react-native-blob-util'
 import DocumentPicker from 'react-native-document-picker'
-
 
 export function Settings() {
   const [poolingRate, setPoolingRate] = useState<number>(1)
@@ -50,11 +52,43 @@ export function Settings() {
 
 
   const handleExport = async () => {
+    try {
+      const jsonData = await localStorage.exportData()
+      const path = `${RNFS.TemporaryDirectoryPath}/exportedData.json`
 
+      await RNBlobUtil.fs.writeFile(path, jsonData, 'utf8')
+
+      await Share.open({
+        url: `file://${path}`,
+        title: 'Export Data',
+        type: 'application/json',
+        subject: 'Backup of your data', // for email
+      })
+
+      // Optionally, clean up the temporary file after sharing
+      await RNBlobUtil.fs.unlink(path)
+    } catch (error) {
+      console.error('Error while exporting data:', error)
+      Alert.alert('Export Error', 'There was an error while exporting your data.')
+    }
   }
 
   const handleImport = async () => {
-
+    // try {
+    //   const res = await DocumentPicker.pick({
+    //     type: [DocumentPicker.types.plainText],
+    //   })
+    //
+    //   await localStorage.importData(res.uri)
+    //
+    //   Alert.alert('Success', 'Data imported successfully')
+    // } catch (err) {
+    //   if (DocumentPicker.isCancel(err)) {
+    //     // User cancelled the picker, exit any dialogs or menus and move on
+    //   } else {
+    //     throw err
+    //   }
+    // }
   }
 
 
@@ -93,14 +127,14 @@ export function Settings() {
     restartBackgroundService()
     const options = await localStorage.getOptions()
     options.parameters.delay = poolingRate * 1000
-    await localStorage.setOptions(options)
+    await localStorage.setDataByKey('@local_options', options)
   }
 
   async function onOptionsReset() {
     restartBackgroundService()
     const options = await localStorage.getOptions()
     options.parameters = localStorage.defaultOptions.parameters
-    await localStorage.setOptions(options)
+    await localStorage.setDataByKey('@local_options', options)
     loadOptions()
   }
 
@@ -178,7 +212,7 @@ export function Settings() {
             </View>
           </View>
 
-          <BrutalButton iconName="timer-sand-empty" color="#FF6B6B" text="Delete All Timers" onPress={localStorage.deleteTimers} />
+          <BrutalButton iconName="timer-sand-empty" color="#FF6B6B" text="Delete All Timers" onPress={()=>localStorage.deleteKey('@local_timers')} />
           <BrutalButton iconName="database-export-outline" text="Export Data"  onPress={handleExport} />
           <BrutalButton iconName="database-import-outline" text="Import Data" onPress={handleImport} />
         </ScrollView>

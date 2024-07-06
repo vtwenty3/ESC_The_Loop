@@ -41,7 +41,7 @@ export function Create() {
     }
 
     // Get the current data in storage
-
+    //TODO: FIx create screen
     const currentDataString = await AsyncStorage.getItem('@' + type)
     // If there is no current data, create a new array and add the new data
     if (!currentDataString) {
