@@ -109,8 +109,8 @@ export default function BrutalButton(props: Props = {disabled: false}) {
             transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],
           }}
         >
-          <View className='flex flex-row items-center justify-center border-2 z-3 rounded-xl py-2.5 px-3'
-            style={[{ gap: 5, backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }]}
+          <View className='flex flex-row items-center justify-center border-2 z-3 rounded-xl'
+            style={[{ gap: 5, paddingVertical: props.text ? 10 : 0,  backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }]}
           >
             <Animated.View
               style={[{ transform: [{ rotate: rotation }] }, { padding: props.text ? 0 : 10 }]}

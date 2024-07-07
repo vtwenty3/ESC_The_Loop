@@ -37,9 +37,9 @@ export default function EditModal(props: Props) {
   return (
     <Modal animationType="fade" visible={props.visible} transparent={true}>
       <View className='flex-1 flex justify-center items-center bg-modalBgColor'>
-        <View className='w-[92%] bg-[#D9D9D9] rounded-xl py-5 px-2.5 border-2 border-black flex flex-col gap-y-4'  >
+        <View style={{gap:20}} className='w-[92%] bg-neutral-300 rounded-xl p-5 border-2 border-black flex flex-col'  >
           <View  className='flex flex-row items-center justify-center'>
-            <View style={{flex: 1}}>
+            <View className='flex-1 mr-3' >
               <InputFiled
                 autofocus={props.autofocusTitle}
                 pop={pop}
@@ -60,7 +60,7 @@ export default function EditModal(props: Props) {
                 }
                 setDeleteConfirm(true)
               }}
-            />
+            ></BrutalButton>
           </View>
           <View>
             <InputFiled
