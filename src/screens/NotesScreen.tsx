@@ -9,6 +9,9 @@ import { FlatList, View } from 'react-native'
 import NoDataFound from '../components/NoDataFound'
 import * as localStorage from '../services/LocalStorage'
 
+//TODO: Notes screen and Tasks screen use 90% the same logic. We need to find a way make the code more DRY.
+// Maybe a parent component holding all the common logic? Does react-native has a composible alternative (like vue)
+
 export function Notes() {
   const [data, setData] = useState<any>()
   const [modalVisible, setModalVisible] = useState(false)
