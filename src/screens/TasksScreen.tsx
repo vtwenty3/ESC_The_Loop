@@ -1,13 +1,14 @@
-import React, {useState, useEffect} from 'react'
-import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import React, {useState} from 'react'
+import {useFocusEffect } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {globalStyles} from '../globalStyles'
-import {StyleSheet, View, FlatList, Text} from 'react-native'
+import {View, FlatList} from 'react-native'
 import ModalEdit from '../components/ModalEdit'
 import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import Task from '../components/TaskElement'
 import NoDataFound from '../components/NoDataFound'
+import * as localStorage from '../services/LocalStorage'
 
 export function Tasks() {
   const [data, setData] = useState<any>()
@@ -24,13 +25,6 @@ export function Tasks() {
     console.log('Data Loaded.')
   }
 
-  async function updateMyObject(updatedData: any) {
-    try {
-      await AsyncStorage.setItem('@Task', JSON.stringify(updatedData))
-    } catch (e) {
-      console.log('Error: ', e)
-    }
-  }
   const handleSave = async (itemUpdated: object, timestampOld: string) => {
     const findIndex = data.findIndex(
       (obj: any) => obj.timestamp === timestampOld,
@@ -39,7 +33,7 @@ export function Tasks() {
       data.splice(findIndex, 1) // Remove the object at the found index
       data.push(itemUpdated) // Append the new object to the end of the array
     }
-    await updateMyObject(data)
+    await localStorage.setDataByKey('@local_tasks', data)
     setModalVisible(false)
   }
 
@@ -48,8 +42,8 @@ export function Tasks() {
     if (findIndex !== -1) {
       data.splice(findIndex, 1) // Remove the object at the found index
     }
-    await updateMyObject(data)
-    fetchData()
+    await localStorage.setDataByKey('@local_tasks', data)
+    await fetchData()
     setTimeout(() => {
       setModalVisible(false)
     }, 400)
@@ -60,28 +54,27 @@ export function Tasks() {
     if (findIndex !== -1) {
       data[findIndex].complete = !complete
     }
-    await updateMyObject(data)
+    await localStorage.setDataByKey('@local_tasks', data)
   }
 
   const isActive = true
 
   const fetchData = async () => {
     try {
-      const data = await getMyObject()
+      const data = await localStorage.getDataByKey('@local_tasks')
       if (isActive) {
         setData(data)
+        // console.log('data:', data, typeof data)
       }
     } catch (e) {
       console.log('Error fetchData:', e)
     }
   }
+
+
   useFocusEffect(
     React.useCallback(() => {
-      let isActive = true
       fetchData()
-      return () => {
-        isActive = false
-      }
     }, []),
   )
 
@@ -135,4 +128,3 @@ export function Tasks() {
   )
 }
 
-const styles = StyleSheet.create({})

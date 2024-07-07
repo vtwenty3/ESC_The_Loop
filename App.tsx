@@ -72,7 +72,7 @@ function App(): JSX.Element {
     }
 
     // await AsyncStorage.setItem('@Note', JSON.stringify([note]))
-    await localStorage.setDataByKey('@local_notes' , note )
+    await localStorage.setDataByKey('@local_notes' , [note] )
     //fix these
     await localStorage.setDataByKey('@local_tasks' , [task1, task2, task3] )
 

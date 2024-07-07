@@ -5,10 +5,9 @@ import NoteElement from '../components/NoteElement'
 import { useFocusEffect } from '@react-navigation/native'
 import ModalEdit from '../components/ModalEdit'
 import { globalStyles } from '../globalStyles'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, View } from 'react-native'
 import NoDataFound from '../components/NoDataFound'
 import * as localStorage from '../services/LocalStorage'
-import { setDataByKey } from '../services/LocalStorage'
 
 export function Notes() {
   const [data, setData] = useState<any>()
@@ -22,7 +21,7 @@ export function Notes() {
       data.splice(findIndex, 1) // Remove the object at the found index
       data.push(itemUpdated) // Append the new object to the end of the array
     }
-    await setDataByKey('@local_notes', data)
+    await localStorage.setDataByKey('@local_notes', data)
     setModalVisible(false)
   }
 
@@ -31,9 +30,8 @@ export function Notes() {
     if (findIndex !== -1) {
       data.splice(findIndex, 1) // Remove the object at the found index
     }
-    await setDataByKey('@local_notes', data)
-    fetchData()
-
+    await localStorage.setDataByKey('@local_notes', data)
+    await fetchData()
     setTimeout(() => {
       setModalVisible(false)
     }, 400)
@@ -45,7 +43,7 @@ export function Notes() {
       const data = await localStorage.getDataByKey('@local_notes')
       if (isActive) {
         setData(data)
-        // console.log('data:', data, typeof data);
+        // console.log('data:', data, typeof data)
       }
     } catch (e) {
       console.log('Error fetchData:', e)
@@ -54,11 +52,7 @@ export function Notes() {
 
   useFocusEffect(
     React.useCallback(() => {
-      let isActive = true
       fetchData()
-      return () => {
-        isActive = false
-      }
     }, [])
   )
 
@@ -105,4 +99,3 @@ export function Notes() {
   )
 }
 
-const styles = StyleSheet.create({})

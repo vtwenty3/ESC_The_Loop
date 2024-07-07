@@ -55,8 +55,8 @@ export function Usage() {
   useFocusEffect(
     React.useCallback(() => {
       const loadTimers = async () => {
-        const loadedTimers = await localStorage.getDataByKey('@local_timers') as Timers
-        setTimersRN(loadedTimers)
+        const loadedTimers = await localStorage.getDataByKey('@local_timers')
+        setTimersRN(loadedTimers ?? {})
       }
       setAppUsageData()
       loadTimers()

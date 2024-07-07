@@ -12,6 +12,13 @@ type LocalStorageKeys =
   | '@local_tasks'
   | '@local_options'
 
+export type StorageValueMap = {
+  '@local_timers': Timers;
+  '@local_notes': Note[];
+  '@local_tasks': Task[];
+  '@local_options': Options;
+};
+
 export const defaultOptions: Options = {
   taskName: 'ESC The Loop Background Service',
   taskTitle: 'ESC The Loop',
@@ -49,15 +56,15 @@ export async function getOptions(): Promise<Options> {
 
 
 
-export async function getDataByKey(key: LocalStorageKeys): Promise<Timers| Note | Task | undefined > {
+export async function getDataByKey<K extends LocalStorageKeys>(key: K): Promise<StorageValueMap[K] | null> {
   try {
     const jsonValue = await AsyncStorage.getItem(key)
     return jsonValue != null ? await JSON.parse(jsonValue) : null
   } catch (e) {
-    console.error(' Error loading data for: ',key,  e)
+    console.error('Error loading data for: ', key, e)
+    return null
   }
 }
-
 export async function setDataByKey(key: LocalStorageKeys, data: Timers | Note[] | Task[] | Options ) {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(data))

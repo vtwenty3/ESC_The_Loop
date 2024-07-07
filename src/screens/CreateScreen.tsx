@@ -5,12 +5,15 @@ import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import ToggleButtons from '../components/ToggleButtons'
 import BrutalButton from '../components/BrutalButton'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+// import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as localStorage from '../services/LocalStorage'
+import { Note, Task } from '../types'
+import { Notes } from './NotesScreen'
 
 export function Create() {
   const [title, setTitle] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const [type, setType] = useState('Task')
+  const [type, setType] = useState<'Task' | 'Note'>('Task')
   const [modalEmpty, setModalEmpty] = useState(false)
   const [modalCreated, setModalCreated] = useState(false)
   const [pop, setPop] = useState(false)
@@ -26,12 +29,16 @@ export function Create() {
     setDescription('')
   }
 
-  async function SaveData() {
+
+  async function onCreate() {
     if (title === '') {
       setModalEmpty(true)
       return
     }
-    const data = {
+
+    const localKey = type === 'Task' ? '@local_tasks' : '@local_notes'
+
+    const currentData: Note | Task = {
       title,
       description,
       type,
@@ -40,24 +47,22 @@ export function Create() {
       timestamp: new Date().toISOString(),
     }
 
-    // Get the current data in storage
-    //TODO: FIx create screen
-    const currentDataString = await AsyncStorage.getItem('@' + type)
-    // If there is no current data, create a new array and add the new data
-    if (!currentDataString) {
-      const newDataString = JSON.stringify([data])
-      await AsyncStorage.setItem('@' + type, newDataString)
-    } else {
-      // If there is current data, parse it and add the new data to the array
-      const currentData = JSON.parse(currentDataString)
-      currentData.push(data)
-      const newDataString = JSON.stringify(currentData)
-      await AsyncStorage.setItem('@' + type, newDataString)
+    const composeData = (previousData: Note[] | Task[] | null, current: Note | Task) => {
+      if (previousData) {
+        return [...previousData, current]
+      } else {
+        return [current]
+      }
     }
 
-    // Log the saved data and navigate back to previous screen
-    // console.log('Saved:', data);
+    const previousData: (Note | Task)[] | null = await localStorage.getDataByKey(localKey)
+
+    console.log(previousData)
+
+    // @ts-ignore
+    await localStorage.setDataByKey(localKey, composeData(previousData, currentData))
     complete()
+
   }
 
   return (
@@ -91,7 +96,7 @@ export function Create() {
         <View style={styles.brutalButtonWrapper}>
           <View style={styles.brutalButtonFiller}></View>
           <View style={styles.brutalButtonFiller}>
-            <BrutalButton text={'Create'} onPress={SaveData} />
+            <BrutalButton text={'Create'} onPress={onCreate} />
             {/* <BrutalButton onPress={PrintData} /> */}
           </View>
         </View>
