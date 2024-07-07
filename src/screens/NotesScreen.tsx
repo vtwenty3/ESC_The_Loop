@@ -32,6 +32,8 @@ export function Notes() {
     }
     await localStorage.setDataByKey('@local_notes', data)
     await fetchData()
+
+
     setTimeout(() => {
       setModalVisible(false)
     }, 400)
@@ -43,7 +45,7 @@ export function Notes() {
       const data = await localStorage.getDataByKey('@local_notes')
       if (isActive) {
         setData(data)
-        // console.log('data:', data, typeof data)
+        console.log('data:', data)
       }
     } catch (e) {
       console.log('Error fetchData:', e)

@@ -9,7 +9,7 @@ import { Settings } from './src/screens/SettingsScreen'
 import { Usage } from './src/screens/UsageScreen'
 import { Create } from './src/screens/CreateScreen'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Note, Task } from 'src/types'
+import { Note, Task } from './src/types'
 const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
 import * as localStorage from './src/services/LocalStorage'
@@ -44,7 +44,7 @@ function App(): JSX.Element {
       type: 'Note',
       tags: '',
       complete: false,
-      timestamp: 1,
+      timestamp: new Date().toISOString(),
     }
     const task1: Task = {
       title: 'I\'m a sample task!',
@@ -52,7 +52,7 @@ function App(): JSX.Element {
       type: 'Task',
       tags: '',
       complete: false,
-      timestamp: 2,
+      timestamp: new Date().toISOString(),
     }
     const task2: Task = {
       title: 'Mark me as complete...',
@@ -60,7 +60,7 @@ function App(): JSX.Element {
       type: 'Task',
       tags: '',
       complete: false,
-      timestamp: 3,
+      timestamp: new Date().toISOString(),
     }
     const task3 : Task = {
       title: '...or click me to edit!',
@@ -68,7 +68,7 @@ function App(): JSX.Element {
       type: 'Task',
       tags: '',
       complete: false,
-      timestamp: 4,
+      timestamp: new Date().toISOString(),
     }
 
     // await AsyncStorage.setItem('@Note', JSON.stringify([note]))

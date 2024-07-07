@@ -61,6 +61,7 @@ export function Settings() {
       await Share.open({
         url: `file://${path}`,
         title: 'Export Data',
+        filename: 'data.json',
         type: 'application/json',
         subject: 'Backup of your data', // for email
       })
@@ -74,21 +75,21 @@ export function Settings() {
   }
 
   const handleImport = async () => {
-    // try {
-    //   const res = await DocumentPicker.pick({
-    //     type: [DocumentPicker.types.plainText],
-    //   })
-    //
-    //   await localStorage.importData(res.uri)
-    //
-    //   Alert.alert('Success', 'Data imported successfully')
-    // } catch (err) {
-    //   if (DocumentPicker.isCancel(err)) {
-    //     // User cancelled the picker, exit any dialogs or menus and move on
-    //   } else {
-    //     throw err
-    //   }
-    // }
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.json],
+      })
+
+      await localStorage.importData(res[0].uri)
+
+      Alert.alert('Success', 'Data imported successfully')
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        // User cancelled the picker, exit any dialogs or menus and move on
+      } else {
+        throw err
+      }
+    }
   }
 
 

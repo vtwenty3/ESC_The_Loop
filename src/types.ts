@@ -37,7 +37,7 @@ export interface Note {
   type: 'Note'
   tags: string,
   complete: boolean,
-  timestamp: number
+  timestamp: string
 }
 
 export interface Task {
@@ -46,5 +46,5 @@ export interface Task {
   type: 'Task'
   tags: string,
   complete: boolean,
-  timestamp: number
+  timestamp: string
 }

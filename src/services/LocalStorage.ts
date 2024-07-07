@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Note, Options, Task, Timers } from '../types'
+import RNFS from 'react-native-fs'
 // import RNFS from 'react-native-fs'
 
 
@@ -125,8 +126,8 @@ export async function exportData() {
     const options = await getOptions()
     const allData = {
       timers,
-      notes: notes ? JSON.parse(notes) : null,
-      tasks: tasks ? JSON.parse(tasks) : null,
+      notes,
+      tasks,
       options,
     }
     return JSON.stringify(allData) // Serialize the JSON data
@@ -138,19 +139,32 @@ export async function exportData() {
 
 export async function importData(filePath: string) {
   try {
-    // // Read the file
-    // const jsonString = await RNFS.readFile(filePath, 'utf8')
-    //
-    // // Parse the JSON
-    // const importedData = JSON.parse(jsonString)
-    //
-    // // Save the data to AsyncStorage
-    // if (importedData.timers) await setTimers(importedData.timers)
-    // if (importedData.notes) await AsyncStorage.setItem(LOCAL_STORAGE_NOTES, JSON.stringify(importedData.notes))
-    // if (importedData.tasks) await AsyncStorage.setItem(LOCAL_STORAGE_TASKS, JSON.stringify(importedData.tasks))
-    // if (importedData.options) await setOptions(importedData.options)
-    //
-    // console.log('Data imported successfully')
+    // Read the file
+    const jsonString = await RNFS.readFile(filePath, 'utf8')
+    console.log('File content:', jsonString)
+
+    // Parse the JSON
+    const importedData = JSON.parse(jsonString)
+    console.log('Parsed data:', importedData)
+
+    // Save the data to AsyncStorage
+    if (importedData.timers) {
+      await setDataByKey('@local_timers', importedData.timers)
+      console.log('Timers imported successfully')
+    }
+    if (importedData.notes) {
+      await setDataByKey('@local_notes', importedData.notes)
+      console.log('Notes imported successfully', importedData.notes)
+      console.log(await  getDataByKey('@local_notes'))
+    }
+    if (importedData.tasks) {
+      await setDataByKey('@local_tasks', importedData.tasks)
+      console.log('Tasks imported successfully')
+    }
+    if (importedData.options) {
+      await setDataByKey('@local_options', importedData.options)
+      console.log('Options imported successfully')
+    }
   } catch (error) {
     console.error('Error importing data:', error)
     throw error
