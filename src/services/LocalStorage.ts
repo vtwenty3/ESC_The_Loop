@@ -119,9 +119,9 @@ export async function deleteAll() {
 
 export async function exportData() {
   try {
-    const timers = await getDataByKey('@local_timers') as Timers
-    const notes = await getDataByKey('@local_notes') as Note
-    const tasks = await getDataByKey('@local_tasks') as Task
+    const timers = await getDataByKey('@local_timers')
+    const notes = await getDataByKey('@local_notes')
+    const tasks = await getDataByKey('@local_tasks')
     const options = await getOptions()
     const allData = {
       timers,
