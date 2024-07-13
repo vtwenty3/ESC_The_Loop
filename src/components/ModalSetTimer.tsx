@@ -46,9 +46,7 @@ export function ModalSetTimer(props: Props) {
     }
   }, [timeLimit])
 
-  function addFiveMinutesClick() {
-    setAddFiveMinutes(true)
-  }
+
 
   function handleClose() {
     setTimeLimit(0)
