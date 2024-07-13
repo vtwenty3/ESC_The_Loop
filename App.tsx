@@ -13,6 +13,7 @@ import { Note, Task } from './src/types'
 const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
 import * as localStorage from './src/services/LocalStorage'
+import './global.css'
 
 function App(): JSX.Element {
   const [iconSize] = useState(37)
