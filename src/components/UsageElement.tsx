@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
+import BrutalButton from './BrutalButton'
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
@@ -49,6 +50,10 @@ export default function UsageElement(props: Props) {
     })
   }
 
+  function addFiveMinutes()
+  {
+    console.log('add 5 min')
+  }
 
   const handlePressOut = () => {
     setIsPressed(false)
@@ -68,14 +73,15 @@ export default function UsageElement(props: Props) {
   }
 
   return (
-    <View className=' w-11/12 mx-auto' style={[ { paddingTop: -shadow, paddingLeft: -shadow }]}>
+    <View className='flex flex-row w-[95%] mx-auto gap-1 max-h-[75]' style={[ { paddingTop: -shadow, paddingLeft: -shadow }]}>
       <TouchableOpacity
+        className='flex-1'
         activeOpacity={1}
         onPress={handlePressIn}
       >
-        <View className='flex items-center bg-black rounded-xl' >
+        <View className='flex items-center bg-black rounded-xl h-full'  >
           <Animated.View
-            className='flex flex-row items-center bg-yellow-100 rounded-xl border-2 border-black p-2 z-20'
+            className='flex flex-row items-center bg-yellow-100 rounded-xl border-2 border-black p-2 z-20 h-full'
             style={[{ gap: 8, transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }]}]}>
             <View className='w-14 h-14 border-2 border-black rounded-full'>
               <Image className='w-full h-full'
@@ -83,7 +89,12 @@ export default function UsageElement(props: Props) {
             </View>
 
             <View className='flex-grow flex flex-col'>
-              <Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>
+              <View className='flex flex-row justify-between'>
+                <Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>
+
+                {/*<Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>*/}
+
+              </View>
               <View className='w-full h-7 border-2 border-black rounded-lg overflow-hidden'>
                 <View className='bg-red-400 w-full h-full'>
                   <View className='absolute z-10 flex font-lexend flex-row justify-between items-center pb-px w-full h-full px-1.5'>
@@ -100,9 +111,21 @@ export default function UsageElement(props: Props) {
                 </View>
               </View>
             </View>
+
           </Animated.View>
+
         </View>
       </TouchableOpacity>
+      {props.timer?.timeLeft !== undefined && (
+        <View className='h-full'>
+          <BrutalButton
+            fullHeight
+            iconName="timer-sand"
+            color="#4ade80"
+            onPress={addFiveMinutes}
+          />
+        </View>
+      )}
     </View>
   )
 }

@@ -32,7 +32,7 @@ export function ModalSetTimer(props: Props) {
 
   useEffect(() => {
     console.log('test')
-    const initialValue = props.timers[props.packageName]?.timeSet
+    const initialValue = props.timers[props.packageName]?.timeLeft
     setTimeLimit(props.timers[props.packageName]?.timeSet ?? 0)
     if (initialValue && initialValue < 60) {
       setIsFiveMinDisabled(false)
@@ -93,9 +93,18 @@ export function ModalSetTimer(props: Props) {
       <View className="flex-1 justify-center items-center bg-black/40">
         <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:20}}>
           <View className='flex items-center'>
-            <Text className="text-lg text-black font-[Lexend-Medium]">{props.name}</Text>
+            <Text className="text-lg text-black font-[Lexend-Medium]">Timer for: {props.name}</Text>
             <Text className="text-sm text-black font-[Lexend-Medium]">Timer set: {props.timers[props.packageName]?.timeSet}s</Text>
             <Text className="text-sm text-black font-[Lexend-Medium]">Time left: {props.timers[props.packageName]?.timeLeft}s</Text>
+            <View className='w-[295] pt-4 '>
+              {/*<BrutalButton*/}
+              {/*  disabled={isFiveMinDisabled}*/}
+              {/*  onPress={addFiveMinutesClick}*/}
+              {/*  text="Extend 5 minutes"*/}
+              {/*  color='#FDF298'*/}
+              {/*  iconName="plus-circle-outline"*/}
+              {/*/>*/}
+            </View>
           </View>
           <TimerPicker
             padWithNItems={2}
@@ -123,24 +132,16 @@ export function ModalSetTimer(props: Props) {
               },
             }}
           />
-          <View className='w-[295]'>
-            <BrutalButton
-              disabled={isFiveMinDisabled}
-              onPress={addFiveMinutesClick}
-              text="5 min to time left"
-              color='#FDF298'
-              iconName="plus-circle-outline"
-            />
-          </View>
+
           <View className="flex-row" style={{gap:8}}>
-            <View className='w-36'>
+            <View className='w-40'>
               <BrutalButton
                 onPress={handleClose}
                 text="Close"
                 color="#FF6B6B"
                 iconName="close-circle-outline" />
             </View>
-            <View className='w-36'>
+            <View className='w-40'>
               <BrutalButton disabled={!change} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
             </View>
           </View>
