@@ -89,20 +89,10 @@ export function ModalSetTimer(props: Props) {
   return (
     <Modal animationType="fade" transparent>
       <View className="flex-1 justify-center items-center bg-black/40">
-        <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:20}}>
+        <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:15}}>
           <View className='flex items-center'>
-            <Text className="text-lg text-black font-[Lexend-Medium]">Timer for: {props.name}</Text>
-            <Text className="text-sm text-black font-[Lexend-Medium]">Timer set: {props.timers[props.packageName]?.timeSet}s</Text>
-            <Text className="text-sm text-black font-[Lexend-Medium]">Time left: {props.timers[props.packageName]?.timeLeft}s</Text>
-            <View className='w-[295] pt-4 '>
-              {/*<BrutalButton*/}
-              {/*  disabled={isFiveMinDisabled}*/}
-              {/*  onPress={addFiveMinutesClick}*/}
-              {/*  text="Extend 5 minutes"*/}
-              {/*  color='#FDF298'*/}
-              {/*  iconName="plus-circle-outline"*/}
-              {/*/>*/}
-            </View>
+            <Text className="text-2xl text-black font-[Lexend-Medium]">Set App Timer</Text>
+            <Text className="text-md text-black font-[Lexend-Medium]">for: {props.name}</Text>
           </View>
           <TimerPicker
             padWithNItems={2}

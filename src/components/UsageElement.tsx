@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
 import BrutalButton from './BrutalButton'
+import { CustomModal }  from './Modal'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import * as localStorage from '../services/LocalStorage'
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
+
+
 type Props = {
   item: {
     packageName: string
@@ -20,6 +25,7 @@ export default function UsageElement(props: Props) {
   const shadow = -5
   const [isPressed, setIsPressed] = useState(false)
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
+  const [isModalVisible, setIsModalVisible] = useState(false)
 
   const calculateUsagePercentage = () => {
     const timeLeft = props.timer?.timeLeft || 0
@@ -50,10 +56,31 @@ export default function UsageElement(props: Props) {
     })
   }
 
-  function addFiveMinutes()
-  {
-    console.log('add 5 min')
+
+  //TODO: Make sure that the state of the usageTime updates as now it doesn't
+  const  handleConfirmModal = async () => {
+    const loadedTimers = await localStorage.getDataByKey('@local_timers')
+    if (loadedTimers){
+      const newTimers = {
+        ...loadedTimers,
+        [props.item.packageName]: {
+          ...loadedTimers[props.item.packageName],
+          timeLeft: (loadedTimers[props.item.packageName]?.timeLeft || 0) + 300,
+        },
+      }
+      await localStorage.setDataByKey('@local_timers', newTimers)
+    }
+    setIsModalVisible(false)
   }
+
+  const openModal = () => {
+    setIsModalVisible(true)
+  }
+
+  const closeModal = () => {
+    setIsModalVisible(false)
+  }
+
 
   const handlePressOut = () => {
     setIsPressed(false)
@@ -92,7 +119,6 @@ export default function UsageElement(props: Props) {
               <View className='flex flex-row justify-between'>
                 <Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>
 
-                {/*<Text className='font-lexend-semi-bold text-[16px] text-black pb-1' >{props.item.appName}</Text>*/}
 
               </View>
               <View className='w-full h-7 border-2 border-black rounded-lg overflow-hidden'>
@@ -122,10 +148,19 @@ export default function UsageElement(props: Props) {
             fullHeight
             iconName="timer-sand"
             color="#4ade80"
-            onPress={addFiveMinutes}
+            onPress={openModal}
           />
         </View>
       )}
+      <CustomModal visible={isModalVisible} onClose={closeModal} onConfirm={handleConfirmModal} >
+        <Icon
+          name='timer-sand'
+          size={100}
+          color="black"
+        />
+        <Text className="text-2xl text-black font-[Lexend-Medium]">Need More Time?</Text>
+        <Text className="text-md text-black font-[Lexend-Regular]">This will grant you an <Text className='font-[Lexend-Bold]'>extra 5 minutes</Text> for today only, and won't alter your set daily time."</Text>
+      </CustomModal>
     </View>
   )
 }
