@@ -123,9 +123,6 @@ public void currentActivity(Promise promise) {
         PackageManager pm = context.getPackageManager();
 
         for (UsageStats usageStats : usageStatsList) {
-//            if (pm.getLaunchIntentForPackage(usageStats.getPackageName()) == null) {
-//                continue;
-//            }
 
             long usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
             if (usageTimeSeconds < 10) {
@@ -135,9 +132,6 @@ public void currentActivity(Promise promise) {
             appUsageData.packageName = usageStats.getPackageName();
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(appUsageData.packageName, 0);
-//                if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) { // Add this condition to filter out system apps
-//                    continue;
-//                }
                 appUsageData.appName = ai.loadLabel(pm).toString();
 
                 Drawable icon = pm.getApplicationIcon(ai);
@@ -157,10 +151,6 @@ public void currentActivity(Promise promise) {
                     byte[] byteArray = byteArrayOutputStream.toByteArray();
                     appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 }
-//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
-//                byte[] byteArray = byteArrayOutputStream.toByteArray();
-//                appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace(); // Add this line to print the stack trace
 

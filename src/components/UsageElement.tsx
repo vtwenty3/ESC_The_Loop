@@ -4,6 +4,8 @@ import BrutalButton from './BrutalButton'
 import { CustomModal }  from './Modal'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import * as localStorage from '../services/LocalStorage'
+import useFormatTime from '../hooks/useFormatTime'
+
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
 }
@@ -19,6 +21,7 @@ type Props = {
   }
   timer: { timeLeft?: number; timeSet?: number }
   modalVisible: boolean
+  setTimers: React.Dispatch<React.SetStateAction<Timers>>
   onOpenModal: (appName: string, packageName: string) => void
 }
 export default function UsageElement(props: Props) {
@@ -26,6 +29,9 @@ export default function UsageElement(props: Props) {
   const [isPressed, setIsPressed] = useState(false)
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
   const [isModalVisible, setIsModalVisible] = useState(false)
+
+
+
 
   const calculateUsagePercentage = () => {
     const timeLeft = props.timer?.timeLeft || 0
@@ -68,6 +74,7 @@ export default function UsageElement(props: Props) {
           timeLeft: (loadedTimers[props.item.packageName]?.timeLeft || 0) + 300,
         },
       }
+      props.setTimers(newTimers)
       await localStorage.setDataByKey('@local_timers', newTimers)
     }
     setIsModalVisible(false)
@@ -123,14 +130,16 @@ export default function UsageElement(props: Props) {
               </View>
               <View className='w-full h-7 border-2 border-black rounded-lg overflow-hidden'>
                 <View className='bg-red-400 w-full h-full'>
-                  <View className='absolute z-10 flex font-lexend flex-row justify-between items-center pb-px w-full h-full px-1.5'>
-                    <Text className='text-15 text-black font-lexend' >Used: {props.item.usageTimeSeconds}s</Text>
+                  <View className='absolute z-10 flex font-lexend flex-row items-center pb-px w-full h-full px-1.5'>
+                    {props.timer?.timeLeft === undefined && (
+                      <Text className='text-15 text-black font-lexend' >Used: {useFormatTime(props.item.usageTimeSeconds)}</Text>
+                    )}
                     {props.timer?.timeLeft === undefined ?
                       ('')
                       :
-                      ( <Text className='text-15 text-black font-lexend'>
-                        Left: {props.timer?.timeLeft}s/
-                        {props.timer?.timeSet}s
+                      ( <Text className='text-15 text-black font-lexend ml-auto'>
+                        Left: {useFormatTime(props.timer?.timeLeft)}/
+                        {useFormatTime(props.timer?.timeSet)}
                       </Text> )}
                   </View>
                   <View className='bg-pink-200 w-full h-full' style={{ width: `${calculateUsagePercentage()}%` }} />

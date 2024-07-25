@@ -125,7 +125,8 @@ export function Usage() {
                 contentContainerStyle={{ gap: 10, paddingTop: 20 }}
                 keyExtractor={(item) => item.appName}
                 renderItem={({ item }) => (
-                  <UsageElement item={item}  timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
+                  <UsageElement item={item}  setTimers={setTimersRN}
+                    timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
                 )}
               />
               {modalVisible ? (
@@ -138,11 +139,11 @@ export function Usage() {
                 />
               ) : null}
 
-              <CustomModal visible={addTimeModal} onClose={handleClose}>
-                <Text>Timer for: idk</Text>
-                {/* Add more components here */}
-                <BrutalButton onPress={handleClose} text="Close" color="#FF6B6B" iconName="close-circle-outline" />
-              </CustomModal>
+              {/*<CustomModal visible={addTimeModal} onClose={handleClose}>*/}
+              {/*  <Text>Timer for: idk</Text>*/}
+              {/*  /!* Add more components here *!/*/}
+              {/*  /!*<BrutalButton onPress={handleClose} text="Close" color="#FF6B6B" iconName="close-circle-outline" />*!/*/}
+              {/*</CustomModal>*/}
             </View>
           </View>
         </>
