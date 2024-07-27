@@ -14,6 +14,7 @@ type Props = {
   rotate?: boolean
   getStuck?: boolean
   disabled?: boolean
+  fullHeight?: boolean
 }
 export default function BrutalButton(props: Props = {disabled: false}) {
   // const [isPressed, setIsPressed] = useState(false)
@@ -110,7 +111,7 @@ export default function BrutalButton(props: Props = {disabled: false}) {
           }}
         >
           <View className='flex flex-row items-center justify-center border-2 z-3 rounded-xl'
-            style={[{ gap: 5, paddingVertical: props.text ? 10 : 0,  backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }]}
+            style={[{ gap: 5, paddingVertical: props.text ? 10 : 0,  backgroundColor: props.disabled ? '#dbdbdb' : (props.color ? props.color : '#7FBC8C') }, {height: props.fullHeight ? '100%' : 'auto'}]}
           >
             <Animated.View
               style={[{ transform: [{ rotate: rotation }] }, { padding: props.text ? 0 : 10 }]}

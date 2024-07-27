@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {AppState, AppStateStatus, FlatList, Linking, NativeModules, View} from 'react-native'
+import { AppState, AppStateStatus, FlatList, Linking, NativeModules, Text, View } from 'react-native'
 
 import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -14,11 +14,14 @@ import * as localStorage from '../services/LocalStorage'
 import * as activityService from '../services/ActivityService'
 import {useFocusEffect} from '@react-navigation/native'
 import {AppUsageData, Timers} from '../types'
+import { CustomModal } from '../components/Modal'
+import BrutalButton from '../components/BrutalButton'
 
 const { UsageLog } = NativeModules as {
   UsageLog: {
     currentActivity: () => Promise<string>
     getAppUsageData2: (callback: (callBackData: string) => void) => void
+    getUsageStats: (callback: (callBackData: string) => void) => void
   }
 }
 
@@ -30,9 +33,16 @@ export function Usage() {
   const [modalPackageName, setModalPackageName] = useState('')
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState)
 
+  const [addTimeModal, setAddTimeModal] = useState(false)
+
+  function handleClose() {
+    setAddTimeModal(false)
+  }
+
+
   function setAppUsageData() {
     console.log('Getting data from Android')
-    UsageLog.getAppUsageData2((androidUsageData: string) => {
+    UsageLog.getUsageStats((androidUsageData: string) => {
       const parsedData: AppUsageData[] = JSON.parse(androidUsageData)
       parsedData.sort((a, b) => b.usageTimeSeconds - a.usageTimeSeconds)
       setData(parsedData)
@@ -116,7 +126,8 @@ export function Usage() {
                 contentContainerStyle={{ gap: 10, paddingTop: 20 }}
                 keyExtractor={(item) => item.appName}
                 renderItem={({ item }) => (
-                  <UsageElement item={item}  timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
+                  <UsageElement item={item}  setTimers={setTimersRN}
+                    timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
                 )}
               />
               {modalVisible ? (
@@ -128,6 +139,12 @@ export function Usage() {
                   timers={timersRN}
                 />
               ) : null}
+
+              {/*<CustomModal visible={addTimeModal} onClose={handleClose}>*/}
+              {/*  <Text>Timer for: idk</Text>*/}
+              {/*  /!* Add more components here *!/*/}
+              {/*  /!*<BrutalButton onPress={handleClose} text="Close" color="#FF6B6B" iconName="close-circle-outline" />*!/*/}
+              {/*</CustomModal>*/}
             </View>
           </View>
         </>

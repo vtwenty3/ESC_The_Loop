@@ -110,34 +110,63 @@ public void currentActivity(Promise promise) {
     }
 }
 
-    @ReactMethod //this method is better in terms of accuracy
-    public void getAppUsageData2(Callback callBack) {
+    @ReactMethod
+    public void getUsageStats(Callback callBack) {
         ReactApplicationContext context = getReactApplicationContext();
         UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+
+        // Get current time and start of the day (midnight)
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        long endTime = calendar.getTimeInMillis();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         long startTime = calendar.getTimeInMillis();
-        long endTime = System.currentTimeMillis();
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+
+        // Use queryEvents to get all events from start time to end time
+        UsageEvents usageEvents = usageStatsManager.queryEvents(startTime, endTime);
+
         HashMap<String, AppUsageData> appUsageTimeMap = new HashMap<>();
+        HashMap<String, Long> foregroundTimes = new HashMap<>();
+
+        UsageEvents.Event event = new UsageEvents.Event();
+
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event);
+            String packageName = event.getPackageName();
+
+            if (event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                foregroundTimes.put(packageName, event.getTimeStamp());
+            } else if (event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                if (foregroundTimes.containsKey(packageName)) {
+                    long foregroundTime = foregroundTimes.get(packageName);
+                    long backgroundTime = event.getTimeStamp();
+
+                    long usageDuration = backgroundTime - foregroundTime;
+
+                    AppUsageData appUsageData = appUsageTimeMap.get(packageName);
+                    if (appUsageData == null) {
+                        appUsageData = new AppUsageData();
+                        appUsageData.packageName = packageName;
+                        appUsageData.usageTimeSeconds = 0;
+                        appUsageData.usageTimeMinutes = 0;
+                        appUsageTimeMap.put(packageName, appUsageData);
+                    }
+
+                    appUsageData.usageTimeSeconds += usageDuration / 1000;
+                    appUsageData.usageTimeMinutes += TimeUnit.MILLISECONDS.toMinutes(usageDuration);
+
+                    foregroundTimes.remove(packageName);
+                }
+            }
+        }
+
         PackageManager pm = context.getPackageManager();
 
-        for (UsageStats usageStats : usageStatsList) {
-//            if (pm.getLaunchIntentForPackage(usageStats.getPackageName()) == null) {
-//                continue;
-//            }
-
-            long usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
-            if (usageTimeSeconds < 10) {
-                continue;
-            }
-            AppUsageData appUsageData = new AppUsageData();
-            appUsageData.packageName = usageStats.getPackageName();
+        for (AppUsageData appUsageData : appUsageTimeMap.values()) {
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(appUsageData.packageName, 0);
-//                if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) { // Add this condition to filter out system apps
-//                    continue;
-//                }
                 appUsageData.appName = ai.loadLabel(pm).toString();
 
                 Drawable icon = pm.getApplicationIcon(ai);
@@ -157,19 +186,11 @@ public void currentActivity(Promise promise) {
                     byte[] byteArray = byteArrayOutputStream.toByteArray();
                     appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 }
-//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
-//                byte[] byteArray = byteArrayOutputStream.toByteArray();
-//                appUsageData.iconBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace(); // Add this line to print the stack trace
 
                 appUsageData.appName = appUsageData.packageName;
-
             }
-            appUsageData.usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
-            appUsageData.usageTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(usageStats.getTotalTimeInForeground());
-            appUsageTimeMap.put(appUsageData.packageName, appUsageData);
         }
 
         JSONArray jsonArray = new JSONArray();
@@ -187,11 +208,92 @@ public void currentActivity(Promise promise) {
             }
             jsonArray.put(jsonObject);
         }
-
         callBack.invoke(jsonArray.toString());
     }
 
 
+
+
+    @ReactMethod
+    public void getAppUsageData2(Callback callback) {
+        ReactApplicationContext context = getReactApplicationContext();
+        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+
+        // Get the app usage statistics for the last day
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        long startTime = calendar.getTimeInMillis();
+        long endTime = System.currentTimeMillis();
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+
+        // Convert the UsageStats objects to AppUsageData objects
+        List<AppUsageData> appUsageDataList = new ArrayList<>();
+        PackageManager pm = context.getPackageManager();
+        for (UsageStats usageStats : usageStatsList) {
+            long usageTimeSeconds = usageStats.getTotalTimeInForeground() / 1000;
+            if (usageTimeSeconds < 10) {
+                continue;
+            }
+
+            AppUsageData appUsageData = new AppUsageData();
+            appUsageData.packageName = usageStats.getPackageName();
+            appUsageData.usageTimeSeconds = usageTimeSeconds;
+            appUsageData.usageTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(usageStats.getTotalTimeInForeground());
+
+            // Get the app name and icon base64 string
+            try {
+                ApplicationInfo ai = pm.getApplicationInfo(appUsageData.packageName, 0);
+                appUsageData.appName = ai.loadLabel(pm).toString();
+                appUsageData.iconBase64 = getIconBase64(pm, ai);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+                appUsageData.appName = appUsageData.packageName;
+            }
+
+            appUsageDataList.add(appUsageData);
+        }
+
+        // Convert the AppUsageData objects to a JSON array
+        JSONArray jsonArray = new JSONArray();
+        for (AppUsageData appUsageData : appUsageDataList) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("packageName", appUsageData.packageName);
+                jsonObject.put("appName", appUsageData.appName);
+                jsonObject.put("iconBase64", appUsageData.iconBase64);
+                jsonObject.put("usageTimeSeconds", appUsageData.usageTimeSeconds);
+                jsonObject.put("usageTimeMinutes", appUsageData.usageTimeMinutes);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(jsonObject);
+        }
+
+        // Invoke the callback with the JSON array
+        callback.invoke(jsonArray.toString());
+    }
+
+    private String getIconBase64(PackageManager pm, ApplicationInfo ai) {
+        Drawable icon = pm.getApplicationIcon(ai);
+        Bitmap bitmap = null;
+        if (icon instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) icon).getBitmap();
+        } else if (icon instanceof AdaptiveIconDrawable) {
+            // Convert adaptive icon to bitmap
+            bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            icon.draw(canvas);
+        }
+        if (bitmap != null) {
+            // Convert bitmap to base64 string
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 10, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        }
+        return null;
+    }
 
 
 
