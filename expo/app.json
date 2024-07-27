@@ -23,7 +23,7 @@
       },
       "package": "com.kisimoff.esctheloop",
       "permissions": [
-        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "web": {
