@@ -23,20 +23,12 @@ type Props = {
 
 export function ModalSetTimer(props: Props) {
   const [timeLimit, setTimeLimit] = useState<number>(0)
-  const [pop, setPop] = useState<boolean>(false)
-  const [isFiveMinDisabled, setIsFiveMinDisabled] = useState(true)
-  const [addFiveMinutes, setAddFiveMinutes] = useState(false)
   const [change, setChange] = useState(false)
 
 
 
   useEffect(() => {
-    console.log('test')
-    const initialValue = props.timers[props.packageName]?.timeLeft
     setTimeLimit(props.timers[props.packageName]?.timeSet ?? 0)
-    if (initialValue && initialValue < 60) {
-      setIsFiveMinDisabled(false)
-    }
   }, [])
 
 
@@ -62,17 +54,15 @@ export function ModalSetTimer(props: Props) {
 
 
   async function onConfirm() {
-    setPop(false)
     const currentTimeLeft = props.timers[props.packageName]?.timeLeft
     const newTimeLeft = currentTimeLeft !== undefined ? currentTimeLeft : timeLimit
-    const additionalTime = addFiveMinutes ? 300 : 0
 
 
 
     let newTimers = {
       ...props.timers,
       [props.packageName]: {
-        timeLeft: newTimeLeft + additionalTime,
+        timeLeft: newTimeLeft,
         timeSet: timeLimit,
       },
     }
@@ -88,8 +78,8 @@ export function ModalSetTimer(props: Props) {
 
   return (
     <Modal animationType="fade" transparent>
-      <View className="flex-1 justify-center items-center bg-black/40">
-        <View className="bg-white rounded-xl w-fit border-2 border-black items-center justify-center p-4" style={{gap:15}}>
+      <View className="items-center justify-center flex-1 bg-black/40">
+        <View className="items-center justify-center p-4 bg-white border-2 border-black rounded-xl w-fit" style={{gap:15}}>
           <View className='flex items-center'>
             <Text className="text-2xl text-black font-[Lexend-Medium]">Set App Timer</Text>
             <Text className="text-md text-black font-[Lexend-Medium]">for: {props.name}</Text>

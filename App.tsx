@@ -18,7 +18,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 function App()  {
   const [iconSize] = useState(37)
-  // const radius = (iconSize + 14) / 2;
   const MyTheme = {
     dark: false,    
     colors: {  
@@ -78,12 +77,8 @@ function App()  {
       key: uuidv4()
     }
 
-    // await AsyncStorage.setItem('@Note', JSON.stringify([note]))
     await localStorage.setDataByKey('@local_notes' , [note] )
-    //fix these
     await localStorage.setDataByKey('@local_tasks' , [task1, task2, task3] )
-
-    // await AsyncStorage.setItem('@Task', JSON.stringify([task1, task2, task3]))
   }
 
   useEffect(() => {

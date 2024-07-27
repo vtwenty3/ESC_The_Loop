@@ -15,15 +15,6 @@ export function Tasks() {
   const [modalVisible, setModalVisible] = useState(false)
   const [modalObject, setModalObject] = useState({})
 
-  async function getMyObject() {
-    try {
-      const jsonValue = await AsyncStorage.getItem('@Task')
-      return jsonValue != null ? await JSON.parse(jsonValue) : null
-    } catch (e) {
-      console.log(' Error: ', e)
-    }
-    console.log('Data Loaded.')
-  }
 
   const handleSave = async (itemUpdated: object, timestampOld: string) => {
     const findIndex = data.findIndex(

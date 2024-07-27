@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
+import { Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
 import BrutalButton from './BrutalButton'
 import { CustomModal }  from './Modal'
