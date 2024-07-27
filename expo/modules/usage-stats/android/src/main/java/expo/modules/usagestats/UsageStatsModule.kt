@@ -2,8 +2,16 @@ package expo.modules.usagestats
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
+import android.content.Context
+import android.os.PowerManager
+import expo.modules.kotlin.Promise
+import java.util.Calendar
 
 class UsageStatsModule : Module() {
+  private var lastKnownActivity: String? = null
+
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -33,6 +41,44 @@ class UsageStatsModule : Module() {
       sendEvent("onChange", mapOf(
         "value" to value
       ))
+    }
+
+    fun currentActivity(promise: Promise) {
+      try {
+        val context = appContext.reactContext
+        val powerManager = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val usageStatsManager = context?.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MINUTE, -1)
+        val endTime = System.currentTimeMillis()
+        val startTime = calendar.timeInMillis
+
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        var currentActivity: String? = null
+        val event = UsageEvents.Event()
+
+        while (usageEvents.hasNextEvent()) {
+          usageEvents.getNextEvent(event)
+          if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+            currentActivity = event.packageName
+            lastKnownActivity = currentActivity
+          }
+        }
+
+        if (powerManager.isInteractive) {
+          if (currentActivity != null) {
+            promise.resolve(currentActivity)
+          } else {
+            promise.resolve(lastKnownActivity)
+          }
+        } else {
+          promise.resolve("Screen Off!")
+        }
+
+      } catch (e: Exception) {
+        promise.reject("ACTIVITY_ERROR", "Failed to get current activity", e)
+      }
     }
 
     // Enables the module to be used as a native view. Definition components that are accepted as part of
