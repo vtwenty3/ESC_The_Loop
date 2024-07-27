@@ -21,6 +21,7 @@ const { UsageLog } = NativeModules as {
   UsageLog: {
     currentActivity: () => Promise<string>
     getAppUsageData2: (callback: (callBackData: string) => void) => void
+    getUsageStats: (callback: (callBackData: string) => void) => void
   }
 }
 
@@ -41,7 +42,7 @@ export function Usage() {
 
   function setAppUsageData() {
     console.log('Getting data from Android')
-    UsageLog.getAppUsageData2((androidUsageData: string) => {
+    UsageLog.getUsageStats((androidUsageData: string) => {
       const parsedData: AppUsageData[] = JSON.parse(androidUsageData)
       parsedData.sort((a, b) => b.usageTimeSeconds - a.usageTimeSeconds)
       setData(parsedData)
