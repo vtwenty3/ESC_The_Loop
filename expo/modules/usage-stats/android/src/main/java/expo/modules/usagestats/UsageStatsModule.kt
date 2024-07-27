@@ -43,7 +43,7 @@ class UsageStatsModule : Module() {
       ))
     }
 
-    fun currentActivity(promise: Promise) {
+    AsyncFunction("currentActivity") { promise: Promise ->
       try {
         val context = appContext.reactContext
         val powerManager = context?.getSystemService(Context.POWER_SERVICE) as PowerManager

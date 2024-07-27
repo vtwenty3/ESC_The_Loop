@@ -1,14 +1,59 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import {
+  Image,
+  View,
+  StyleSheet,
+  PermissionsAndroid,
+  Linking,
+  Platform,
+  Button
+} from 'react-native'
+import BackgroundService from 'react-native-background-actions'
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { hello } from '@/modules/usage-stats';
 import { currentActivity } from '@/modules/usage-stats';
+import { toggleBackground } from '@/hooks/useCurrentActivity'
+import { useEffect } from 'react';
 
 export default function HomeScreen() {
-  console.log(currentActivity())
+
+  useEffect(() => {
+    if (!BackgroundService.isRunning()) {
+      toggleBackground()
+    }
+    // setAppUsageData()
+    // return () => {
+      // Remove AppState listener
+      // appStateListener.remove()
+    // }
+  }, [])
+
+  async function logActivity(){
+    const ca = await currentActivity() 
+    console.log(ca)
+
+  }
+  async function openSettings() {
+    Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS')
+
+
+    // const pNotification = await PermissionsAndroid.check(
+    //   PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    // )
+  
+    // if (pNotification) {
+    //   Linking.sendIntent('android.settings.USAGE_ACCESS_SETTINGS')
+    // } else {
+    //   await PermissionsAndroid.request(
+    //     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    //   )
+    // }
+  }
+
+
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -20,9 +65,11 @@ export default function HomeScreen() {
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
+        <Button title='Settings' onPress={openSettings} ></Button>
+
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        
+      <Button title='Current Activity' onPress={logActivity} ></Button>
       </ThemedView>
     </ParallaxScrollView>
   );

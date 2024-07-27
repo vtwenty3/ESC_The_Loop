@@ -21,7 +21,10 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.kisimoff.esctheloop"
+      "package": "com.kisimoff.esctheloop",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+      ]
     },
     "web": {
       "bundler": "metro",

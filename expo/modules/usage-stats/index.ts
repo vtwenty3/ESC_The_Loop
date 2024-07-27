@@ -13,6 +13,10 @@ export function hello(): string {
   return UsageStatsModule.hello();
 }
 
+export function currentActivity(): Promise<String> {
+  return UsageStatsModule.currentActivity();
+}
+
 export async function setValueAsync(value: string) {
   return await UsageStatsModule.setValueAsync(value);
 }
