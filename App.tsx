@@ -14,8 +14,9 @@ const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
 import * as localStorage from './src/services/LocalStorage'
 import './global.css'
+import { v4 as uuidv4 } from 'uuid'
 
-function App(): JSX.Element {
+function App()  {
   const [iconSize] = useState(37)
   // const radius = (iconSize + 14) / 2;
   const MyTheme = {
@@ -46,6 +47,7 @@ function App(): JSX.Element {
       tags: '',
       complete: false,
       timestamp: new Date().toISOString(),
+      key: uuidv4()
     }
     const task1: Task = {
       title: 'I\'m a sample task!',
@@ -54,6 +56,7 @@ function App(): JSX.Element {
       tags: '',
       complete: false,
       timestamp: new Date().toISOString(),
+      key: uuidv4()
     }
     const task2: Task = {
       title: 'Mark me as complete...',
@@ -62,6 +65,8 @@ function App(): JSX.Element {
       tags: '',
       complete: false,
       timestamp: new Date().toISOString(),
+      key: uuidv4()
+
     }
     const task3 : Task = {
       title: '...or click me to edit!',
@@ -70,6 +75,7 @@ function App(): JSX.Element {
       tags: '',
       complete: false,
       timestamp: new Date().toISOString(),
+      key: uuidv4()
     }
 
     // await AsyncStorage.setItem('@Note', JSON.stringify([note]))

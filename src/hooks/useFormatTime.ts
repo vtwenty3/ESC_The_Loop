@@ -21,7 +21,7 @@ const useFormatTime = (timeInSeconds: number | undefined) => {
     return `${minutes}m`
   }
 
-  return `${minutes}m ${seconds}s`
+  return `${minutes}m`
 }
 
 export default useFormatTime

@@ -41,7 +41,8 @@
     "react-native-timer-picker": "^1.8.2",
     "react-native-vector-icons": "^9.2.0",
     "tailwind": "^4.0.0",
-    "text-encoding": "^0.7.0"
+    "text-encoding": "^0.7.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -54,6 +55,7 @@
     "@types/react-native-vector-icons": "^6.4.13",
     "@types/react-test-renderer": "^18.0.0",
     "@types/text-encoding": "^0.0.39",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "babel-jest": "^29.2.1",

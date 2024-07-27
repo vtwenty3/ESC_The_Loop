@@ -98,7 +98,7 @@ export function Tasks() {
           <FlatList
             contentContainerStyle={{paddingTop: 15, gap: 5}}
             data={data}
-            keyExtractor={item => item.timestamp}
+            keyExtractor={item => item.key}
             renderItem={({item}) => (
               <Task
                 onOpenModal={() => {

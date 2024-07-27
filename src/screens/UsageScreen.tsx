@@ -49,6 +49,19 @@ export function Usage() {
     })
   }
 
+
+  useEffect(() => {
+    const appStateListener = AppState.addEventListener('change', handleAppStateChange)
+    if (!BackgroundService.isRunning()) {
+      activityService.toggleBackground()
+    }
+    setAppUsageData()
+    return () => {
+      // Remove AppState listener
+      appStateListener.remove()
+    }
+  }, [appState])
+
   useEffect(() => {
     const appStateListener = AppState.addEventListener('change', handleAppStateChange)
     if (!BackgroundService.isRunning()) {
