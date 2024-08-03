@@ -1,10 +1,10 @@
 import { Text, View, TouchableOpacity, Animated, Image, Vibration } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState } from 'react'
 import BrutalButton from './BrutalButton'
 import { CustomModal }  from './Modal'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import * as localStorage from '../services/LocalStorage'
 import useFormatTime from '../hooks/useFormatTime'
+import { ModalSetTimer } from './ModalSetTimer'
 
 interface Timers {
   [key: string]: { timeLeft?: number; timeSet?: number }
@@ -20,17 +20,17 @@ type Props = {
     iconBase64: string
   }
   timer: { timeLeft?: number; timeSet?: number }
-  modalVisible: boolean
+  timers: Timers
   setTimers: React.Dispatch<React.SetStateAction<Timers>>
-  onOpenModal: (appName: string, packageName: string) => void
 }
-export default function UsageElement(props: Props) {
+export default React.memo(function UsageElement(props: Props) {
+
   const shadow = -5
   const [isPressed, setIsPressed] = useState(false)
   const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : shadow)).current
   const [isModalVisible, setIsModalVisible] = useState(false)
-
-
+  const [isModalVisibleTimer, setIsModalVisibleTimer] = useState(false)
+  const [timeLimit, setTimeLimit] = useState<number>(props.timer?.timeSet ?? 0)
 
 
   const calculateUsagePercentage = () => {
@@ -40,15 +40,9 @@ export default function UsageElement(props: Props) {
     return 100 - percentage
   }
 
-  useEffect(() => {
-    if (!props.modalVisible && isPressed) {
-      handlePressOut()
-    }
-  }, [props.modalVisible])
 
   const handlePressIn = async () => {
-    setIsPressed(true)
-
+    // props.onOpenModal(props.item.appName, props.item.packageName)
     Animated.spring(animatedValueTask, {
       toValue: 0,
       stiffness: 70,
@@ -57,37 +51,8 @@ export default function UsageElement(props: Props) {
       restSpeedThreshold: 1,
       restDisplacementThreshold: 0.5,
       useNativeDriver: true,
-    }).start(() => {
-      props.onOpenModal(props.item.appName, props.item.packageName)
-    })
+    }).start()
   }
-
-
-  //TODO: Make sure that the state of the usageTime updates as now it doesn't
-  const  handleConfirmModal = async () => {
-    const loadedTimers = await localStorage.getDataByKey('@local_timers')
-    if (loadedTimers){
-      const newTimers = {
-        ...loadedTimers,
-        [props.item.packageName]: {
-          ...loadedTimers[props.item.packageName],
-          timeLeft: (loadedTimers[props.item.packageName]?.timeLeft || 0) + 300,
-        },
-      }
-      props.setTimers(newTimers)
-      await localStorage.setDataByKey('@local_timers', newTimers)
-    }
-    setIsModalVisible(false)
-  }
-
-  const openModal = () => {
-    setIsModalVisible(true)
-  }
-
-  const closeModal = () => {
-    setIsModalVisible(false)
-  }
-
 
   const handlePressOut = () => {
     setIsPressed(false)
@@ -106,12 +71,71 @@ export default function UsageElement(props: Props) {
     }).start()
   }
 
+
+  function handleModalOpenTimer () {
+    // handlePressIn()
+    setIsModalVisibleTimer(true)
+  }
+
+  async function handleModalOpen () {
+    handlePressIn()
+    setTimeout(() => {
+      setIsModalVisible(true)
+    }, 100)
+  }
+
+
+  function handleModalClose () {
+    setIsModalVisible(false)
+    setIsModalVisibleTimer(false)
+    handlePressOut()
+  }
+
+
+
+  //TODO: Make sure that the state of the usageTime updates as now it doesn't
+  const  handleConfirmModalTimer = async () => {
+    if (props.timers){
+      const newTimers = {
+        ...props.timers,
+        [props.item.packageName]: {
+          ...props.timers[props.item.packageName],
+          timeLeft: (props.timers[props.item.packageName]?.timeLeft || 0) + 300,
+        },
+      }
+      props.setTimers(newTimers)
+    }
+    setIsModalVisibleTimer(false)
+    handlePressOut()
+  }
+
+  const  handleConfirmModal = async () => {
+
+    const currentTimeLeft = props.timer?.timeLeft
+    const newTimeLeft = currentTimeLeft !== undefined ? currentTimeLeft : timeLimit
+    const newTimers = {
+      ...props.timers,
+      [props.item.packageName]: {
+        timeLeft: newTimeLeft,
+        timeSet: timeLimit,
+      },
+    }
+  
+    if (timeLimit === 0) {
+      delete newTimers[props.item.packageName]
+    }
+  
+    props.setTimers(newTimers) 
+    setIsModalVisible(false)
+  }
+
+ 
   return (
     <View className='flex flex-row w-[95%] mx-auto gap-1 max-h-[75]' style={[ { paddingTop: -shadow, paddingLeft: -shadow }]}>
       <TouchableOpacity
         className='flex-1'
         activeOpacity={1}
-        onPress={handlePressIn}
+        onPress={handleModalOpen}
       >
         <View className='flex items-center h-full bg-black rounded-xl'  >
           <Animated.View
@@ -130,16 +154,12 @@ export default function UsageElement(props: Props) {
               </View>
               <View className='w-full overflow-hidden border-2 border-black rounded-lg h-7'>
                 <View className='w-full h-full bg-red-400'>
-                  <View className='absolute z-10 flex font-lexend flex-row items-center pb-px w-full h-full px-1.5'>
-                    {props.timer?.timeLeft === undefined && (
-                      <Text className='text-black text-15 font-lexend' >Used: {useFormatTime(props.item.usageTimeSeconds)}</Text>
-                    )}
-                    {props.timer?.timeLeft === undefined ?
-                      ('')
-                      :
+                  <View className='absolute z-10 flex font-lexend flex-row items-center justify-between pb-px w-full h-full px-1.5'>
+                    <Text className='text-black text-15 font-lexend' >Used: {useFormatTime(props.item.usageTimeSeconds)}</Text>
+                    {props.timer?.timeLeft !== undefined &&
                       ( <Text className='text-black text-15 font-lexend '>
-                        Left: {useFormatTime(props.timer?.timeLeft)}/
-                        {useFormatTime(props.timer?.timeSet)}
+                        Left: {useFormatTime(props.timers[props.item.packageName].timeLeft)}
+                        {/*{useFormatTime(props.timer?.timeSet)}*/}
                       </Text> )}
                   </View>
                   <View className='w-full h-full bg-pink-200' style={{ width: `${calculateUsagePercentage()}%` }} />
@@ -157,11 +177,11 @@ export default function UsageElement(props: Props) {
             fullHeight
             iconName="timer-sand"
             color="#4ade80"
-            onPress={openModal}
+            onPress={handleModalOpenTimer}
           />
         </View>
       )}
-      <CustomModal visible={isModalVisible} onClose={closeModal} onConfirm={handleConfirmModal} >
+      <CustomModal visible={isModalVisibleTimer} onClose={handleModalClose} onConfirm={handleConfirmModalTimer} >
         <Icon
           name='timer-sand'
           size={100}
@@ -170,6 +190,15 @@ export default function UsageElement(props: Props) {
         <Text className="text-2xl text-black font-[Lexend-Medium]">Need More Time?</Text>
         <Text className="text-md text-black font-[Lexend-Regular]">This will grant you an <Text className='font-[Lexend-Bold]'>extra 5 minutes</Text> for today only, and won't alter your set daily time."</Text>
       </CustomModal>
+  
+      <CustomModal visible={isModalVisible} onClose={handleModalClose} onConfirm={handleConfirmModal} >
+        <ModalSetTimer
+          name={props.item.packageName}
+          timeLimit={timeLimit}
+          setTimeLimit={setTimeLimit}
+        />
+      </CustomModal>
+
     </View>
   )
-}
+})

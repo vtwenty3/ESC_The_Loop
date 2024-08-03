@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
 import {useFocusEffect } from '@react-navigation/native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {globalStyles} from '../globalStyles'
 import {View, FlatList} from 'react-native'
 import ModalEdit from '../components/ModalEdit'

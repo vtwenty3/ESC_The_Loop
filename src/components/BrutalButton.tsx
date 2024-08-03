@@ -1,5 +1,5 @@
 import { Text, View, TouchableOpacity, Animated, Easing, Vibration } from 'react-native'
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useRef, useEffect, useCallback } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 //TODO: If disabled background grey and popped in
@@ -18,7 +18,6 @@ type Props = {
 }
 export default function BrutalButton(props: Props = {disabled: false}) {
   // const [isPressed, setIsPressed] = useState(false)
-  const [isPressed, setIsPressed] = useState(!!props.disabled)
 
   // const animatedValueTask = useRef(new Animated.Value(isPressed ? 0 : -4)).current
   const animatedValueTask = useRef(new Animated.Value(props.disabled ? 0 : -4)).current
@@ -71,7 +70,6 @@ export default function BrutalButton(props: Props = {disabled: false}) {
 
   const handlePressIn = () => {
     Vibration.vibrate(10)
-    setIsPressed(true)
     Animated.spring(animatedValueTask, {
       toValue: 0,
       stiffness: 170,
@@ -84,7 +82,6 @@ export default function BrutalButton(props: Props = {disabled: false}) {
   }
 
   const handlePressOut = () => {
-    setIsPressed(false)
     Animated.spring(animatedValueTask, {
       toValue: -4,
       stiffness: 270,
@@ -104,7 +101,7 @@ export default function BrutalButton(props: Props = {disabled: false}) {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <View className='rounded-xl bg-black'>
+      <View className='bg-black rounded-xl'>
         <Animated.View
           style={{
             transform: [{ translateX: animatedValueTask }, { translateY: animatedValueTask }],

@@ -14,6 +14,7 @@ const { width, height } = Dimensions.get('window')
 const Tab = createBottomTabNavigator()
 import * as localStorage from './src/services/LocalStorage'
 import './global.css'
+import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid'
 
 function App()  {

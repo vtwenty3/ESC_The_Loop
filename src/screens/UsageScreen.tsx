@@ -1,11 +1,10 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState} from 'react'
 import { AppState, AppStateStatus, FlatList, Linking, NativeModules,  View } from 'react-native'
 
 import BackgroundService from 'react-native-background-actions'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import notifee, {EventType} from '@notifee/react-native'
 import {globalStyles} from '../globalStyles'
-import {ModalSetTimer} from '../components/ModalSetTimer'
 import Title from '../components/TitleElement'
 import Esc from '../components/EscElement'
 import UsageElement from '../components/UsageElement'
@@ -24,12 +23,15 @@ const { UsageLog } = NativeModules as {
 
 export function Usage() {
   const [data, setData] = useState<AppUsageData[] | null>(null)
-  const [modalVisible, setModalVisible] = useState(false)
   const [timersRN, setTimersRN] = useState<Timers>({})
-  const [modalAppName, setModalAppName] = useState('')
-  const [modalPackageName, setModalPackageName] = useState('')
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState)
 
+  type Arg = {
+    [x: string]: {
+      timeLeft: number;
+      timeSet: number;
+  };
+  }
 
 
   function setAppUsageData() {
@@ -106,11 +108,7 @@ export function Usage() {
     }
   })
 
-  const handleOpenModal = (appName: string, packageName: string) => {
-    setModalAppName(appName)
-    setModalPackageName(packageName)
-    setModalVisible(true)
-  }
+
   return (
     <>
       {!data?.length ? (
@@ -130,12 +128,18 @@ export function Usage() {
                 data={data}
                 contentContainerStyle={{ gap: 10, paddingTop: 20 }}
                 keyExtractor={(item) => item.appName}
+                initialNumToRender={10}
+                maxToRenderPerBatch={5}
                 renderItem={({ item }) => (
-                  <UsageElement item={item}  setTimers={setTimersRN}
-                    timer={timersRN[item.packageName]} modalVisible={modalVisible} onOpenModal={handleOpenModal}   />
+                  <UsageElement
+                    item={item}
+                    setTimers={setTimersRN}
+                    timers={timersRN}
+                    timer={timersRN[item.packageName]}
+                  />
                 )}
               />
-              {modalVisible ? (
+              {/* {modalVisible ? (
                 <ModalSetTimer
                   setVisible={setModalVisible}
                   name={modalAppName}
@@ -143,7 +147,7 @@ export function Usage() {
                   setTimers={setTimersRN}
                   timers={timersRN}
                 />
-              ) : null}
+              ) : null} */}
 
               {/*<CustomModal visible={addTimeModal} onClose={handleClose}>*/}
               {/*  <Text>Timer for: idk</Text>*/}

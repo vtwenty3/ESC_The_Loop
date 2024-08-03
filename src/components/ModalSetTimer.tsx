@@ -1,130 +1,53 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text,  Modal } from 'react-native'
-import BrutalButton from './BrutalButton'
+import React from 'react'
+import { View, Text, } from 'react-native'
 import { TimerPicker } from 'react-native-timer-picker'
 import { LinearGradient } from 'react-native-linear-gradient'
 
-
-//TODO: Add the toggle buttons so you can set individually timeSet and timeLeft?
-//When setting a timer we should account for the amount of time the app is used today
-
-
-interface Timers {
-  [key: string]: { timeLeft?: number; timeSet?: number }
-}
-
 type Props = {
   name: string
-  packageName: string
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>
-  setTimers: React.Dispatch<React.SetStateAction<Timers>> //also updates the local storage automatically
-  timers: Timers
+  timeLimit: number
+  setTimeLimit: React.Dispatch<React.SetStateAction<number>>
 }
 
 export function ModalSetTimer(props: Props) {
-  const [timeLimit, setTimeLimit] = useState<number>(0)
-  const [change, setChange] = useState(false)
-
-
-
-  useEffect(() => {
-    setTimeLimit(props.timers[props.packageName]?.timeSet ?? 0)
-  }, [])
-
-
-  useEffect(() => {
-    if (props.timers[props.packageName]?.timeSet !== timeLimit) {
-      setChange(true)
-    }
-  }, [timeLimit])
-
-
-
-  function handleClose() {
-    setTimeLimit(0)
-    setTimeout(() => {
-      props.setVisible(false)
-    }, 250)
-  }
 
   function handleDurationChange (duration: { hours: number, minutes: number, seconds: number }) {
     const totalSeconds = duration.minutes * 60 + duration.seconds
-    setTimeLimit(totalSeconds)
-  }
-
-
-  async function onConfirm() {
-    const currentTimeLeft = props.timers[props.packageName]?.timeLeft
-    const newTimeLeft = currentTimeLeft !== undefined ? currentTimeLeft : timeLimit
-
-
-
-    let newTimers = {
-      ...props.timers,
-      [props.packageName]: {
-        timeLeft: newTimeLeft,
-        timeSet: timeLimit,
-      },
-    }
-
-    if (timeLimit === 0) {
-      delete newTimers[props.packageName]
-    }
-
-    props.setTimers(newTimers) 
-
-    handleClose()
+    props.setTimeLimit(totalSeconds)
   }
 
   return (
-    <Modal animationType="fade" transparent>
-      <View className="items-center justify-center flex-1 bg-black/40">
-        <View className="items-center justify-center p-4 bg-white border-2 border-black rounded-xl w-fit" style={{gap:15}}>
-          <View className='flex items-center'>
-            <Text className="text-2xl text-black font-[Lexend-Medium]">Set App Timer</Text>
-            <Text className="text-md text-black font-[Lexend-Medium]">for: {props.name}</Text>
-          </View>
-          <TimerPicker
-            padWithNItems={2}
-            hideHours
-            minuteLabel="min"
-            secondLabel="sec"
-            LinearGradient={LinearGradient}
-            initialValue={{ minutes: Math.floor(timeLimit / 60), seconds: timeLimit % 60 }}
-            onDurationChange={(duration) => handleDurationChange(duration)}
-            styles={{
-              theme: 'light',
-              backgroundColor: '#FFFFFF',
-              pickerItem: {
-                fontSize: 24,
-              },
-              pickerLabel: {
-                fontSize: 20,
-                right: -20,
-              },
-              pickerLabelContainer: {
-                width: 40,
-              },
-              pickerItemContainer: {
-                width: 120,
-              },
-            }}
-          />
-
-          <View className="flex-row" style={{gap:8}}>
-            <View className='w-40'>
-              <BrutalButton
-                onPress={handleClose}
-                text="Close"
-                color="#FF6B6B"
-                iconName="close-circle-outline" />
-            </View>
-            <View className='w-40'>
-              <BrutalButton disabled={!change} onPress={onConfirm} text="Confirm" iconName="timer-sand" />
-            </View>
-          </View>
-        </View>
+    <View>
+      <View className='flex items-center'>
+        <Text className="text-2xl text-black font-[Lexend-Medium]">Set App Timer</Text>
+        <Text className="text-md text-black font-[Lexend-Medium]">for: {props.name}</Text>
       </View>
-    </Modal>
+      <TimerPicker
+        padWithNItems={2}
+        hideHours
+        minuteLabel="min"
+        secondLabel="sec"
+        LinearGradient={LinearGradient}
+        initialValue={{ minutes: Math.floor(props.timeLimit / 60), seconds: props.timeLimit % 60 }}
+        onDurationChange={(duration) => handleDurationChange(duration)}
+        styles={{
+          theme: 'light',
+          backgroundColor: '#FFFFFF',
+          pickerItem: {
+            fontSize: 24,
+          },
+          pickerLabel: {
+            fontSize: 20,
+            right: -20,
+          },
+          pickerLabelContainer: {
+            width: 40,
+          },
+          pickerItemContainer: {
+            width: 120,
+          },
+        }}
+      />
+    </View>
   )
 }
