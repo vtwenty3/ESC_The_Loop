@@ -106,7 +106,6 @@ export default React.memo(function UsageElement(props: Props) {
       props.setTimers(newTimers)
     }
     setIsModalVisibleTimer(false)
-    handlePressOut()
   }
 
   const  handleConfirmModal = async () => {
@@ -127,6 +126,7 @@ export default React.memo(function UsageElement(props: Props) {
   
     props.setTimers(newTimers) 
     setIsModalVisible(false)
+    handlePressOut()
   }
 
  
